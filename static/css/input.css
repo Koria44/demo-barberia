@@ -1,0 +1,124 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --color-bg-dark: #0A0A0A;
+  --color-bg-surface: #141414;
+  --color-bg-elevated: #1C1C1C;
+  --color-gold: #C9A24B;
+  --color-gold-hover: #DDB968;
+  --color-ivory: #F5F0E6;
+  --color-ivory-muted: #A8A294;
+  --color-status-success: #3E8E5E;
+  --color-status-error: #B3412F;
+}
+
+/* Scrollbar estilizada de lujo */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0A0A0A;
+}
+::-webkit-scrollbar-thumb {
+  background: #2A2A2A;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #C9A24B;
+}
+
+/* Barra de progreso de lectura */
+#reading-progress {
+  transform-origin: left;
+  transform: scaleX(0);
+  transition: transform 0.1s ease-out;
+}
+
+/* Efecto de poste de barbero sutil y elegante */
+.barber-pole-stripes {
+  background: repeating-linear-gradient(
+    45deg,
+    rgba(179, 65, 47, 0.25),
+    rgba(179, 65, 47, 0.25) 12px,
+    rgba(245, 240, 230, 0.2) 12px,
+    rgba(245, 240, 230, 0.2) 24px,
+    rgba(59, 126, 212, 0.25) 24px,
+    rgba(59, 126, 212, 0.25) 36px,
+    rgba(245, 240, 230, 0.2) 36px,
+    rgba(245, 240, 230, 0.2) 48px
+  );
+  animation: barberPoleMove 4s linear infinite;
+}
+
+@keyframes barberPoleMove {
+  0% { background-position: 0 0; }
+  100% { background-position: 96px 0; }
+}
+
+/* Botón con efecto de brillo metálico cruzado */
+.btn-shimmer-effect {
+  position: relative;
+  overflow: hidden;
+}
+.btn-shimmer-effect::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    60deg,
+    transparent,
+    rgba(255, 255, 255, 0.15),
+    transparent
+  );
+  transform: rotate(30deg) translateX(-100%);
+  animation: btnShimmer 5s infinite;
+}
+
+@keyframes btnShimmer {
+  0%, 80% { transform: rotate(30deg) translateX(-100%); }
+  100% { transform: rotate(30deg) translateX(100%); }
+}
+
+/* Animación de entrada con scroll */
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.reveal-on-scroll.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Línea dorada que se dibuja */
+.draw-gold-line {
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.draw-gold-line.is-visible {
+  transform: scaleX(1);
+}
+
+/* Respeto a usuarios con movimiento reducido */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+  .reveal-on-scroll {
+    opacity: 1 !important;
+    transform: none !important;
+  }
+  .draw-gold-line {
+    transform: scaleX(1) !important;
+  }
+}

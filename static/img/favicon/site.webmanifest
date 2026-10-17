@@ -1,0 +1,16 @@
+{
+  "name": "Demo Barber Club",
+  "short_name": "Demo Barber",
+  "description": "Barbería clásica y de lujo en Chile. Cortes exclusivos, afeitado tradicional y reservas en línea.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#0A0A0A",
+  "theme_color": "#C9A24B",
+  "icons": [
+    {
+      "src": "/static/img/favicon/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}

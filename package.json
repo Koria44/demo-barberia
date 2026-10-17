@@ -1,0 +1,20 @@
+{
+  "name": "demo-barber",
+  "version": "1.0.0",
+  "description": "Plataforma web premium para barberías: reservas, tienda, cuentas y dashboard",
+  "scripts": {
+    "dev": "tailwindcss -i ./static/css/input.css -o ./static/css/output.css --watch",
+    "build": "tailwindcss -i ./static/css/input.css -o ./static/css/output.css --minify"
+  },
+  "keywords": [
+    "barberia",
+    "django",
+    "reservas",
+    "tailwind"
+  ],
+  "author": "Demo Barber Club",
+  "license": "MIT",
+  "devDependencies": {
+    "tailwindcss": "^3.4.17"
+  }
+}
