@@ -45,10 +45,12 @@ class Producto(models.Model):
     slug = models.SlugField('Slug para URL', max_length=160, unique=True, blank=True)
     descripcion = models.TextField('Descripción Detallada')
     precio = models.IntegerField('Precio en CLP (ej. 14990)', default=14990)
-    stock = models.PositiveIntegerField('Unidades en Stock', default=20)
+    precio_costo = models.IntegerField('Precio de Costo CLP (para margen)', null=True, blank=True)
+    sku = models.CharField('Código SKU', max_length=50, blank=True, db_index=True)
+    stock = models.PositiveIntegerField('Unidades en Stock Global', default=20)
     stock_minimo_alerta = models.PositiveIntegerField('Umbral de Alerta de Stock Bajo', default=5)
     destacado = models.BooleanField('Producto Destacado en Portada', default=False)
-    imagen = models.ImageField('Fotografía del Producto', upload_to='productos/', blank=True, null=True)
+    imagen = models.ImageField('Fotografía Principal', upload_to='productos/', blank=True, null=True)
     foto_estatica_demo = models.CharField('Ruta estática de demo', max_length=255, blank=True, default='img/productos/pomada_mate.webp')
     activo = models.BooleanField('Disponible para la Venta', default=True)
     orden = models.PositiveSmallIntegerField('Orden de Visualización', default=1)
@@ -166,3 +168,190 @@ class ItemPedido(models.Model):
 
     def __str__(self):
         return f"{self.cantidad}x {self.producto.nombre} ({formatear_clp(self.subtotal)})"
+
+
+class ProductoImagen(models.Model):
+    """Galería de imágenes adicionales de un producto"""
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='imagenes_galeria')
+    imagen = models.ImageField('Fotografía de Detalle', upload_to='productos/galeria/')
+    orden = models.PositiveSmallIntegerField('Orden', default=1)
+
+    class Meta:
+        verbose_name = 'Imagen de Producto'
+        verbose_name_plural = 'Imágenes de Productos'
+        ordering = ['orden']
+
+
+class StockSucursal(models.Model):
+    """
+    Control de inventario de un producto en una sucursal específica.
+    Permite stock independiente en cada sede.
+    """
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='stocks_sucursal', verbose_name='Producto')
+    sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='stocks_producto', verbose_name='Sucursal')
+    cantidad = models.IntegerField('Cantidad en Stock', default=0)
+    stock_minimo_alerta = models.PositiveIntegerField('Umbral de Alerta de Stock Bajo', default=5)
+
+    class Meta:
+        verbose_name = 'Stock por Sucursal'
+        verbose_name_plural = 'Stocks por Sucursal'
+        unique_together = ('producto', 'sucursal')
+        ordering = ['sucursal', 'producto']
+
+    def __str__(self):
+        return f"{self.producto.nombre} en {self.sucursal.nombre}: {self.cantidad} uds"
+
+    @property
+    def en_alerta(self):
+        return self.cantidad <= self.stock_minimo_alerta
+
+    @property
+    def estado_stock(self):
+        if self.cantidad <= 0:
+            return 'AGOTADO'
+        elif self.cantidad <= self.stock_minimo_alerta:
+            return 'BAJO'
+        return 'OK'
+
+
+class MovimientoStock(models.Model):
+    """
+    Registro histórico inmutable de auditoría para cada movimiento de inventario.
+    El stock actual siempre se modifica a través de estos movimientos sin permitir stock negativo.
+    """
+    class Tipo(models.TextChoices):
+        ENTRADA = 'ENTRADA', 'Entrada (Compra / Reposición)'
+        SALIDA = 'SALIDA', 'Salida (Merma / Uso interno)'
+        AJUSTE = 'AJUSTE', 'Ajuste de Inventario'
+        VENTA = 'VENTA', 'Venta en Tienda'
+        DEVOLUCION = 'DEVOLUCION', 'Devolución de Pedido'
+        TRASLADO = 'TRASLADO', 'Traslado entre Sucursales'
+
+    tipo = models.CharField('Tipo de Movimiento', max_length=20, choices=Tipo.choices)
+    producto = models.ForeignKey(Producto, on_delete=models.CASCADE, related_name='movimientos_stock', verbose_name='Producto')
+    sucursal = models.ForeignKey(Sucursal, on_delete=models.CASCADE, related_name='movimientos_stock', verbose_name='Sucursal Afectada / Origen')
+    sucursal_destino = models.ForeignKey(
+        Sucursal,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='traslados_stock_recibidos',
+        verbose_name='Sucursal Destino (solo para traslados)'
+    )
+    cantidad = models.IntegerField('Cantidad Involucrada (positiva)')
+    stock_resultante = models.IntegerField('Stock Resultante en la Sucursal', default=0)
+    usuario = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        verbose_name='Usuario Responsable'
+    )
+    fecha = models.DateTimeField('Fecha y Hora', auto_now_add=True)
+    motivo = models.CharField('Motivo del Movimiento', max_length=200)
+    nota = models.TextField('Notas de Auditoría', blank=True)
+
+    class Meta:
+        verbose_name = 'Movimiento de Inventario'
+        verbose_name_plural = 'Movimientos de Inventario'
+        ordering = ['-fecha']
+
+    def __str__(self):
+        return f"{self.get_tipo_display()} - {self.producto.nombre} ({self.cantidad} uds) en {self.sucursal.nombre}"
+
+
+def registrar_movimiento_stock(producto, sucursal, tipo, cantidad, usuario=None, motivo="", nota="", sucursal_destino=None):
+    """
+    Registra atómicamente un movimiento de stock garantizando que nunca quede negativo.
+    Actualiza el stock local por sucursal y el stock global agregado del producto.
+    """
+    from django.db import transaction
+    if cantidad <= 0 and tipo != MovimientoStock.Tipo.AJUSTE:
+        raise ValueError("La cantidad involucrada debe ser un entero positivo mayor a cero.")
+
+    with transaction.atomic():
+        stock_obj, _ = StockSucursal.objects.select_for_update().get_or_create(
+            producto=producto,
+            sucursal=sucursal,
+            defaults={'cantidad': 0, 'stock_minimo_alerta': producto.stock_minimo_alerta}
+        )
+
+        if tipo in (MovimientoStock.Tipo.ENTRADA, MovimientoStock.Tipo.DEVOLUCION):
+            stock_obj.cantidad += cantidad
+        elif tipo in (MovimientoStock.Tipo.SALIDA, MovimientoStock.Tipo.VENTA):
+            if stock_obj.cantidad < cantidad:
+                raise ValueError(f"Stock insuficiente en {sucursal.nombre}: disponible {stock_obj.cantidad}, requerido {cantidad}.")
+            stock_obj.cantidad -= cantidad
+        elif tipo == MovimientoStock.Tipo.AJUSTE:
+            if cantidad < 0:
+                raise ValueError("El nuevo stock ajustado no puede ser negativo.")
+            stock_obj.cantidad = cantidad
+        elif tipo == MovimientoStock.Tipo.TRASLADO:
+            if not sucursal_destino:
+                raise ValueError("Se requiere una sucursal destino para traslados.")
+            if sucursal_destino.id == sucursal.id:
+                raise ValueError("La sucursal destino debe ser distinta a la sucursal origen.")
+            if stock_obj.cantidad < cantidad:
+                raise ValueError(f"Stock insuficiente en {sucursal.nombre} para trasladar: disponible {stock_obj.cantidad}, requerido {cantidad}.")
+            stock_obj.cantidad -= cantidad
+            stock_obj.save(update_fields=['cantidad'])
+
+            # Registrar salida por traslado en sucursal origen
+            mov_origen = MovimientoStock.objects.create(
+                tipo=MovimientoStock.Tipo.TRASLADO,
+                producto=producto,
+                sucursal=sucursal,
+                sucursal_destino=sucursal_destino,
+                cantidad=cantidad,
+                stock_resultante=stock_obj.cantidad,
+                usuario=usuario,
+                motivo=motivo or f"Traslado hacia {sucursal_destino.nombre}",
+                nota=nota
+            )
+
+            # Destino: sumar stock y registrar recepción
+            stock_dest, _ = StockSucursal.objects.select_for_update().get_or_create(
+                producto=producto,
+                sucursal=sucursal_destino,
+                defaults={'cantidad': 0, 'stock_minimo_alerta': producto.stock_minimo_alerta}
+            )
+            stock_dest.cantidad += cantidad
+            stock_dest.save(update_fields=['cantidad'])
+
+            MovimientoStock.objects.create(
+                tipo=MovimientoStock.Tipo.ENTRADA,
+                producto=producto,
+                sucursal=sucursal_destino,
+                cantidad=cantidad,
+                stock_resultante=stock_dest.cantidad,
+                usuario=usuario,
+                motivo=f"Recepción de traslado desde {sucursal.nombre}",
+                nota=nota
+            )
+
+            # Sincronizar stock total del producto
+            total_stock = sum(StockSucursal.objects.filter(producto=producto).values_list('cantidad', flat=True))
+            producto.stock = total_stock
+            producto.save(update_fields=['stock'])
+            return mov_origen
+
+        stock_obj.save(update_fields=['cantidad'])
+
+        mov = MovimientoStock.objects.create(
+            tipo=tipo,
+            producto=producto,
+            sucursal=sucursal,
+            sucursal_destino=sucursal_destino,
+            cantidad=cantidad,
+            stock_resultante=stock_obj.cantidad,
+            usuario=usuario,
+            motivo=motivo,
+            nota=nota
+        )
+
+        total_stock = sum(StockSucursal.objects.filter(producto=producto).values_list('cantidad', flat=True))
+        producto.stock = total_stock
+        producto.save(update_fields=['stock'])
+
+        return mov
+

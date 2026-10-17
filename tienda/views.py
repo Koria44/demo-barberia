@@ -158,7 +158,17 @@ def checkout_view(request):
 
         sucursal = get_object_or_404(Sucursal, id=sucursal_id)
 
-        # Crear pedido de forma atómica y descontar stock
+        # 1. Validar disponibilidad de stock en la sucursal seleccionada
+        from tienda.models import StockSucursal, MovimientoStock, registrar_movimiento_stock
+        for prod_id_str, item in carrito.items():
+            producto = get_object_or_404(Producto, id=int(prod_id_str))
+            stock_suc = StockSucursal.objects.filter(producto=producto, sucursal=sucursal).first()
+            disp = stock_suc.cantidad if stock_suc else 0
+            if disp < item['cantidad']:
+                messages.error(request, f'No hay suficiente stock de "{producto.nombre}" en la sede {sucursal.nombre} (disponible: {disp} uds, solicitado: {item["cantidad"]}).')
+                return redirect('tienda:checkout')
+
+        # 2. Crear pedido y descontar stock por sucursal atómicamente
         with transaction.atomic():
             pedido = Pedido.objects.create(
                 cliente=request.user if request.user.is_authenticated else None,
@@ -175,14 +185,16 @@ def checkout_view(request):
             for prod_id_str, item in carrito.items():
                 producto = Producto.objects.select_for_update().get(id=int(prod_id_str))
                 cant = item['cantidad']
-                if producto.stock >= cant:
-                    producto.stock -= cant
-                    producto.save(update_fields=['stock'])
-                else:
-                    # En caso de stock insuficiente
-                    cant = producto.stock
-                    producto.stock = 0
-                    producto.save(update_fields=['stock'])
+
+                # Registrar movimiento oficial de VENTA y descontar de la sucursal
+                registrar_movimiento_stock(
+                    producto=producto,
+                    sucursal=sucursal,
+                    tipo=MovimientoStock.Tipo.VENTA,
+                    cantidad=cant,
+                    usuario=request.user if request.user.is_authenticated else None,
+                    motivo=f'Venta por tienda online (Pedido {pedido.codigo_pedido})'
+                )
 
                 ItemPedido.objects.create(
                     pedido=pedido,
