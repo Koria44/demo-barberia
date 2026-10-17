@@ -14,7 +14,7 @@ from sucursales.models import Sucursal
 from barberos.models import Barbero
 from catalogo.models import CategoriaServicio, Servicio, ServicioSucursal, ServicioBarbero
 from reservas.models import HorarioTrabajo, Bloqueo, Reserva, DiaSemana
-from tienda.models import CategoriaProducto, Producto, Pedido, ItemPedido
+from tienda.models import CategoriaProducto, Producto, Pedido, ItemPedido, StockSucursal, MovimientoStock, registrar_movimiento_stock
 from contenido.models import ConfiguracionSitio, Testimonio, PreguntaFrecuente, ImagenGaleria, EntradaBlog
 
 
@@ -61,7 +61,7 @@ class Command(BaseCommand):
                 "first_name": "Administrador",
                 "last_name": "Demo",
                 "telefono": "+56 9 8888 7777",
-                "rol": Usuario.Rol.ADMINISTRADOR,
+                "rol": Usuario.Rol.ADMIN_MAESTRO,
                 "is_staff": True,
                 "is_superuser": True
             }
@@ -183,6 +183,53 @@ class Command(BaseCommand):
             sucursal_objs.append(suc)
         suc_prov, suc_condes, suc_vita = sucursal_objs
         self.stdout.write(self.style.SUCCESS("[OK] 3 Sucursales creadas."))
+
+        # 3.1 Administradores de Sucursal (1 por sucursal)
+        admin_prov, _ = Usuario.objects.get_or_create(
+            email="admin.providencia@demobarberclub.cl",
+            defaults={
+                "username": "admin.providencia@demobarberclub.cl",
+                "first_name": "Admin",
+                "last_name": "Providencia",
+                "telefono": "+56 9 7711 2233",
+                "rol": Usuario.Rol.ADMIN_SUCURSAL,
+                "is_staff": True,
+            }
+        )
+        admin_prov.set_password("admin123")
+        admin_prov.save()
+        admin_prov.sucursales_asignadas.set([suc_prov])
+
+        admin_condes, _ = Usuario.objects.get_or_create(
+            email="admin.lascondes@demobarberclub.cl",
+            defaults={
+                "username": "admin.lascondes@demobarberclub.cl",
+                "first_name": "Admin",
+                "last_name": "Las Condes",
+                "telefono": "+56 9 7722 3344",
+                "rol": Usuario.Rol.ADMIN_SUCURSAL,
+                "is_staff": True,
+            }
+        )
+        admin_condes.set_password("admin123")
+        admin_condes.save()
+        admin_condes.sucursales_asignadas.set([suc_condes])
+
+        admin_vita, _ = Usuario.objects.get_or_create(
+            email="admin.vitacura@demobarberclub.cl",
+            defaults={
+                "username": "admin.vitacura@demobarberclub.cl",
+                "first_name": "Admin",
+                "last_name": "Vitacura",
+                "telefono": "+56 9 7733 4455",
+                "rol": Usuario.Rol.ADMIN_SUCURSAL,
+                "is_staff": True,
+            }
+        )
+        admin_vita.set_password("admin123")
+        admin_vita.save()
+        admin_vita.sucursales_asignadas.set([suc_vita])
+        self.stdout.write(self.style.SUCCESS("[OK] 3 Administradores de sucursal creados y vinculados."))
 
         # 4. Barberos Profesionales (algunos trabajan en 2 sucursales)
         barberos_datos = [
@@ -351,6 +398,47 @@ class Command(BaseCommand):
                             activo=True
                         )
         self.stdout.write(self.style.SUCCESS("[OK] Horarios laborales semanales asignados equitativamente."))
+
+        # 5.1 Bloqueos de Agenda (Vacaciones, Permisos, Feriado y Recurrente)
+        Bloqueo.objects.all().delete()
+        ahora_demo = timezone.now()
+
+        # 1. Vacaciones de Matías Silva (en 6 días)
+        Bloqueo.objects.create(
+            barbero=barbero_objs[0],
+            sucursal=suc_prov,
+            fecha_inicio=ahora_demo + timedelta(days=6),
+            fecha_fin=ahora_demo + timedelta(days=9),
+            tipo=Bloqueo.TipoBloqueo.VACACIONES,
+            motivo="Vacaciones familiares programadas",
+            todo_el_dia=True
+        )
+
+        # 2. Permiso Personal de Rodrigo Valenzuela (en 2 días, por la tarde)
+        fecha_permiso = (ahora_demo + timedelta(days=2)).date()
+        Bloqueo.objects.create(
+            barbero=barbero_objs[1],
+            sucursal=suc_prov,
+            fecha_inicio=timezone.make_aware(datetime.combine(fecha_permiso, time(15, 0))),
+            fecha_fin=timezone.make_aware(datetime.combine(fecha_permiso, time(17, 30))),
+            tipo=Bloqueo.TipoBloqueo.PERMISO,
+            motivo="Trámite personal / médico",
+            todo_el_dia=False
+        )
+
+        # 3. Reunión semanal recurrente todos los Lunes en Providencia (09:30 - 10:30)
+        Bloqueo.objects.create(
+            barbero=None, # Toda la sucursal
+            sucursal=suc_prov,
+            fecha_inicio=timezone.make_aware(datetime.combine(ahora_demo.date(), time(9, 30))),
+            fecha_fin=timezone.make_aware(datetime.combine(ahora_demo.date(), time(10, 30))),
+            tipo=Bloqueo.TipoBloqueo.BLOQUEO_MANUAL,
+            motivo="Alineación semanal y calibración de instrumental",
+            todo_el_dia=False,
+            es_recurrente=True,
+            dia_semana_recurrente=DiaSemana.LUNES
+        )
+        self.stdout.write(self.style.SUCCESS("[OK] Bloqueos de agenda (vacaciones, permiso, recurrente) generados."))
 
         # 6. Categorías y 6 Servicios de Catálogo
         cat_corte, _ = CategoriaServicio.objects.get_or_create(nombre="Cortes de Cabello", defaults={"orden": 1})
@@ -546,6 +634,94 @@ class Command(BaseCommand):
             )
             producto_objs.append(prod)
         self.stdout.write(self.style.SUCCESS("[OK] 8 Productos de barberia cargados en catalogo."))
+
+        # 7.1 Stock por Sucursal y Movimientos de Auditoría Inmutables
+        StockSucursal.objects.all().delete()
+        MovimientoStock.objects.all().delete()
+
+        for prod in producto_objs:
+            # Sede Providencia: Stock saludable salvo el peine en nivel bajo (3 uds)
+            cant_prov = 3 if prod.slug == "peine-antiestatico-fibra-carbono" else random.choice([12, 15, 20])
+            StockSucursal.objects.create(
+                producto=prod,
+                sucursal=suc_prov,
+                cantidad=cant_prov,
+                stock_minimo_alerta=5
+            )
+            MovimientoStock.objects.create(
+                tipo=MovimientoStock.Tipo.ENTRADA,
+                producto=prod,
+                sucursal=suc_prov,
+                cantidad=cant_prov,
+                stock_resultante=cant_prov,
+                usuario=admin_prov,
+                motivo="Reposición inicial de inventario demo"
+            )
+
+            # Sede Las Condes: Stock saludable salvo pomada mate en nivel crítico (2 uds)
+            cant_condes = 2 if prod.slug == "pomada-mate-fijacion-fuerte-100g" else random.choice([8, 14, 18])
+            StockSucursal.objects.create(
+                producto=prod,
+                sucursal=suc_condes,
+                cantidad=cant_condes,
+                stock_minimo_alerta=5
+            )
+            MovimientoStock.objects.create(
+                tipo=MovimientoStock.Tipo.ENTRADA,
+                producto=prod,
+                sucursal=suc_condes,
+                cantidad=cant_condes,
+                stock_resultante=cant_condes,
+                usuario=admin_condes,
+                motivo="Carga inicial de existencias para apertura"
+            )
+
+            # Sede Vitacura: Un producto agotado (0 uds) para probar alerta de quiebre de stock
+            cant_vita = 0 if prod.slug == "shampoo-mentolado-vigorizante-250ml" else random.choice([10, 16, 22])
+            StockSucursal.objects.create(
+                producto=prod,
+                sucursal=suc_vita,
+                cantidad=cant_vita,
+                stock_minimo_alerta=5
+            )
+            MovimientoStock.objects.create(
+                tipo=MovimientoStock.Tipo.ENTRADA,
+                producto=prod,
+                sucursal=suc_vita,
+                cantidad=cant_vita if cant_vita > 0 else 5,
+                stock_resultante=cant_vita,
+                usuario=admin_vita,
+                motivo="Inventario inicial"
+            )
+            if cant_vita == 0:
+                MovimientoStock.objects.create(
+                    tipo=MovimientoStock.Tipo.SALIDA,
+                    producto=prod,
+                    sucursal=suc_vita,
+                    cantidad=5,
+                    stock_resultante=0,
+                    usuario=admin_vita,
+                    motivo="Quiebre de stock por venta rápida en local"
+                )
+
+            # Actualizar stock total agregado del producto
+            prod.stock = cant_prov + cant_condes + cant_vita
+            prod.sku = f"SKU-{prod.slug[:8].upper()}-{prod.id}"
+            prod.precio_costo = int(prod.precio * 0.45)
+            prod.save(update_fields=['stock', 'sku', 'precio_costo'])
+
+        # Registrar un traslado de ejemplo entre Providencia y Las Condes
+        prod_traslado = producto_objs[0]
+        registrar_movimiento_stock(
+            producto=prod_traslado,
+            sucursal=suc_prov,
+            tipo=MovimientoStock.Tipo.TRASLADO,
+            cantidad=3,
+            usuario=admin_user,
+            motivo="Traslado preventivo para abastecer fin de semana",
+            sucursal_destino=suc_condes
+        )
+        self.stdout.write(self.style.SUCCESS("[OK] Stock por sucursal y movimientos históricos de auditoría creados."))
 
         # 8. Testimonios de Clientes
         testimonios = [

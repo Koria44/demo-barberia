@@ -9,14 +9,14 @@
   <div class="bg-bg-surface border border-bg-border p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
     <div class="flex items-center gap-2">
       <span class="text-xs uppercase tracking-wider text-ivory-dim font-bold">Filtrar por Sede:</span>
-      <form method="GET" class="flex items-center gap-2">
-        <select name="sucursal" onchange="this.form.submit()" class="bg-bg-dark border border-bg-border focus:border-gold text-ivory text-xs px-3 py-1.5 cursor-pointer">
-          <option value="">Todas las Sucursales</option>
-          {% for s in sucursales %}
-          <option value="{{ s.id }}" {% if sucursal_seleccionada == s.id|stringformat:"s" %}selected{% endif %}>{{ s.nombre }}</option>
-          {% endfor %}
-        </select>
-      </form>
+      <select onchange="window.location.href='{% url 'panel:cambiar_sucursal' %}?sucursal=' + this.value + '&next=/panel/'" class="bg-bg-dark border border-bg-border focus:border-gold text-ivory text-xs px-3 py-1.5 cursor-pointer">
+        {% if es_admin_maestro %}
+        <option value="0" {% if not panel_sucursal_activa_id %}selected{% endif %}>🏢 Todas las Sedes (Consolidado)</option>
+        {% endif %}
+        {% for s in sucursales %}
+        <option value="{{ s.id }}" {% if panel_sucursal_activa_id == s.id %}selected{% endif %}>📍 {{ s.nombre }}</option>
+        {% endfor %}
+      </select>
     </div>
     <div class="flex items-center gap-3">
       <a href="{% url 'panel:exportar_reservas_csv' %}" class="px-3 py-1.5 border border-bg-border hover:border-gold text-xs uppercase tracking-wider font-semibold text-ivory transition-colors">
@@ -29,13 +29,13 @@
   </div>
 
   <!-- Alerta de Stock Bajo (Si aplica) -->
-  {% if productos_alerta_stock %}
+  {% if stocks_alerta %}
   <div class="p-4 bg-status-warning/10 border-l-4 border-status-warning flex items-center justify-between">
     <div class="flex items-center gap-3">
       <span class="text-status-warning font-bold text-lg">⚠</span>
       <div class="text-xs">
-        <strong class="text-ivory block">Atención: Hay {{ productos_alerta_stock|length }} producto(s) con stock crítico.</strong>
-        <span class="text-ivory-muted">{% for p in productos_alerta_stock %}{{ p.nombre }} ({{ p.stock }} un.){% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        <strong class="text-ivory block">Atención: Hay {{ stocks_alerta|length }} registro(s) con stock crítico.</strong>
+        <span class="text-ivory-muted">{% for st in stocks_alerta|slice:":5" %}{{ st.producto.nombre }} en {{ st.sucursal.nombre }} ({{ st.cantidad }} un.){% if not forloop.last %}, {% endif %}{% endfor %}</span>
       </div>
     </div>
     <a href="{% url 'panel:productos_list' %}" class="text-xs text-status-warning font-bold underline whitespace-nowrap">Gestionar Stock →</a>
@@ -132,6 +132,58 @@
       </div>
     </div>
   </div>
+
+  <!-- 3. Comparativa entre Sucursales (Exclusivo Administrador Maestro en Vista Consolidada) -->
+  {% if comparativa_sucursales %}
+  <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark space-y-4">
+    <div class="flex items-center justify-between border-b border-bg-border pb-3">
+      <div>
+        <h3 class="text-sm font-serif font-bold text-ivory">Comparativa de Rendimiento entre Sucursales</h3>
+        <p class="text-[11px] text-ivory-dim">Consolidado comercial multi-sede de los últimos 30 días</p>
+      </div>
+      <span class="text-xs text-gold font-bold px-2 py-0.5 bg-gold/15 border border-gold/40 uppercase tracking-wider text-[10px]">
+        Exclusivo Maestro
+      </span>
+    </div>
+
+    <div class="overflow-x-auto">
+      <table class="w-full text-left text-xs divide-y divide-bg-border">
+        <thead class="bg-bg-elevated text-ivory-dim uppercase text-[10px] tracking-wider font-semibold">
+          <tr>
+            <th class="py-3 px-4">Sucursal</th>
+            <th class="py-3 px-4">Ingresos Últimos 30 Días</th>
+            <th class="py-3 px-4">Reservas Totales</th>
+            <th class="py-3 px-4">Equipo Activo</th>
+            <th class="py-3 px-4">Stock Crítico</th>
+            <th class="py-3 px-4 text-right">Acción</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-bg-border text-ivory">
+          {% for comp in comparativa_sucursales %}
+          <tr class="hover:bg-bg-elevated/40 transition-colors">
+            <td class="py-3 px-4 font-bold text-ivory">📍 {{ comp.sucursal.nombre }}</td>
+            <td class="py-3 px-4 font-mono font-bold text-gold">{{ comp.ingresos_mes }}</td>
+            <td class="py-3 px-4 font-mono">{{ comp.reservas_mes }} citas</td>
+            <td class="py-3 px-4 font-mono">{{ comp.barberos_activos }} barberos</td>
+            <td class="py-3 px-4 font-mono">
+              {% if comp.stock_critico > 0 %}
+              <span class="text-status-warning font-bold">{{ comp.stock_critico }} en alerta</span>
+              {% else %}
+              <span class="text-status-success font-bold">Óptimo (0)</span>
+              {% endif %}
+            </td>
+            <td class="py-3 px-4 text-right">
+              <a href="{% url 'panel:cambiar_sucursal' %}?sucursal={{ comp.sucursal.id }}&next=/panel/" class="px-2.5 py-1 text-[11px] font-bold uppercase border border-gold/40 text-gold hover:bg-gold/15 transition-colors">
+                Filtrar Sede →
+              </a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+  {% endif %}
 </div>
 {% endblock %}
 
