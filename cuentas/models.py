@@ -29,7 +29,7 @@ class UsuarioManager(BaseUserManager):
     def create_superuser(self, email, password=None, **extra_fields):
         extra_fields.setdefault('is_staff', True)
         extra_fields.setdefault('is_superuser', True)
-        extra_fields.setdefault('rol', Usuario.Rol.ADMINISTRADOR)
+        extra_fields.setdefault('rol', Usuario.Rol.ADMIN_MAESTRO)
 
         if extra_fields.get('is_staff') is not True:
             raise ValueError(_('El superusuario debe tener is_staff=True.'))
@@ -42,12 +42,14 @@ class UsuarioManager(BaseUserManager):
 class Usuario(AbstractUser):
     """
     Modelo de usuario personalizado para la plataforma Demo Barber Club.
-    Soporta autenticación por email y tres roles diferenciados con permisos específicos.
+    Soporta autenticación por email y cuatro roles diferenciados con permisos específicos:
+    CLIENTE, BARBERO, ADMIN_SUCURSAL y ADMIN_MAESTRO.
     """
     class Rol(models.TextChoices):
         CLIENTE = 'CLIENTE', _('Cliente')
         BARBERO = 'BARBERO', _('Barbero')
-        ADMINISTRADOR = 'ADMINISTRADOR', _('Administrador')
+        ADMIN_SUCURSAL = 'ADMIN_SUCURSAL', _('Administrador de Sucursal')
+        ADMIN_MAESTRO = 'ADMIN_MAESTRO', _('Administrador Maestro')
 
     email = models.EmailField(_('Correo Electrónico'), unique=True)
     telefono = models.CharField(_('Teléfono / WhatsApp'), max_length=20, blank=True)
@@ -56,6 +58,12 @@ class Usuario(AbstractUser):
         max_length=20,
         choices=Rol.choices,
         default=Rol.CLIENTE
+    )
+    sucursales_asignadas = models.ManyToManyField(
+        'sucursales.Sucursal',
+        blank=True,
+        related_name='administradores',
+        verbose_name=_('Sucursales Asignadas')
     )
     foto_perfil = models.ImageField(
         _('Foto de Perfil'),
@@ -106,5 +114,13 @@ class Usuario(AbstractUser):
         return self.rol == self.Rol.BARBERO
 
     @property
+    def es_admin_maestro(self):
+        return self.rol == self.Rol.ADMIN_MAESTRO or self.is_superuser
+
+    @property
+    def es_admin_sucursal(self):
+        return self.rol == self.Rol.ADMIN_SUCURSAL
+
+    @property
     def es_administrador(self):
-        return self.rol == self.Rol.ADMINISTRADOR or self.is_superuser
+        return self.es_admin_maestro or self.es_admin_sucursal

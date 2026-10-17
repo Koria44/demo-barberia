@@ -67,7 +67,7 @@ def logout_view(request):
 def redirect_por_rol_view(request):
     """
     Redirige inteligentemente al usuario tras identificarse según su rol:
-    - ADMINISTRADOR -> Dashboard /panel/
+    - ADMIN_MAESTRO y ADMIN_SUCURSAL -> Dashboard /panel/
     - BARBERO -> Su agenda diaria /panel/agenda/
     - CLIENTE -> Su historial /mi-cuenta/
     """

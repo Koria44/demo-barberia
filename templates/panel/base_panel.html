@@ -62,9 +62,16 @@
         <span>Servicios</span>
       </a>
 
-      <a href="{% url 'panel:productos_list' %}" class="flex items-center gap-3 px-4 py-3 text-ivory hover:bg-bg-elevated hover:text-gold rounded transition-colors {% if request.resolver_match.url_name == 'productos_list' %}bg-bg-elevated text-gold font-bold border-l-2 border-gold{% endif %}">
-        <svg class="w-4 h-4 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-        <span>Inventario Stock</span>
+      <a href="{% url 'panel:productos_list' %}" class="flex items-center justify-between px-4 py-3 text-ivory hover:bg-bg-elevated hover:text-gold rounded transition-colors {% if request.resolver_match.url_name == 'productos_list' %}bg-bg-elevated text-gold font-bold border-l-2 border-gold{% endif %}">
+        <div class="flex items-center gap-3">
+          <svg class="w-4 h-4 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+          <span>Inventario Stock</span>
+        </div>
+        {% if stock_bajo_total_count > 0 %}
+        <span class="px-1.5 py-0.5 text-[10px] font-bold bg-status-error/20 text-status-error border border-status-error/40 rounded-none" title="{{ stock_bajo_total_count }} productos en stock bajo">
+          {{ stock_bajo_total_count }}
+        </span>
+        {% endif %}
       </a>
 
       <a href="{% url 'panel:barberos_list' %}" class="flex items-center gap-3 px-4 py-3 text-ivory hover:bg-bg-elevated hover:text-gold rounded transition-colors {% if request.resolver_match.url_name == 'barberos_list' %}bg-bg-elevated text-gold font-bold border-l-2 border-gold{% endif %}">
@@ -72,20 +79,24 @@
         <span>Equipo Barberos</span>
       </a>
 
+      {% if es_admin_maestro %}
       <a href="{% url 'panel:sucursales_list' %}" class="flex items-center gap-3 px-4 py-3 text-ivory hover:bg-bg-elevated hover:text-gold rounded transition-colors {% if request.resolver_match.url_name == 'sucursales_list' %}bg-bg-elevated text-gold font-bold border-l-2 border-gold{% endif %}">
         <svg class="w-4 h-4 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
         <span>Sucursales</span>
       </a>
+      {% endif %}
 
       <a href="{% url 'panel:clientes_list' %}" class="flex items-center gap-3 px-4 py-3 text-ivory hover:bg-bg-elevated hover:text-gold rounded transition-colors {% if request.resolver_match.url_name == 'clientes_list' %}bg-bg-elevated text-gold font-bold border-l-2 border-gold{% endif %}">
         <svg class="w-4 h-4 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
         <span>Clientes</span>
       </a>
 
+      {% if es_admin_maestro %}
       <a href="{% url 'panel:configuracion' %}" class="flex items-center gap-3 px-4 py-3 text-ivory hover:bg-bg-elevated hover:text-gold rounded transition-colors {% if request.resolver_match.url_name == 'configuracion' %}bg-bg-elevated text-gold font-bold border-l-2 border-gold{% endif %}">
         <svg class="w-4 h-4 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
         <span>Configuración</span>
       </a>
+      {% endif %}
 
       <hr class="border-bg-border my-2">
 
@@ -110,13 +121,47 @@
   <!-- Contenedor de Contenido Principal del Dashboard -->
   <div class="flex-1 flex flex-col h-full overflow-hidden">
     <!-- Barra Superior -->
-    <header class="bg-bg-surface border-b border-bg-border px-6 py-4 flex items-center justify-between shrink-0">
+    <header class="bg-bg-surface border-b border-bg-border px-6 py-3 flex items-center justify-between shrink-0 gap-4">
       <div class="flex items-center gap-4">
         <h1 class="text-base sm:text-lg font-serif font-bold text-ivory">{% block header_title %}Panel de Control{% endblock %}</h1>
       </div>
+
+      <!-- Selector Global de Sucursal y Acciones de Cabecera -->
       <div class="flex items-center gap-3 text-xs">
-        <span class="hidden sm:inline text-ivory-dim">{{ "now"|date:"l, d de F Y" }}</span>
-        <a href="{% url 'reservas:agendar' %}" target="_blank" class="px-3 py-1.5 bg-gold text-bg-dark font-bold uppercase tracking-wider text-[11px] shadow-gold-glow">
+        {% if es_admin_maestro %}
+        <div class="flex items-center gap-2 bg-bg-elevated border border-gold/30 px-2 py-1">
+          <label for="selector-sucursal-global" class="text-[10px] uppercase text-gold font-bold hidden sm:inline tracking-wider">Sede:</label>
+          <select id="selector-sucursal-global"
+                  class="bg-transparent text-ivory text-xs focus:outline-none cursor-pointer"
+                  onchange="window.location.href='{% url 'panel:cambiar_sucursal' %}?sucursal=' + this.value + '&next=' + encodeURIComponent(window.location.pathname + window.location.search)">
+            <option value="0" class="bg-bg-surface text-ivory" {% if not panel_sucursal_activa_id %}selected{% endif %}>🏢 Todas las Sedes (Consolidado)</option>
+            {% for s in panel_sucursales_permitidas %}
+              <option value="{{ s.id }}" class="bg-bg-surface text-ivory" {% if panel_sucursal_activa_id == s.id %}selected{% endif %}>📍 {{ s.nombre }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        {% elif es_admin_sucursal %}
+          {% if panel_sucursales_permitidas.count > 1 %}
+          <div class="flex items-center gap-2 bg-bg-elevated border border-gold/30 px-2 py-1">
+            <label for="selector-sucursal-global" class="text-[10px] uppercase text-gold font-bold hidden sm:inline tracking-wider">Sede:</label>
+            <select id="selector-sucursal-global"
+                    class="bg-transparent text-ivory text-xs focus:outline-none cursor-pointer"
+                    onchange="window.location.href='{% url 'panel:cambiar_sucursal' %}?sucursal=' + this.value + '&next=' + encodeURIComponent(window.location.pathname + window.location.search)">
+              {% for s in panel_sucursales_permitidas %}
+                <option value="{{ s.id }}" class="bg-bg-surface text-ivory" {% if panel_sucursal_activa_id == s.id %}selected{% endif %}>📍 {{ s.nombre }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          {% else %}
+          <div class="flex items-center gap-1.5 px-2.5 py-1 bg-gold/10 border border-gold/40 text-gold text-xs">
+            <span>📍</span>
+            <span class="font-bold tracking-wide">{{ panel_sucursal_activa.nombre|default:"Mi Sucursal" }}</span>
+          </div>
+          {% endif %}
+        {% endif %}
+
+        <span class="hidden lg:inline text-ivory-dim">{{ "now"|date:"l, d \d\e F Y" }}</span>
+        <a href="{% url 'reservas:agendar' %}" target="_blank" class="px-3 py-1.5 bg-gold text-bg-dark font-bold uppercase tracking-wider text-[11px] shadow-gold-glow hover:bg-gold-light transition-colors">
           + Nueva Reserva
         </a>
       </div>
