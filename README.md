@@ -41,35 +41,42 @@ Plataforma web comercial completa para barberías y salones masculinos de alta g
   * **Prevención de colisiones**: Transacciones atómicas (`transaction.atomic`) y bloqueo a nivel de base de datos (`select_for_update`).
   * Notificación en pantalla y correo de confirmación con botón **"Agregar a Google Calendar"** y enlace directo a WhatsApp.
 
-### 3. Cuentas de Usuario y Roles
+### 3. Cuentas de Usuario y Jerarquía de Administración
 - Modelo personalizado con correo electrónico como identificador único.
-- Tres roles estrictamente separados:
-  * **Cliente**: Historial de citas, estado, notas de visagismo y cancelación/reprogramación online respetando horas de anticipación.
-  * **Barbero**: Agenda diaria interactiva, control de atenciones y bloqueo de horas personales.
-  * **Administrador**: Acceso exclusivo al Dashboard propio en `/panel/`.
+- **Cuatro roles con alcance validado en el servidor**:
+  * **ADMIN_MAESTRO**: Control total de la plataforma. Dispone de un selector global de sucursal en el encabezado del panel ("Todas las sedes" o una sede específica) que filtra KPIs, gráficos, listados y reportes. Es el único que puede crear/editar sucursales, crear administradores de sede y asignarles sedes, editar la configuración global del sitio y gestionar el catálogo base.
+  * **ADMIN_SUCURSAL**: Administrador local con una o más sedes asignadas (`sucursales_asignadas`). Solo puede ver y gestionar reservas, agenda, barberos asignados, stock, pedidos y ventas de SUS sucursales. La restricción está protegida en backend con `AlcanceSucursalMixin` y `validar_pertenencia_objeto` (retorna HTTP 403 ante cualquier intento de acceso directo por URL).
+  * **BARBERO**: Redirección directa tras el inicio de sesión a su agenda interactiva (`/panel/agenda/`). Acceso exclusivo a sus citas y horarios.
+  * **CLIENTE**: Historial de citas, notas y pedidos en `/mi-cuenta/`.
 - Protección contra ataques de fuerza bruta en el login y recuperación de clave por correo.
 
-### 4. Tienda Online Integrada
-- Catálogo de productos de grooming (pomadas, aceites, champús, ceras, perfumes).
-- Carrito de compras gestionado en sesión.
-- Control de inventario en tiempo real con alertas de stock crítico.
-- Checkout para retiro físico en sucursal con pago acordado en el local o transferencia.
-- Interfaz abstracta desacoplada (`PasarelaPagoInterface`) lista para conectar Flow o Webpay Plus.
+### 4. Tienda Online e Inventario Multi-Sucursal
+- Catálogo de productos de grooming masculino (pomadas, aceites, champús, ceras, perfumes) con SKU, precios y costo para cálculo de márgenes.
+- **Stock por Sucursal (`StockSucursal`)**: Cada producto mantiene existencias independientes en cada sede física.
+- **Auditoría Inmutable (`MovimientoStock`)**: Todo cambio en el stock se realiza a través de movimientos transaccionales (`transaction.atomic`) y bloqueo pesimista (`select_for_update`), imposibilitando saldos negativos:
+  * `ENTRADA`: Compra o reposición directa por sede.
+  * `SALIDA`: Merma, daño o uso interno en la barbería.
+  * `AJUSTE`: Inventario físico periódico.
+  * `VENTA`: Descuento automático al confirmar pedidos en tienda para retiro local.
+  * `DEVOLUCION`: Restitución inmediata del stock si un pedido es cancelado desde el panel.
+  * `TRASLADO`: Movimiento entre dos sedes que conserva con exactitud el total global del producto.
+- Panel de inventario con filtros por estado (`OK`, `BAJO`, `AGOTADO`), buscador, alertas en dashboard, contador en el menú lateral y exportación completa a CSV.
 
-### 5. Dashboard de Administración Propio (`/panel/`)
-- **KPIs Comerciales en Tiempo Real**: Ventas del día, semana y mes, desglose por servicios vs tienda, citas pendientes, ticket promedio, clientes nuevos y tasa de cancelación.
+### 5. Agenda de Barberos: Horarios Multi-Tramo y Bloqueos
+- **Horarios Semanales Flexibles**:
+  * Configuración por día (Lunes a Domingo) con múltiples tramos horarios (ej. 10:00–14:00 y 15:00–20:00), definiendo la colación de forma natural entre tramos.
+  * Botones rápidos para "Agregar tramo", "Copiar Lunes a toda la semana" y "Copiar horario a otro barbero".
+  * Validaciones en el servidor: `hora_inicio < hora_fin`, prevención de solapamientos internos y detección de colisiones entre sucursales diferentes para el mismo profesional.
+  * Detección preventiva de reservas futuras afectadas con solicitud de confirmación antes de aplicar cambios.
+- **Bloqueos de Intervalos y Recurrentes**:
+  * Bloqueo manual por barbero o para toda la sucursal, por rango de horas o día completo, con motivo (capacitación, vacaciones, permiso, feriado) y recurrencia semanal opcional.
+  * Sincronización inmediata con el motor público: las horas bloqueadas desaparecen al instante del agendamiento del cliente y de la opción "Cualquier barbero".
+
+### 6. Dashboard de Administración Propio (`/panel/`)
+- **KPIs Comerciales con Selector Global**: Ingresos, reservas, ocupación, ticket promedio y alertas de stock bajo según la sede activa o consolidado.
+- **Comparativo de Sucursales (Exclusivo ADMIN_MAESTRO)**: Tabla comparativa de rendimiento entre sedes con ingresos, citas, horas atendidas, ticket promedio y productos críticos.
 - **Gráficos Interactivos con Chart.js**: Ingresos diarios, reservas por sede, servicios más solicitados y rendimiento por barbero.
-- **Control de Citas**: Tabla con búsqueda, filtros múltiples y cambio de estado inmediato.
-- **Agenda del Barbero**: Vista personalizada para el equipo técnico.
-- **Exportación**: Descarga de reservas y ventas en formato CSV compatible con Microsoft Excel (codificación UTF-8 con BOM).
-- **Personalización Total**: Módulo de configuración para editar nombre, WhatsApp, Instagram, logo, textos del Hero, colores y políticas de cancelación sin tocar código.
-
-### 6. SEO y Rendimiento
-- Marcado semántico HTML5 con jerarquía estricta (un solo `<h1>` por página).
-- Datos estructurados JSON-LD: `BarberShop`, `LocalBusiness`, `Service`, `Product`, `BlogPosting` y `FAQPage`.
-- Landings SEO locales por sucursal (`/sucursales/<slug>/`).
-- `sitemap.xml` dinámico y `robots.txt` configurado.
-- Imágenes en formato WebP con `loading="lazy"` y CSS minificado con Tailwind CLI.
+- **Control de Citas y Pedidos**: Tablas con cambio de estado rápido, trazabilidad de stock y exportación a CSV con UTF-8 BOM.
 
 ---
 
@@ -144,7 +151,7 @@ python manage.py migrate
 ```
 
 ### 7. Cargar Datos de Demostración
-Puebla la base de datos con el negocio ficticio, 3 sucursales, 5 barberos, 6 servicios, 8 productos, testimonios, blog, reservas y pedidos de ejemplo:
+Puebla la base de datos de forma idempotente con sucursales, administradores de sede, barberos, horarios multi-tramo, bloqueos, stock por sede y movimientos históricos:
 ```bash
 python manage.py cargar_demo
 ```
@@ -168,13 +175,16 @@ Abre tu navegador en: **`http://127.0.0.1:8000/`**
 
 ---
 
-## 👥 Usuarios de Prueba por Rol
+## 👥 Cuentas de Acceso de Demostración
 
-| Rol | Correo Electrónico | Contraseña | Destino post login |
-| :--- | :--- | :--- | :--- |
-| **Administrador** | `admin@demobarberclub.cl` | `admin123` | Dashboard `/panel/` |
-| **Master Barber** | `barbero@demobarberclub.cl` | `barbero123` | Su Agenda `/panel/agenda/` |
-| **Cliente** | `cliente@demobarberclub.cl` | `cliente123` | Mi Cuenta `/mi-cuenta/` |
+| Rol | Correo Electrónico | Contraseña | Alcance / Permisos | Destino Post Login |
+| :--- | :--- | :--- | :--- | :--- |
+| **ADMIN_MAESTRO** | `admin@demobarberclub.cl` | `admin123` | Control total, selector global, configuración y catálogo base | `/panel/` |
+| **ADMIN_SUCURSAL** | `admin.providencia@demobarberclub.cl` | `admin123` | Exclusivo Sede Providencia (agenda, barberos, stock, pedidos) | `/panel/` |
+| **ADMIN_SUCURSAL** | `admin.lascondes@demobarberclub.cl` | `admin123` | Exclusivo Sede Las Condes (agenda, barberos, stock, pedidos) | `/panel/` |
+| **ADMIN_SUCURSAL** | `admin.vitacura@demobarberclub.cl` | `admin123` | Exclusivo Sede Vitacura (agenda, barberos, stock, pedidos) | `/panel/` |
+| **BARBERO** | `barbero@demobarberclub.cl` | `barbero123` | Su propia agenda y registro de atenciones | `/panel/agenda/` |
+| **CLIENTE** | `cliente@demobarberclub.cl` | `cliente123` | Historial de citas, pedidos y perfil personal | `/mi-cuenta/` |
 
 ---
 
@@ -234,13 +244,16 @@ Toda la plataforma ha sido concebida para adaptarse a cualquier cliente en minut
 
 ## 🧪 Pruebas Automáticas (Testing)
 
-El sistema incluye pruebas unitarias y de integración que verifican los componentes más críticos del motor de reservas:
-- Cálculo de horarios disponibles y pausas de colación.
-- Prevención de doble reserva mediante transacciones atómicas.
-- Validación de barberos multi-sucursal (bloqueo cruzado de turnos).
-- Política de cancelación por anticipación mínima.
+El sistema incluye una suite integral de 14 pruebas automáticas que verifican exhaustivamente:
+1. **Alcance y Seguridad por Sede**: `ADMIN_SUCURSAL` no puede ver ni editar datos de otra sucursal (retorna HTTP 403 en acceso directo por URL a barberos, agenda y pedidos, y querysets estrictamente filtrados).
+2. **Selector Global del ADMIN_MAESTRO**: Vista consolidada y filtrado dinámico en KPIs, gráficos y listados al seleccionar una sede o "Todas".
+3. **Validación de Tramos Horarios**: `hora_inicio < hora_fin`, prevención de solapamientos el mismo día y detección de colisiones entre sucursales para el mismo barbero.
+4. **Bloqueos de Intervalo**: Eliminación exacta e inmediata de los horarios bloqueados del motor público de reservas.
+5. **Seguridad de Stock y Auditoría**: Imposibilidad de saldo negativo, conservación exacta del stock total en traslados inter-sucursales y restitución automática de stock (`DEVOLUCION`) al cancelar pedidos.
+6. **Control de Acceso por Roles**: Usuarios con rol `CLIENTE` y `BARBERO` reciben HTTP 403 Forbidden al intentar ingresar a módulos de administración.
+7. **Disponibilidad y Concurrencia**: Prevención de doble reserva simultánea con bloqueos a nivel de base de datos.
 
-Ejecutar la suite de pruebas:
+Ejecutar la suite completa de pruebas:
 ```bash
 python manage.py test
 ```
