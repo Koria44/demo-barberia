@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% load static barber_tags %}
+
+{% block title %}Gestionar Reserva {{ reserva.codigo_reserva }} — {{ sitio.nombre_negocio }}{% endblock %}
+
+{% block content %}
+<section class="py-24 px-4 sm:px-6 lg:px-8 max-w-xl mx-auto min-h-[75vh] flex flex-col justify-center">
+  <div class="bg-bg-surface border border-bg-border p-8 sm:p-10 shadow-card-dark text-center">
+    <span class="text-xs uppercase tracking-widest text-gold font-serif block mb-2">Gestión de Cita</span>
+    <h1 class="text-2xl font-serif font-bold text-ivory mb-2">Reserva {{ reserva.codigo_reserva }}</h1>
+    <p class="text-xs text-ivory-muted mb-6">Hola, {{ reserva.cliente_nombre }}. Puedes revisar o cancelar tu cita programada.</p>
+
+    <!-- Resumen -->
+    <div class="bg-bg-dark border border-bg-border p-5 text-left text-xs space-y-2 mb-6">
+      <div class="flex justify-between">
+        <span class="text-ivory-muted">Servicio:</span>
+        <span class="text-ivory font-bold">{{ reserva.servicio.nombre }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-ivory-muted">Barbero:</span>
+        <span class="text-gold font-bold">{{ reserva.barbero.nombre_profesional }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-ivory-muted">Sede:</span>
+        <span class="text-ivory">{{ reserva.sucursal.nombre }}</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-ivory-muted">Fecha & Hora:</span>
+        <span class="text-ivory font-bold">{{ reserva.fecha_hora_inicio|date:"l d/m/Y, H:i" }} hrs</span>
+      </div>
+      <div class="flex justify-between">
+        <span class="text-ivory-muted">Estado actual:</span>
+        <span class="font-bold text-status-warning">{{ reserva.get_estado_display }}</span>
+      </div>
+    </div>
+
+    {% if es_cancelable %}
+    <form method="POST" onsubmit="return confirm('¿Confirmas que deseas cancelar definitivamente esta reserva?');">
+      {% csrf_token %}
+      <p class="text-xs text-ivory-muted mb-4">Puedes cancelar sin costo hasta con {{ horas_cancelacion }} horas de anticipación.</p>
+      <button type="submit" class="w-full py-3 bg-status-error hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider transition-colors mb-3">
+        Cancelar esta Reserva
+      </button>
+    </form>
+    {% else %}
+    <div class="p-4 bg-bg-dark border border-status-warning/40 text-xs text-ivory-muted mb-4">
+      Esta cita ya no puede ser cancelada online debido a la política de anticipación mínima (menos de {{ horas_cancelacion }} horas). Por favor comunícate directamente por WhatsApp al <a href="https://wa.me/{{ sitio.whatsapp_numero|cut:' '|cut:'+' }}" class="text-gold underline">{{ sitio.whatsapp_numero }}</a>.
+    </div>
+    {% endif %}
+
+    <div class="pt-4 border-t border-bg-border/60">
+      <a href="{% url 'sitio_publico:inicio' %}" class="text-xs text-ivory-muted hover:text-gold transition-colors">
+        ← Volver al sitio principal
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}

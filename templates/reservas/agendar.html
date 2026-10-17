@@ -1,0 +1,581 @@
+{% extends 'base.html' %}
+{% load static barber_tags %}
+
+{% block title %}Agendar Cita Online — {{ sitio.nombre_negocio }}{% endblock %}
+
+{% block content %}
+<section class="py-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto min-h-[85vh]">
+  <!-- Encabezado de la Sección -->
+  <div class="text-center mb-10">
+    <span class="text-xs uppercase tracking-widest text-gold font-serif block mb-2">Sistema de Reservas Exclusivo</span>
+    <h1 class="text-3xl sm:text-4xl font-serif font-bold text-ivory">Agendar tu Sesión</h1>
+    <p class="text-xs sm:text-sm text-ivory-muted mt-2 max-w-xl mx-auto">
+      Selecciona tu sede de preferencia, tu servicio y el horario ideal. Garantizamos puntualidad y confort.
+    </p>
+    <div class="w-16 h-[1.5px] bg-gold mx-auto mt-4"></div>
+  </div>
+
+  <!-- Barra de Progreso en 6 Pasos -->
+  <div class="mb-10">
+    <div class="flex items-center justify-between max-w-3xl mx-auto relative">
+      <!-- Línea base conectora -->
+      <div class="absolute left-0 top-1/2 -translate-y-1/2 h-[2px] w-full bg-bg-border -z-0"></div>
+      <div id="progress-bar-fill" class="absolute left-0 top-1/2 -translate-y-1/2 h-[2px] bg-gold transition-all duration-500 -z-0" style="width: 0%;"></div>
+
+      <!-- Paso 1 -->
+      <div class="step-indicator relative z-10 flex flex-col items-center" data-step="1">
+        <div class="step-circle w-8 h-8 rounded-full bg-gold text-bg-dark font-bold text-xs flex items-center justify-center transition-all duration-300">1</div>
+        <span class="text-[10px] uppercase font-bold tracking-wider mt-2 text-gold hidden sm:block">Sucursal</span>
+      </div>
+      <!-- Paso 2 -->
+      <div class="step-indicator relative z-10 flex flex-col items-center" data-step="2">
+        <div class="step-circle w-8 h-8 rounded-full bg-bg-elevated border border-bg-border text-ivory-dim font-bold text-xs flex items-center justify-center transition-all duration-300">2</div>
+        <span class="text-[10px] uppercase font-bold tracking-wider mt-2 text-ivory-dim hidden sm:block">Servicio</span>
+      </div>
+      <!-- Paso 3 -->
+      <div class="step-indicator relative z-10 flex flex-col items-center" data-step="3">
+        <div class="step-circle w-8 h-8 rounded-full bg-bg-elevated border border-bg-border text-ivory-dim font-bold text-xs flex items-center justify-center transition-all duration-300">3</div>
+        <span class="text-[10px] uppercase font-bold tracking-wider mt-2 text-ivory-dim hidden sm:block">Barbero</span>
+      </div>
+      <!-- Paso 4 -->
+      <div class="step-indicator relative z-10 flex flex-col items-center" data-step="4">
+        <div class="step-circle w-8 h-8 rounded-full bg-bg-elevated border border-bg-border text-ivory-dim font-bold text-xs flex items-center justify-center transition-all duration-300">4</div>
+        <span class="text-[10px] uppercase font-bold tracking-wider mt-2 text-ivory-dim hidden sm:block">Fecha y Hora</span>
+      </div>
+      <!-- Paso 5 -->
+      <div class="step-indicator relative z-10 flex flex-col items-center" data-step="5">
+        <div class="step-circle w-8 h-8 rounded-full bg-bg-elevated border border-bg-border text-ivory-dim font-bold text-xs flex items-center justify-center transition-all duration-300">5</div>
+        <span class="text-[10px] uppercase font-bold tracking-wider mt-2 text-ivory-dim hidden sm:block">Tus Datos</span>
+      </div>
+      <!-- Paso 6 -->
+      <div class="step-indicator relative z-10 flex flex-col items-center" data-step="6">
+        <div class="step-circle w-8 h-8 rounded-full bg-bg-elevated border border-bg-border text-ivory-dim font-bold text-xs flex items-center justify-center transition-all duration-300">6</div>
+        <span class="text-[10px] uppercase font-bold tracking-wider mt-2 text-ivory-dim hidden sm:block">Confirmar</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- Contenedor de Formularios y Pasos -->
+  <div class="bg-bg-surface border border-bg-border p-6 sm:p-10 shadow-card-dark relative min-h-[420px]">
+    <!-- Spinner de Carga -->
+    <div id="booking-loading" class="hidden absolute inset-0 bg-bg-surface/85 backdrop-blur-sm z-30 flex flex-col items-center justify-center gap-3">
+      <div class="w-8 h-8 rounded-full border-2 border-gold/30 border-t-gold animate-spin"></div>
+      <span class="text-xs uppercase tracking-widest text-gold font-serif">Consultando disponibilidad...</span>
+    </div>
+
+    <!-- PASO 1: Selección de Sucursal -->
+    <div id="step-pane-1" class="step-pane">
+      <div class="mb-6">
+        <h2 class="text-xl font-serif font-bold text-ivory">01. Selecciona la Sucursal</h2>
+        <p class="text-xs text-ivory-muted mt-1">Elige la sede más conveniente para tu atención.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {% for suc in sucursales %}
+        <div class="sucursal-card group cursor-pointer border border-bg-border hover:border-gold bg-bg-dark/70 p-5 transition-all duration-300 relative flex flex-col justify-between"
+             data-id="{{ suc.id }}" 
+             data-slug="{{ suc.slug }}" 
+             data-nombre="{{ suc.nombre }}"
+             data-direccion="{{ suc.direccion }}">
+          <div>
+            <div class="h-36 overflow-hidden mb-4 relative">
+              <img src="{{ suc.imagen_url }}" alt="{{ suc.nombre }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105">
+              <span class="absolute top-2 right-2 bg-bg-dark/90 text-gold text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 border border-gold/30">
+                {{ suc.comuna }}
+              </span>
+            </div>
+            <h3 class="text-base font-serif font-bold text-ivory group-hover:text-gold transition-colors">{{ suc.nombre }}</h3>
+            <p class="text-xs text-ivory-muted mt-1">{{ suc.direccion }}</p>
+            <p class="text-[11px] text-ivory-dim mt-2 flex items-center gap-1">
+              <svg class="w-3.5 h-3.5 text-gold shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+              <span>{{ suc.horario_atencion }}</span>
+            </p>
+          </div>
+          <button type="button" class="mt-5 w-full py-2.5 text-xs font-bold uppercase tracking-wider border border-gold/40 text-gold group-hover:bg-gold group-hover:text-bg-dark transition-all">
+            Seleccionar Sede
+          </button>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <!-- PASO 2: Selección de Servicio -->
+    <div id="step-pane-2" class="step-pane hidden">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-xl font-serif font-bold text-ivory">02. Elige tu Servicio</h2>
+          <p class="text-xs text-ivory-muted mt-1">Servicios de precisión adaptados a tu estilo y necesidades.</p>
+        </div>
+        <button onclick="irAPaso(1)" class="text-xs uppercase tracking-wider text-ivory-muted hover:text-gold transition-colors">← Cambiar Sucursal</button>
+      </div>
+
+      <div id="servicios-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Renderizado dinámico vía API -->
+      </div>
+    </div>
+
+    <!-- PASO 3: Selección de Barbero -->
+    <div id="step-pane-3" class="step-pane hidden">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-xl font-serif font-bold text-ivory">03. Selecciona tu Master Barber</h2>
+          <p class="text-xs text-ivory-muted mt-1">Puedes elegir a tu profesional favorito o permitir que asignemos al barbero libre con menor carga.</p>
+        </div>
+        <button onclick="irAPaso(2)" class="text-xs uppercase tracking-wider text-ivory-muted hover:text-gold transition-colors">← Cambiar Servicio</button>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+        <!-- Opción: Cualquier Barbero Disponible -->
+        <div class="barbero-card cursor-pointer border-2 border-dashed border-gold/40 hover:border-gold bg-gold/5 p-6 text-center transition-all flex flex-col items-center justify-center group"
+             data-id="cualquiera" data-nombre="Cualquier Barbero Disponible">
+          <div class="w-16 h-16 rounded-full bg-gold/15 border border-gold flex items-center justify-center text-gold mb-3 group-hover:scale-110 transition-transform">
+            <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+          </div>
+          <h3 class="text-base font-serif font-bold text-ivory group-hover:text-gold">Cualquier Barbero</h3>
+          <p class="text-[11px] text-ivory-muted mt-1">Asignación inteligente según disponibilidad</p>
+          <span class="mt-4 text-xs uppercase font-bold text-gold tracking-wider">Elegir esta opción</span>
+        </div>
+
+        <div id="barberos-container" class="contents">
+          <!-- Renderizado dinámico de barberos -->
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 4: Calendario y Horarios Disponibles -->
+    <div id="step-pane-4" class="step-pane hidden">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-xl font-serif font-bold text-ivory">04. Elige Fecha y Horario</h2>
+          <p class="text-xs text-ivory-muted mt-1">Horarios en tiempo real sincronizados con la agenda de la sede.</p>
+        </div>
+        <button onclick="irAPaso(3)" class="text-xs uppercase tracking-wider text-ivory-muted hover:text-gold transition-colors">← Cambiar Barbero</button>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+        <!-- Selector de Fecha (Próximos días en tira o input) -->
+        <div class="lg:col-span-5 border-r border-bg-border/60 lg:pr-8">
+          <label class="block text-xs uppercase tracking-wider text-gold font-bold mb-3 font-serif">Selecciona el Día</label>
+          <input type="date" id="input-fecha-reserva" class="w-full bg-bg-dark border border-bg-border focus:border-gold text-ivory px-4 py-3 text-sm rounded-none mb-4 cursor-pointer">
+          
+          <div class="text-[11px] text-ivory-dim space-y-1.5">
+            <p>• Los domingos nuestras sucursales permanecen cerradas.</p>
+            <p>• Disponibilidad calculada considerando pausas y sanitización.</p>
+          </div>
+        </div>
+
+        <!-- Botones de Horarios Disponibles -->
+        <div class="lg:col-span-7">
+          <label class="block text-xs uppercase tracking-wider text-gold font-bold mb-3 font-serif">Horarios Libres para el Día Elegido</label>
+          <div id="horarios-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-[320px] overflow-y-auto pr-2">
+            <!-- Renderizado dinámico de slots horarios -->
+            <p class="text-xs text-ivory-muted col-span-full py-8 text-center">Selecciona una fecha para ver horarios disponibles.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PASO 5: Datos del Cliente (Express o Autenticado) -->
+    <div id="step-pane-5" class="step-pane hidden max-w-xl mx-auto">
+      <div class="flex items-center justify-between mb-6">
+        <div>
+          <h2 class="text-xl font-serif font-bold text-ivory">05. Información de Contacto</h2>
+          <p class="text-xs text-ivory-muted mt-1">Necesitamos tus datos para enviarte la confirmación y recordatorio.</p>
+        </div>
+        <button onclick="irAPaso(4)" class="text-xs uppercase tracking-wider text-ivory-muted hover:text-gold transition-colors">← Cambiar Horario</button>
+      </div>
+
+      <form id="form-datos-cliente" class="space-y-4">
+        <div>
+          <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1">Nombre Completo *</label>
+          <input type="text" id="cli-nombre" required class="w-full bg-bg-dark border border-bg-border focus:border-gold text-ivory px-4 py-3 text-sm rounded-none placeholder-ivory-dim" placeholder="Ej. Sebastián Tapia">
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1">Correo Electrónico *</label>
+            <input type="email" id="cli-email" required class="w-full bg-bg-dark border border-bg-border focus:border-gold text-ivory px-4 py-3 text-sm rounded-none placeholder-ivory-dim" placeholder="tu@correo.cl">
+          </div>
+          <div>
+            <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1">Teléfono / WhatsApp *</label>
+            <input type="tel" id="cli-telefono" required class="w-full bg-bg-dark border border-bg-border focus:border-gold text-ivory px-4 py-3 text-sm rounded-none placeholder-ivory-dim" placeholder="+56 9 1234 5678">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1">Notas o Preferencias (Opcional)</label>
+          <textarea id="cli-notas" rows="2" class="w-full bg-bg-dark border border-bg-border focus:border-gold text-ivory px-4 py-2.5 text-sm rounded-none placeholder-ivory-dim" placeholder="Ej. Corte bajo, piel sensible, primera visita."></textarea>
+        </div>
+
+        <button type="button" onclick="irAResumen()" class="w-full btn-shimmer-effect bg-gold hover:bg-gold-hover text-bg-dark font-bold text-xs uppercase tracking-widest py-3.5 shadow-gold-glow mt-4 transition-all">
+          Revisar Resumen y Confirmar
+        </button>
+      </form>
+    </div>
+
+    <!-- PASO 6: Resumen y Confirmación Final -->
+    <div id="step-pane-6" class="step-pane hidden max-w-xl mx-auto">
+      <div class="text-center mb-6">
+        <span class="text-xs uppercase tracking-widest text-gold font-serif block mb-1">Paso Final</span>
+        <h2 class="text-2xl font-serif font-bold text-ivory">Resumen de tu Cita</h2>
+        <p class="text-xs text-ivory-muted mt-1">Por favor verifica los detalles antes de confirmar tu reserva.</p>
+      </div>
+
+      <!-- Ticket / Voucher de Resumen -->
+      <div class="bg-bg-dark border border-gold/40 p-6 shadow-card-dark relative mb-6">
+        <div class="flex items-center justify-between pb-4 border-b border-bg-border">
+          <span class="text-xs uppercase tracking-widest text-gold font-bold font-serif">Demo Barber Club</span>
+          <span class="text-[10px] text-ivory-dim uppercase tracking-wider">Pago en el Local</span>
+        </div>
+
+        <div class="py-4 space-y-3 text-xs">
+          <div class="flex justify-between">
+            <span class="text-ivory-muted">Sucursal:</span>
+            <span id="resumen-sucursal" class="text-ivory font-bold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-ivory-muted">Servicio:</span>
+            <span id="resumen-servicio" class="text-ivory font-bold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-ivory-muted">Duración:</span>
+            <span id="resumen-duracion" class="text-ivory"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-ivory-muted">Barbero:</span>
+            <span id="resumen-barbero" class="text-gold font-bold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-ivory-muted">Fecha & Hora:</span>
+            <span id="resumen-fechahora" class="text-ivory font-bold"></span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-ivory-muted">Cliente:</span>
+            <span id="resumen-cliente" class="text-ivory"></span>
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-bg-border flex items-center justify-between">
+          <span class="text-sm font-serif font-bold text-ivory">Total a pagar:</span>
+          <span id="resumen-precio" class="text-lg font-serif font-bold text-gold"></span>
+        </div>
+      </div>
+
+      <div class="flex gap-4">
+        <button type="button" onclick="irAPaso(5)" class="flex-1 py-3 text-xs uppercase tracking-wider font-bold border border-bg-border text-ivory-muted hover:text-ivory transition-colors">
+          Modificar
+        </button>
+        <button type="button" id="btn-confirmar-final" onclick="ejecutarConfirmacion()" class="flex-2 w-full btn-shimmer-effect bg-gold hover:bg-gold-hover text-bg-dark font-bold text-xs uppercase tracking-widest py-3.5 shadow-gold-glow transition-all">
+          Confirmar Reserva Ahora
+        </button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Script del Flujo de Reserva en Vanilla JS -->
+<script>
+  // Estado local del agendamiento
+  const state = {
+    step: 1,
+    sucursal: null,
+    servicio: null,
+    barbero: null,
+    fecha: null,
+    hora: null,
+    cliente: JSON.parse('{{ cliente_inicial|safe }}')
+  };
+
+  document.addEventListener('DOMContentLoaded', () => {
+    // Inicializar fecha mínima en el selector (hoy)
+    const hoyStr = new Date().toISOString().split('T')[0];
+    const inputFecha = document.getElementById('input-fecha-reserva');
+    inputFecha.min = hoyStr;
+    inputFecha.value = hoyStr;
+    state.fecha = hoyStr;
+
+    inputFecha.addEventListener('change', (e) => {
+      state.fecha = e.target.value;
+      cargarHorarios();
+    });
+
+    // Rellenar datos si el cliente está autenticado
+    if (state.cliente.autenticado) {
+      document.getElementById('cli-nombre').value = state.cliente.nombre || '';
+      document.getElementById('cli-email').value = state.cliente.email || '';
+      document.getElementById('cli-telefono').value = state.cliente.telefono || '';
+      document.getElementById('cli-notas').value = state.cliente.notas || '';
+    }
+
+    // Listener para tarjetas de sucursal
+    document.querySelectorAll('.sucursal-card').forEach(card => {
+      card.addEventListener('click', () => {
+        state.sucursal = {
+          id: card.dataset.id,
+          slug: card.dataset.slug,
+          nombre: card.dataset.nombre,
+          direccion: card.dataset.direccion
+        };
+        cargarServicios();
+        irAPaso(2);
+      });
+    });
+
+    // Comprobar preselecciones por URL
+    const preSuc = "{{ pre_sucursal|default:'' }}";
+    if (preSuc) {
+      const matchSuc = document.querySelector(`.sucursal-card[data-slug="${preSuc}"]`);
+      if (matchSuc) matchSuc.click();
+    }
+  });
+
+  function toggleLoading(show) {
+    const el = document.getElementById('booking-loading');
+    if (show) el.classList.remove('hidden');
+    else el.classList.add('hidden');
+  }
+
+  function irAPaso(paso) {
+    state.step = paso;
+    document.querySelectorAll('.step-pane').forEach(el => el.classList.add('hidden'));
+    const pane = document.getElementById(`step-pane-${paso}`);
+    if (pane) pane.classList.remove('hidden');
+
+    // Actualizar barra de progreso visual
+    const pct = ((paso - 1) / 5) * 100;
+    document.getElementById('progress-bar-fill').style.width = `${pct}%`;
+
+    document.querySelectorAll('.step-indicator').forEach(ind => {
+      const p = parseInt(ind.dataset.step);
+      const circle = ind.querySelector('.step-circle');
+      if (p <= paso) {
+        circle.classList.add('bg-gold', 'text-bg-dark');
+        circle.classList.remove('bg-bg-elevated', 'border', 'border-bg-border', 'text-ivory-dim');
+      } else {
+        circle.classList.remove('bg-gold', 'text-bg-dark');
+        circle.classList.add('bg-bg-elevated', 'border', 'border-bg-border', 'text-ivory-dim');
+      }
+    });
+
+    window.scrollTo({ top: 150, behavior: 'smooth' });
+  }
+
+  // 1. Cargar Servicios para la sucursal elegida
+  async function cargarServicios() {
+    toggleLoading(true);
+    try {
+      const resp = await fetch(`/reservas/api/servicios/?sucursal_id=${state.sucursal.id}`);
+      const data = await resp.json();
+      const grid = document.getElementById('servicios-grid');
+      grid.innerHTML = '';
+
+      data.servicios.forEach(s => {
+        const item = document.createElement('div');
+        item.className = 'cursor-pointer border border-bg-border hover:border-gold bg-bg-dark p-5 transition-all flex items-start gap-4 group';
+        item.innerHTML = `
+          <div class="w-20 h-20 shrink-0 bg-bg-surface overflow-hidden border border-bg-border/60">
+            <img src="${s.imagen_url}" alt="${s.nombre}" class="w-full h-full object-cover group-hover:scale-105 transition-transform">
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-serif font-bold text-ivory group-hover:text-gold transition-colors">${s.nombre}</h3>
+              <span class="text-xs font-bold text-gold">${s.precio_formateado}</span>
+            </div>
+            <p class="text-[11px] text-ivory-muted mt-1 line-clamp-2">${s.descripcion}</p>
+            <div class="flex items-center gap-2 mt-2">
+              <span class="text-[10px] text-ivory-dim bg-bg-elevated px-2 py-0.5">${s.duracion} min</span>
+              ${s.etiqueta ? `<span class="text-[10px] text-gold bg-gold/10 px-2 py-0.5 border border-gold/30">${s.etiqueta}</span>` : ''}
+            </div>
+          </div>
+        `;
+        item.addEventListener('click', () => {
+          state.servicio = s;
+          cargarBarberos();
+          irAPaso(3);
+        });
+        grid.appendChild(item);
+      });
+    } catch (err) {
+      alert('Error cargando servicios.');
+    } finally {
+      toggleLoading(false);
+    }
+  }
+
+  // 2. Cargar Barberos para sucursal + servicio
+  async function cargarBarberos() {
+    toggleLoading(true);
+    try {
+      const resp = await fetch(`/reservas/api/barberos/?sucursal_id=${state.sucursal.id}&servicio_id=${state.servicio.id}`);
+      const data = await resp.json();
+      const cont = document.getElementById('barberos-container');
+      cont.innerHTML = '';
+
+      // Configurar listener para "Cualquiera"
+      const btnCualquiera = document.querySelector('.barbero-card[data-id="cualquiera"]');
+      btnCualquiera.onclick = () => {
+        state.barbero = { id: 'cualquiera', nombre: 'Cualquier Barbero Disponible' };
+        cargarHorarios();
+        irAPaso(4);
+      };
+
+      data.barberos.forEach(b => {
+        const item = document.createElement('div');
+        item.className = 'barbero-card cursor-pointer border border-bg-border hover:border-gold bg-bg-dark p-5 transition-all text-center flex flex-col items-center justify-between group';
+        item.innerHTML = `
+          <div>
+            <div class="w-20 h-20 rounded-full overflow-hidden mx-auto mb-3 border-2 border-gold/40 group-hover:border-gold transition-colors">
+              <img src="${b.imagen_url}" alt="${b.nombre}" class="w-full h-full object-cover">
+            </div>
+            <h3 class="text-sm font-serif font-bold text-ivory group-hover:text-gold transition-colors">${b.nombre}</h3>
+            <p class="text-[11px] text-ivory-muted mt-0.5">${b.especialidad}</p>
+            <span class="text-[10px] text-gold font-mono block mt-1">${b.anios_experiencia} años de experiencia</span>
+          </div>
+          <button type="button" class="mt-4 w-full py-2 text-xs font-bold uppercase tracking-wider border border-gold/40 text-gold group-hover:bg-gold group-hover:text-bg-dark transition-all">
+            Reservar con él
+          </button>
+        `;
+        item.addEventListener('click', () => {
+          state.barbero = { id: b.id, nombre: b.nombre };
+          cargarHorarios();
+          irAPaso(4);
+        });
+        cont.appendChild(item);
+      });
+    } catch (err) {
+      alert('Error cargando barberos.');
+    } finally {
+      toggleLoading(false);
+    }
+  }
+
+  // 3. Cargar Horarios Disponibles
+  async function cargarHorarios() {
+    if (!state.fecha) return;
+    toggleLoading(true);
+    try {
+      const url = `/reservas/api/horarios/?sucursal_id=${state.sucursal.id}&servicio_id=${state.servicio.id}&fecha=${state.fecha}&barbero_id=${state.barbero ? state.barbero.id : ''}`;
+      const resp = await fetch(url);
+      const data = await resp.json();
+      const grid = document.getElementById('horarios-grid');
+      grid.innerHTML = '';
+
+      if (!data.horarios || data.horarios.length === 0) {
+        grid.innerHTML = '<p class="text-xs text-status-warning col-span-full py-8 text-center">No hay horarios disponibles para esta fecha. Por favor selecciona otro día.</p>';
+        return;
+      }
+
+      data.horarios.forEach(h => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'p-3 bg-bg-surface hover:bg-gold hover:text-bg-dark border border-bg-border hover:border-gold text-xs font-mono font-bold text-ivory rounded-none transition-all flex flex-col items-center justify-center';
+        btn.innerHTML = `
+          <span>${h.hora}</span>
+          <span class="text-[9px] font-sans opacity-70 mt-0.5">${h.barberos_count} libre${h.barberos_count > 1 ? 's' : ''}</span>
+        `;
+        btn.addEventListener('click', () => {
+          state.hora = h.hora;
+          irAPaso(5);
+        });
+        grid.appendChild(btn);
+      });
+    } catch (err) {
+      alert('Error consultando horarios.');
+    } finally {
+      toggleLoading(false);
+    }
+  }
+
+  // 4. Ir a Pantalla de Resumen (Paso 6)
+  function irAResumen() {
+    const nom = document.getElementById('cli-nombre').value.trim();
+    const email = document.getElementById('cli-email').value.trim();
+    const tel = document.getElementById('cli-telefono').value.trim();
+    const notas = document.getElementById('cli-notas').value.trim();
+
+    if (!nom || !email || !tel) {
+      alert('Por favor completa tu nombre, correo electrónico y teléfono.');
+      return;
+    }
+
+    state.cliente.nombre = nom;
+    state.cliente.email = email;
+    state.cliente.telefono = tel;
+    state.cliente.notas = notas;
+
+    // Pintar valores en el voucher de resumen
+    document.getElementById('resumen-sucursal').innerText = `${state.sucursal.nombre} (${state.sucursal.direccion})`;
+    document.getElementById('resumen-servicio').innerText = state.servicio.nombre;
+    document.getElementById('resumen-duracion').innerText = `${state.servicio.duracion} minutos`;
+    document.getElementById('resumen-barbero').innerText = state.barbero.nombre;
+    document.getElementById('resumen-fechahora').innerText = `${state.fecha} a las ${state.hora} hrs`;
+    document.getElementById('resumen-cliente').innerText = `${state.cliente.nombre} (${state.cliente.telefono})`;
+    document.getElementById('resumen-precio').innerText = state.servicio.precio_formateado;
+
+    irAPaso(6);
+  }
+
+  // 5. Enviar Confirmación Final
+  async function ejecutarConfirmacion() {
+    const btn = document.getElementById('btn-confirmar-final');
+    btn.disabled = true;
+    btn.innerText = 'PROCESANDO RESERVA...';
+    toggleLoading(true);
+
+    const payload = {
+      sucursal_id: state.sucursal.id,
+      servicio_id: state.servicio.id,
+      barbero_id: state.barbero.id,
+      fecha: state.fecha,
+      hora: state.hora,
+      cliente_nombre: state.cliente.nombre,
+      cliente_email: state.cliente.email,
+      cliente_telefono: state.cliente.telefono,
+      cliente_notas: state.cliente.notas
+    };
+
+    // Obtener cookie CSRF
+    function getCookie(name) {
+      let cookieValue = null;
+      if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+        for (let i = 0; i < cookies.length; i++) {
+          const cookie = cookies[i].trim();
+          if (cookie.substring(0, name.length + 1) === (name + '=')) {
+            cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+            break;
+          }
+        }
+      }
+      return cookieValue;
+    }
+
+    try {
+      const resp = await fetch('/reservas/api/confirmar/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': getCookie('csrftoken')
+        },
+        body: JSON.stringify(payload)
+      });
+      const res = await resp.json();
+
+      if (res.exito) {
+        window.location.href = res.redirect_url;
+      } else {
+        alert(res.error || 'No fue posible completar la reserva.');
+        btn.disabled = false;
+        btn.innerText = 'Confirmar Reserva Ahora';
+        irAPaso(4); // Regresar al paso de horarios si hubo choque
+      }
+    } catch (err) {
+      alert('Error de conexión con el servidor. Por favor intenta nuevamente.');
+      btn.disabled = false;
+      btn.innerText = 'Confirmar Reserva Ahora';
+    } finally {
+      toggleLoading(false);
+    }
+  }
+</script>
+{% endblock %}
