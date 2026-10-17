@@ -233,7 +233,7 @@ class ReservasMotorTestCase(TestCase):
         client = Client(SERVER_NAME='localhost')
 
         admin_user = Usuario.objects.create_user(
-            email="admin.test@demobarberclub.cl", password="password123", rol=Usuario.Rol.ADMINISTRADOR
+            email="admin.test@demobarberclub.cl", password="password123", rol=Usuario.Rol.ADMIN_MAESTRO
         )
         cliente_user = Usuario.objects.create_user(
             email="cliente.test@demobarberclub.cl", password="password123", rol=Usuario.Rol.CLIENTE
@@ -267,7 +267,7 @@ class ReservasMotorTestCase(TestCase):
         )
 
         admin_user = Usuario.objects.create_user(
-            email="admin2.test@demobarberclub.cl", password="password123", rol=Usuario.Rol.ADMINISTRADOR
+            email="admin2.test@demobarberclub.cl", password="password123", rol=Usuario.Rol.ADMIN_MAESTRO
         )
 
         # Admin consulta específicamente la agenda de barbero2

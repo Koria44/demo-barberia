@@ -62,6 +62,9 @@ class Bloqueo(models.Model):
     fecha_fin = models.DateTimeField('Fin del Bloqueo')
     tipo = models.CharField('Tipo de Bloqueo', max_length=25, choices=TipoBloqueo.choices, default=TipoBloqueo.BLOQUEO_MANUAL)
     motivo = models.CharField('Motivo del Bloqueo', max_length=200, blank=True)
+    todo_el_dia = models.BooleanField('Bloqueo de todo el día', default=False)
+    es_recurrente = models.BooleanField('Bloqueo recurrente semanal', default=False)
+    dia_semana_recurrente = models.IntegerField('Día de la semana recurrente', choices=DiaSemana.choices, null=True, blank=True)
     creado_el = models.DateTimeField(auto_now_add=True)
 
     class Meta:

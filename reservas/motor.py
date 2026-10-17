@@ -88,9 +88,10 @@ def calcular_horarios_disponibles(sucursal, servicio, fecha_consulta, barbero=No
 
         # 3. Bloqueos que afecten al barbero o a la sucursal en esta fecha
         bloqueos = Bloqueo.objects.filter(
-            Q(barbero=b) | Q(sucursal=sucursal, barbero__isnull=True),
-            fecha_inicio__date__lte=fecha_consulta,
-            fecha_fin__date__gte=fecha_consulta
+            Q(barbero=b) | Q(sucursal=sucursal, barbero__isnull=True)
+        ).filter(
+            Q(fecha_inicio__date__lte=fecha_consulta, fecha_fin__date__gte=fecha_consulta) |
+            Q(es_recurrente=True, dia_semana_recurrente=dia_semana)
         )
 
         for turno in turnos:
@@ -124,9 +125,23 @@ def calcular_horarios_disponibles(sucursal, servicio, fecha_consulta, barbero=No
                 # Validar bloqueos
                 choca_bloqueo = False
                 for bloq in bloqueos:
-                    if slot_inicio < bloq.fecha_fin and slot_fin > bloq.fecha_inicio:
-                        choca_bloqueo = True
-                        break
+                    if bloq.es_recurrente:
+                        if bloq.todo_el_dia:
+                            choca_bloqueo = True
+                            break
+                        b_ini = timezone.make_aware(datetime.combine(fecha_consulta, bloq.fecha_inicio.time()))
+                        b_fin = timezone.make_aware(datetime.combine(fecha_consulta, bloq.fecha_fin.time()))
+                        if slot_inicio < b_fin and slot_fin > b_ini:
+                            choca_bloqueo = True
+                            break
+                    else:
+                        if bloq.todo_el_dia:
+                            if bloq.fecha_inicio.date() <= fecha_consulta <= bloq.fecha_fin.date():
+                                choca_bloqueo = True
+                                break
+                        elif slot_inicio < bloq.fecha_fin and slot_fin > bloq.fecha_inicio:
+                            choca_bloqueo = True
+                            break
 
                 if choca_bloqueo:
                     hora_actual_dt += intervalo_paso
