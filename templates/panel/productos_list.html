@@ -5,17 +5,17 @@
 
 {% block content %}
 <div class="space-y-6 max-w-7xl mx-auto">
-  <div class="bg-bg-surface border border-bg-border p-5 shadow-card-dark flex items-center justify-between">
+  <div class="bg-white border border-bg-border p-5 flex items-center justify-between">
     <div>
-      <h2 class="text-base font-serif font-bold text-ivory">Productos de la Tienda Online</h2>
-      <p class="text-xs text-ivory-muted">Control de existencias, precios y alertas de inventario.</p>
+      <h2 class="text-base font-serif font-medium text-text-main">Productos de la Tienda Online</h2>
+      <p class="text-xs text-text-muted font-light">Control de existencias, precios y alertas de inventario.</p>
     </div>
-    <span class="text-xs text-gold font-bold">{{ productos|length }} productos en catálogo</span>
+    <span class="text-xs text-text-muted font-semibold">{{ productos|length }} productos en catálogo</span>
   </div>
 
-  <div class="bg-bg-surface border border-bg-border shadow-card-dark overflow-x-auto">
+  <div class="bg-white border border-bg-border overflow-x-auto">
     <table class="w-full text-left text-xs divide-y divide-bg-border">
-      <thead class="bg-bg-elevated text-ivory-dim uppercase text-[10px] tracking-wider font-semibold">
+      <thead class="bg-bg-alt text-text-muted uppercase text-[10px] tracking-wider font-semibold">
         <tr>
           <th class="py-3 px-4">Producto</th>
           <th class="py-3 px-4">Categoría</th>
@@ -25,31 +25,31 @@
           <th class="py-3 px-4">Estado</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-bg-border text-ivory">
+      <tbody class="divide-y divide-bg-border text-text-main">
         {% for p in productos %}
-        <tr class="hover:bg-bg-elevated/50 transition-colors">
+        <tr class="hover:bg-bg-alt transition-colors">
           <td class="py-3 px-4 flex items-center gap-3">
-            <div class="w-10 h-10 bg-bg-dark border border-bg-border overflow-hidden shrink-0">
-              <img src="{{ p.imagen_url }}" alt="{{ p.nombre }}" class="w-full h-full object-cover">
+            <div class="w-10 h-10 bg-bg-alt border border-bg-border overflow-hidden shrink-0">
+              <img src="{{ p.imagen_url }}" alt="{{ p.nombre }}" class="w-full h-full object-cover img-editorial">
             </div>
-            <span class="font-bold text-ivory">{{ p.nombre }}</span>
+            <span class="font-semibold text-text-main">{{ p.nombre }}</span>
           </td>
-          <td class="py-3 px-4 text-ivory-muted">{{ p.categoria.nombre|default:"General" }}</td>
-          <td class="py-3 px-4 font-mono font-bold text-gold">{{ p.precio_formateado }}</td>
+          <td class="py-3 px-4 text-text-muted">{{ p.categoria.nombre|default:"General" }}</td>
+          <td class="py-3 px-4 font-mono font-semibold text-text-main">{{ p.precio_formateado }}</td>
           <td class="py-3 px-4 font-mono">
             {% if p.en_alerta_stock %}
-            <span class="px-2 py-0.5 bg-status-warning/20 border border-status-warning text-status-warning font-bold">
+            <span class="px-2 py-0.5 bg-amber-50 border border-amber-200 text-status-warning font-semibold">
               {{ p.stock }} un. (Crítico)
             </span>
             {% else %}
-            <span class="text-ivory">{{ p.stock }} unidades</span>
+            <span class="text-text-main font-medium">{{ p.stock }} unidades</span>
             {% endif %}
           </td>
           <td class="py-3 px-4">
-            {% if p.destacado %}<span class="text-gold font-bold">✓ Sí</span>{% else %}<span class="text-ivory-dim">No</span>{% endif %}
+            {% if p.destacado %}<span class="text-text-main font-semibold">✓ Sí</span>{% else %}<span class="text-text-dim">No</span>{% endif %}
           </td>
           <td class="py-3 px-4">
-            <span class="text-[10px] uppercase font-bold text-status-success">En Venta</span>
+            <span class="text-[10px] uppercase font-semibold text-status-success px-1.5 py-0.5 bg-green-50 border border-green-200">En Venta</span>
           </td>
         </tr>
         {% endfor %}

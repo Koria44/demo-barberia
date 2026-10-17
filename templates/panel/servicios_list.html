@@ -7,10 +7,10 @@
 <div class="space-y-6 max-w-7xl mx-auto">
 
   <!-- Encabezado con Botón de Creación -->
-  <div class="bg-bg-surface border border-bg-border p-5 shadow-card-dark flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+  <div class="bg-white border border-bg-border p-5 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <h2 class="text-base font-serif font-bold text-ivory">Catálogo de Servicios</h2>
-      <p class="text-xs text-ivory-dim mt-0.5">
+      <h2 class="text-base font-serif font-medium text-text-main">Catálogo de Servicios</h2>
+      <p class="text-xs text-text-muted mt-0.5 font-light">
         {% if es_admin_maestro %}
         Gestión global de servicios base, precios, duraciones y personalización por sede.
         {% else %}
@@ -20,17 +20,17 @@
     </div>
     {% if es_admin_maestro %}
     <div class="flex items-center gap-3">
-      <a href="{% url 'panel:servicio_crear' %}" class="px-4 py-2 bg-gold hover:bg-gold-light text-bg-dark font-bold uppercase tracking-wider text-xs shadow-gold-glow transition-all flex items-center gap-2">
+      <a href="{% url 'panel:servicio_crear' %}" class="px-4 py-2 bg-brand-black hover:bg-neutral-800 text-white font-medium uppercase tracking-wider text-xs transition-colors flex items-center gap-2">
         <span>+</span> Nuevo Servicio
       </a>
     </div>
     {% endif %}
   </div>
 
-  <!-- Tabla de Servicios -->
-  <div class="bg-bg-surface border border-bg-border shadow-card-dark overflow-x-auto">
+  <!-- Tabla de Servicios B&W -->
+  <div class="bg-white border border-bg-border overflow-x-auto">
     <table class="w-full text-left text-xs divide-y divide-bg-border">
-      <thead class="bg-bg-elevated text-ivory-dim uppercase text-[10px] tracking-wider font-semibold">
+      <thead class="bg-bg-alt text-text-muted uppercase text-[10px] tracking-wider font-semibold">
         <tr>
           <th class="py-3 px-4">Orden</th>
           <th class="py-3 px-4">Servicio</th>
@@ -42,44 +42,44 @@
           <th class="py-3 px-4 text-right">Acciones</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-bg-border text-ivory">
+      <tbody class="divide-y divide-bg-border text-text-main">
         {% for item in servicios_info %}
-        <tr class="hover:bg-bg-elevated/50 transition-colors">
-          <td class="py-3 px-4 font-mono text-ivory-dim">{{ item.servicio.orden }}</td>
+        <tr class="hover:bg-bg-alt transition-colors">
+          <td class="py-3 px-4 font-mono text-text-dim">{{ item.servicio.orden }}</td>
           <td class="py-3 px-4">
             <div class="flex items-center gap-3">
               {% if item.servicio.imagen %}
-              <img src="{{ item.servicio.imagen_url }}" class="w-9 h-9 object-cover border border-gold/40 shrink-0">
+              <img src="{{ item.servicio.imagen_url }}" class="w-9 h-9 object-cover border border-bg-border img-editorial shrink-0">
               {% endif %}
               <div>
-                <span class="font-bold block text-ivory">{{ item.servicio.nombre }}</span>
-                <span class="text-[11px] text-ivory-muted line-clamp-1">{{ item.servicio.descripcion }}</span>
+                <span class="font-semibold block text-text-main">{{ item.servicio.nombre }}</span>
+                <span class="text-[11px] text-text-muted line-clamp-1 font-light">{{ item.servicio.descripcion }}</span>
               </div>
             </div>
           </td>
-          <td class="py-3 px-4 text-ivory-muted">{{ item.servicio.categoria.nombre|default:"General" }}</td>
+          <td class="py-3 px-4 text-text-muted">{{ item.servicio.categoria.nombre|default:"General" }}</td>
           <td class="py-3 px-4 font-mono">
             {{ item.duracion_local }} min
             {% if item.config_sucursal and item.config_sucursal.duracion_personalizada %}
-            <span class="text-[9px] text-gold block">(Específico sede)</span>
+            <span class="text-[9px] text-text-muted block font-sans">(Específico sede)</span>
             {% endif %}
           </td>
-          <td class="py-3 px-4 font-mono font-bold text-gold">
+          <td class="py-3 px-4 font-mono font-semibold text-text-main">
             ${{ item.precio_local|formatear_clp_tag }}
             {% if item.config_sucursal and item.config_sucursal.precio_personalizado %}
-            <span class="text-[9px] text-gold block font-sans">(Específico sede)</span>
+            <span class="text-[9px] text-text-muted block font-sans">(Específico sede)</span>
             {% endif %}
           </td>
           <td class="py-3 px-4">
             {% if item.servicio.etiqueta %}
-            <span class="text-[10px] bg-gold/15 border border-gold/40 text-gold px-2 py-0.5">{{ item.servicio.etiqueta }}</span>
+            <span class="text-[10px] bg-bg-alt border border-bg-border text-text-main px-2 py-0.5 font-medium">{{ item.servicio.etiqueta }}</span>
             {% else %}-{% endif %}
           </td>
           <td class="py-3 px-4">
             {% if item.disponible_local %}
-            <span class="text-[10px] uppercase font-bold text-status-success px-1.5 py-0.5 bg-status-success/15 border border-status-success/30">Habilitado</span>
+            <span class="text-[10px] uppercase font-semibold text-status-success px-1.5 py-0.5 bg-green-50 border border-green-200">Habilitado</span>
             {% else %}
-            <span class="text-[10px] uppercase font-bold text-status-error px-1.5 py-0.5 bg-status-error/15 border border-status-error/30">Inhabilitado</span>
+            <span class="text-[10px] uppercase font-semibold text-status-error px-1.5 py-0.5 bg-red-50 border border-red-200">Inhabilitado</span>
             {% endif %}
           </td>
           <td class="py-3 px-4 text-right">
@@ -87,24 +87,24 @@
               <!-- Activar / Desactivar -->
               <form method="POST" action="{% url 'panel:servicio_toggle_activo' item.servicio.id %}" class="inline">
                 {% csrf_token %}
-                <button type="submit" class="px-2 py-1 text-[11px] font-bold uppercase border transition-colors {% if item.disponible_local %}border-status-warning/40 text-status-warning hover:bg-status-warning/10{% else %}border-status-success/40 text-status-success hover:bg-status-success/10{% endif %}" title="{% if item.disponible_local %}Desactivar{% else %}Activar{% endif %}">
+                <button type="submit" class="px-2 py-1 text-[11px] font-semibold uppercase border transition-colors {% if item.disponible_local %}border-amber-300 text-status-warning hover:bg-amber-50{% else %}border-green-300 text-status-success hover:bg-green-50{% endif %}" title="{% if item.disponible_local %}Desactivar{% else %}Activar{% endif %}">
                   {% if item.disponible_local %}Pausar{% else %}Activar{% endif %}
                 </button>
               </form>
 
               <!-- Configurar Sedes -->
-              <a href="{% url 'panel:servicio_sucursales' item.servicio.id %}" class="px-2 py-1 text-[11px] font-bold uppercase border border-bg-border hover:border-gold text-ivory hover:text-gold transition-colors" title="Ajustar por Sede">
+              <a href="{% url 'panel:servicio_sucursales' item.servicio.id %}" class="px-2 py-1 text-[11px] font-semibold uppercase border border-bg-border hover:border-brand-black text-text-muted hover:text-text-main transition-colors" title="Ajustar por Sede">
                 Sedes
               </a>
 
               {% if es_admin_maestro %}
               <!-- Editar Servicio Base -->
-              <a href="{% url 'panel:servicio_editar' item.servicio.id %}" class="px-2 py-1 text-[11px] font-bold uppercase border border-gold/40 text-ivory hover:bg-gold/15 transition-colors" title="Editar Base">
+              <a href="{% url 'panel:servicio_editar' item.servicio.id %}" class="px-2 py-1 text-[11px] font-semibold uppercase border border-brand-black text-brand-black hover:bg-neutral-100 transition-colors" title="Editar Base">
                 Editar
               </a>
 
               <!-- Eliminar -->
-              <button onclick="document.getElementById('modal-eliminar-serv-{{ item.servicio.id }}').classList.remove('hidden')" class="px-2 py-1 text-[11px] text-ivory-dim hover:text-status-error transition-colors" title="Eliminar servicio">
+              <button onclick="document.getElementById('modal-eliminar-serv-{{ item.servicio.id }}').classList.remove('hidden')" class="px-2 py-1 text-[11px] text-text-dim hover:text-status-error transition-colors" title="Eliminar servicio">
                 🗑
               </button>
               {% endif %}
@@ -112,19 +112,19 @@
 
             {% if es_admin_maestro %}
             <!-- Modal de Eliminación de Servicio -->
-            <div id="modal-eliminar-serv-{{ item.servicio.id }}" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden text-left">
-              <div class="bg-bg-surface border border-bg-border max-w-md w-full p-6 space-y-4 shadow-2xl">
-                <h4 class="text-sm font-serif font-bold text-ivory">¿Eliminar el servicio {{ item.servicio.nombre }}?</h4>
-                <p class="text-xs text-ivory-dim">
+            <div id="modal-eliminar-serv-{{ item.servicio.id }}" class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 hidden text-left">
+              <div class="bg-white border border-bg-border max-w-md w-full p-6 space-y-4 shadow-soft">
+                <h4 class="text-sm font-serif font-medium text-text-main">¿Eliminar el servicio {{ item.servicio.nombre }}?</h4>
+                <p class="text-xs text-text-muted font-light">
                   Esta acción eliminará el servicio del catálogo. Si existen citas agendadas con este servicio, el sistema impedirá su eliminación para proteger los registros contables.
                 </p>
                 <div class="flex items-center justify-end gap-3 pt-3 border-t border-bg-border">
-                  <button onclick="document.getElementById('modal-eliminar-serv-{{ item.servicio.id }}').classList.add('hidden')" class="px-4 py-2 border border-bg-border text-xs text-ivory uppercase font-bold">
+                  <button onclick="document.getElementById('modal-eliminar-serv-{{ item.servicio.id }}').classList.add('hidden')" class="px-4 py-2 border border-brand-black text-xs text-brand-black uppercase font-semibold hover:bg-neutral-100 transition-colors">
                     Cancelar
                   </button>
                   <form method="POST" action="{% url 'panel:servicio_eliminar' item.servicio.id %}">
                     {% csrf_token %}
-                    <button type="submit" class="px-4 py-2 bg-status-error text-white text-xs uppercase font-bold">
+                    <button type="submit" class="px-4 py-2 bg-status-error hover:bg-red-700 text-white text-xs uppercase font-medium transition-colors">
                       Confirmar Eliminación
                     </button>
                   </form>
@@ -136,7 +136,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="8" class="py-8 text-center text-xs text-ivory-muted">
+          <td colspan="8" class="py-8 text-center text-xs text-text-muted font-light">
             No hay servicios registrados en el catálogo.
           </td>
         </tr>

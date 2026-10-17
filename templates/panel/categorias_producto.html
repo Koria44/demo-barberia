@@ -7,59 +7,59 @@
 <div class="max-w-4xl mx-auto space-y-6">
 
   <!-- Encabezado -->
-  <div class="flex items-center justify-between bg-bg-surface border border-bg-border p-5 shadow-card-dark">
+  <div class="flex items-center justify-between bg-white border border-bg-border p-5">
     <div>
-      <h2 class="text-base font-serif font-bold text-ivory">Categorías de Productos</h2>
-      <p class="text-xs text-ivory-dim mt-0.5">Organiza tu catálogo de tienda en familias de productos (Pomadas, Barba, Afeitado...).</p>
+      <h2 class="text-base font-serif font-medium text-text-main">Categorías de Productos</h2>
+      <p class="text-xs text-text-muted mt-0.5 font-light">Organiza tu catálogo de tienda en familias de productos (Pomadas, Barba, Afeitado...).</p>
     </div>
-    <a href="{% url 'panel:productos_list' %}" class="px-3 py-1.5 bg-bg-dark border border-bg-border hover:border-gold text-ivory text-xs font-bold uppercase transition-colors">
+    <a href="{% url 'panel:productos_list' %}" class="px-3 py-1.5 bg-white border border-brand-black hover:bg-neutral-100 text-brand-black text-xs font-semibold uppercase transition-colors">
       ← Volver al Inventario
     </a>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-12 gap-6 items-start">
     <!-- Formulario Crear Categoría -->
-    <div class="md:col-span-5 bg-bg-surface border border-bg-border p-5 shadow-card-dark space-y-4">
-      <h3 class="text-sm font-serif font-bold text-ivory border-b border-bg-border pb-2">Nueva Categoría</h3>
+    <div class="md:col-span-5 bg-white border border-bg-border p-5 space-y-4">
+      <h3 class="text-sm font-serif font-medium text-text-main border-b border-bg-border pb-2">Nueva Categoría</h3>
       <form method="POST" class="space-y-4">
         {% csrf_token %}
         <input type="hidden" name="crear_categoria" value="1">
         <div>
-          <label class="block text-xs text-ivory-dim mb-1 font-semibold">Nombre de la Categoría *</label>
+          <label class="block text-xs text-text-muted mb-1 font-semibold">Nombre de la Categoría *</label>
           <input type="text" name="nombre" required placeholder="Ej: Cuidado de Barba"
-                 class="w-full bg-bg-dark border border-bg-border px-3 py-2 text-ivory text-xs focus:border-gold focus:outline-none">
+                 class="w-full bg-white border border-bg-border px-3 py-2 text-text-main text-xs focus:border-brand-black focus:outline-none placeholder:text-text-dim">
         </div>
-        <button type="submit" class="w-full py-2 bg-gold hover:bg-gold-light text-bg-dark text-xs uppercase font-bold tracking-wider shadow-gold-glow transition-all">
+        <button type="submit" class="w-full py-2 bg-brand-black hover:bg-neutral-800 text-white text-xs uppercase font-medium tracking-wider transition-colors">
           Guardar Categoría
         </button>
       </form>
     </div>
 
     <!-- Listado de Categorías -->
-    <div class="md:col-span-7 bg-bg-surface border border-bg-border p-5 shadow-card-dark space-y-4">
-      <h3 class="text-sm font-serif font-bold text-ivory border-b border-bg-border pb-2">Categorías Registradas</h3>
+    <div class="md:col-span-7 bg-white border border-bg-border p-5 space-y-4">
+      <h3 class="text-sm font-serif font-medium text-text-main border-b border-bg-border pb-2">Categorías Registradas</h3>
       <div class="divide-y divide-bg-border">
         {% for c in categorias %}
         <div class="py-3 flex items-center justify-between gap-3">
           <div>
-            <span class="text-xs font-bold text-ivory block">{{ c.nombre }}</span>
-            <span class="text-[11px] text-ivory-dim">{{ c.total_productos }} producto{{ c.total_productos|pluralize }} asociado{{ c.total_productos|pluralize }}</span>
+            <span class="text-xs font-semibold text-text-main block">{{ c.nombre }}</span>
+            <span class="text-[11px] text-text-muted font-light">{{ c.total_productos }} producto{{ c.total_productos|pluralize }} asociado{{ c.total_productos|pluralize }}</span>
           </div>
           {% if c.total_productos == 0 %}
           <form method="POST" onsubmit="return confirm('¿Eliminar la categoría {{ c.nombre }}?')">
             {% csrf_token %}
             <input type="hidden" name="eliminar_categoria" value="1">
             <input type="hidden" name="categoria_id" value="{{ c.id }}">
-            <button type="submit" class="px-2.5 py-1 text-[11px] font-bold uppercase text-status-error border border-status-error/40 hover:bg-status-error/10 transition-colors">
+            <button type="submit" class="px-2.5 py-1 text-[11px] font-semibold uppercase text-status-error border border-status-error/40 hover:bg-status-error/10 transition-colors">
               Eliminar
             </button>
           </form>
           {% else %}
-          <span class="text-[10px] text-ivory-muted italic">En uso</span>
+          <span class="text-[10px] text-text-dim italic">En uso</span>
           {% endif %}
         </div>
         {% empty %}
-        <p class="text-xs text-ivory-muted py-6 text-center">No hay categorías registradas.</p>
+        <p class="text-xs text-text-muted py-6 text-center font-light">No hay categorías registradas.</p>
         {% endfor %}
       </div>
     </div>

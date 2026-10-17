@@ -7,15 +7,15 @@
 <div class="max-w-4xl mx-auto space-y-6">
 
   <!-- Encabezado -->
-  <div class="flex items-center justify-between bg-bg-surface border border-bg-border p-5 shadow-card-dark">
+  <div class="flex items-center justify-between bg-white border border-bg-border p-5">
     <div>
       <div class="flex items-center gap-2">
-        <h2 class="text-base font-serif font-bold text-ivory">{{ servicio.nombre }}</h2>
-        <span class="text-xs text-gold font-bold">({{ servicio.duracion_minutos }} min • {{ servicio.precio_formateado }})</span>
+        <h2 class="text-base font-serif font-medium text-text-main">{{ servicio.nombre }}</h2>
+        <span class="text-xs text-text-main font-semibold">({{ servicio.duracion_minutos }} min • {{ servicio.precio_formateado }})</span>
       </div>
-      <p class="text-xs text-ivory-dim mt-0.5">Define en qué sucursales se ofrece y personaliza precio o duración por sede si corresponde.</p>
+      <p class="text-xs text-text-muted mt-0.5 font-light">Define en qué sucursales se ofrece y personaliza precio o duración por sede si corresponde.</p>
     </div>
-    <a href="{% url 'panel:servicios_list' %}" class="px-3 py-1.5 bg-bg-dark border border-bg-border hover:border-gold text-ivory text-xs font-bold uppercase transition-colors">
+    <a href="{% url 'panel:servicios_list' %}" class="px-3 py-1.5 bg-white border border-brand-black hover:bg-neutral-100 text-brand-black text-xs font-semibold uppercase transition-colors">
       ← Volver al Catálogo
     </a>
   </div>
@@ -23,44 +23,44 @@
   <!-- Formulario por cada Sede -->
   <div class="space-y-4">
     {% for item in configs %}
-    <form method="POST" class="bg-bg-surface border border-bg-border p-5 shadow-card-dark flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <form method="POST" class="bg-white border border-bg-border p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
       {% csrf_token %}
       <input type="hidden" name="sucursal_id" value="{{ item.sucursal.id }}">
 
       <!-- Información de la Sede -->
       <div class="min-w-[200px]">
-        <h3 class="text-sm font-serif font-bold text-ivory flex items-center gap-2">
+        <h3 class="text-sm font-serif font-medium text-text-main flex items-center gap-2">
           <span>📍</span> {{ item.sucursal.nombre }}
         </h3>
-        <span class="text-[11px] text-ivory-dim">{{ item.sucursal.direccion }}, {{ item.sucursal.comuna }}</span>
+        <span class="text-[11px] text-text-muted font-light">{{ item.sucursal.direccion }}, {{ item.sucursal.comuna }}</span>
       </div>
 
       <!-- Ajustes -->
       <div class="flex flex-wrap items-center gap-4 text-xs">
         <!-- Interruptor Disponible -->
         <label class="flex items-center gap-2 cursor-pointer">
-          <input type="checkbox" name="disponible" class="rounded-none border-gold text-gold" {% if not item.config or item.config.disponible %}checked{% endif %}>
-          <span class="text-ivory font-bold">Disponible en esta sede</span>
+          <input type="checkbox" name="disponible" class="rounded-none border-brand-black text-brand-black" {% if not item.config or item.config.disponible %}checked{% endif %}>
+          <span class="text-text-main font-medium">Disponible en esta sede</span>
         </label>
 
         <!-- Precio Personalizado -->
         <div class="w-32">
-          <label class="block text-[10px] text-ivory-dim uppercase tracking-wider mb-0.5">Precio CLP</label>
+          <label class="block text-[10px] text-text-muted uppercase tracking-wider mb-0.5 font-medium">Precio CLP</label>
           <input type="number" name="precio_personalizado" value="{{ item.config.precio_personalizado|default:'' }}"
                  placeholder="{{ servicio.precio }}" step="500" min="0"
-                 class="w-full bg-bg-dark border border-bg-border px-2 py-1 text-ivory text-xs focus:border-gold focus:outline-none">
+                 class="w-full bg-white border border-bg-border px-2 py-1 text-text-main text-xs focus:border-brand-black focus:outline-none">
         </div>
 
         <!-- Duración Personalizada -->
         <div class="w-28">
-          <label class="block text-[10px] text-ivory-dim uppercase tracking-wider mb-0.5">Duración (min)</label>
+          <label class="block text-[10px] text-text-muted uppercase tracking-wider mb-0.5 font-medium">Duración (min)</label>
           <input type="number" name="duracion_personalizada" value="{{ item.config.duracion_personalizada|default:'' }}"
                  placeholder="{{ servicio.duracion_minutos }}" step="5" min="5"
-                 class="w-full bg-bg-dark border border-bg-border px-2 py-1 text-ivory text-xs focus:border-gold focus:outline-none">
+                 class="w-full bg-white border border-bg-border px-2 py-1 text-text-main text-xs focus:border-brand-black focus:outline-none">
         </div>
 
         <!-- Botón Guardar Sede -->
-        <button type="submit" class="px-3 py-1.5 bg-bg-dark border border-gold/50 hover:bg-gold hover:text-bg-dark text-gold font-bold uppercase text-[11px] transition-colors mt-auto">
+        <button type="submit" class="px-3 py-1.5 bg-brand-black hover:bg-neutral-800 text-white font-medium uppercase text-[11px] transition-colors mt-auto">
           Guardar Sede
         </button>
       </div>

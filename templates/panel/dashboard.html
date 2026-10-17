@@ -6,10 +6,10 @@
 {% block content %}
 <div class="space-y-8 max-w-7xl mx-auto">
   <!-- Filtro por Sucursal -->
-  <div class="bg-bg-surface border border-bg-border p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+  <div class="bg-white border border-bg-border p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
     <div class="flex items-center gap-2">
-      <span class="text-xs uppercase tracking-wider text-ivory-dim font-bold">Filtrar por Sede:</span>
-      <select id="filtro-sede-dashboard" data-url="{% url 'panel:cambiar_sucursal' %}" class="bg-bg-dark border border-bg-border focus:border-gold text-ivory text-xs px-3 py-1.5 cursor-pointer">
+      <span class="text-xs uppercase tracking-wider text-text-muted font-semibold">Filtrar por Sede:</span>
+      <select id="filtro-sede-dashboard" data-url="{% url 'panel:cambiar_sucursal' %}" class="bg-white border border-bg-border focus:border-brand-black text-text-main text-xs px-3 py-1.5 cursor-pointer focus:outline-none">
         {% if es_admin_maestro %}
         <option value="0" {% if not panel_sucursal_activa_id %}selected{% endif %}>🏢 Todas las Sedes (Consolidado)</option>
         {% endif %}
@@ -19,10 +19,10 @@
       </select>
     </div>
     <div class="flex items-center gap-3">
-      <a href="{% url 'panel:exportar_reservas_csv' %}" class="px-3 py-1.5 border border-bg-border hover:border-gold text-xs uppercase tracking-wider font-semibold text-ivory transition-colors">
+      <a href="{% url 'panel:exportar_reservas_csv' %}" class="px-3 py-1.5 border border-brand-black hover:bg-neutral-100 text-xs uppercase tracking-wider font-semibold text-brand-black transition-colors">
         📥 Exportar Citas CSV
       </a>
-      <a href="{% url 'panel:exportar_ventas_csv' %}" class="px-3 py-1.5 border border-bg-border hover:border-gold text-xs uppercase tracking-wider font-semibold text-ivory transition-colors">
+      <a href="{% url 'panel:exportar_ventas_csv' %}" class="px-3 py-1.5 border border-brand-black hover:bg-neutral-100 text-xs uppercase tracking-wider font-semibold text-brand-black transition-colors">
         📥 Exportar Ventas CSV
       </a>
     </div>
@@ -30,69 +30,69 @@
 
   <!-- Alerta de Stock Bajo (Si aplica) -->
   {% if stocks_alerta %}
-  <div class="p-4 bg-status-warning/10 border-l-4 border-status-warning flex items-center justify-between">
+  <div class="p-4 bg-amber-50 border-l-4 border-status-warning flex items-center justify-between text-status-warning">
     <div class="flex items-center gap-3">
-      <span class="text-status-warning font-bold text-lg">⚠</span>
+      <span class="font-bold text-lg">⚠</span>
       <div class="text-xs">
-        <strong class="text-ivory block">Atención: Hay {{ stocks_alerta|length }} registro(s) con stock crítico.</strong>
-        <span class="text-ivory-muted">{% for st in stocks_alerta|slice:":5" %}{{ st.producto.nombre }} en {{ st.sucursal.nombre }} ({{ st.cantidad }} un.){% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        <strong class="text-text-main block">Atención: Hay {{ stocks_alerta|length }} registro(s) con stock crítico.</strong>
+        <span class="text-text-muted">{% for st in stocks_alerta|slice:":5" %}{{ st.producto.nombre }} en {{ st.sucursal.nombre }} ({{ st.cantidad }} un.){% if not forloop.last %}, {% endif %}{% endfor %}</span>
       </div>
     </div>
-    <a href="{% url 'panel:productos_list' %}" class="text-xs text-status-warning font-bold underline whitespace-nowrap">Gestionar Stock →</a>
+    <a href="{% url 'panel:productos_list' %}" class="text-xs font-bold underline whitespace-nowrap">Gestionar Stock →</a>
   </div>
   {% endif %}
 
-  <!-- 1. Tarjetas de KPIs Comerciales -->
+  <!-- 1. Tarjetas de KPIs Comerciales B&W -->
   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
     <!-- KPI 1: Ventas del Mes -->
-    <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark relative group hover:border-gold/60 transition-colors">
-      <span class="text-[10px] uppercase tracking-widest text-gold font-serif block mb-1">Ventas Últimos 30 Días</span>
-      <div class="text-2xl sm:text-3xl font-serif font-bold text-ivory tracking-tight">{{ ventas_mes_total }}</div>
-      <div class="text-[11px] text-ivory-dim mt-2 flex justify-between">
+    <div class="bg-white border border-bg-border p-6 relative group hover:border-brand-black transition-colors">
+      <span class="text-[10px] uppercase tracking-widest text-text-dim font-medium block mb-1">Ventas Últimos 30 Días</span>
+      <div class="text-2xl sm:text-3xl font-serif font-light text-text-main tracking-tight">{{ ventas_mes_total }}</div>
+      <div class="text-[11px] text-text-muted mt-2 flex justify-between font-light">
         <span>Servicios: {{ ventas_mes_servicios }}</span>
         <span>Tienda: {{ ventas_mes_productos }}</span>
       </div>
     </div>
 
     <!-- KPI 2: Ventas de Hoy -->
-    <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark relative group hover:border-gold/60 transition-colors">
-      <span class="text-[10px] uppercase tracking-widest text-gold font-serif block mb-1">Ingresos de Hoy</span>
-      <div class="text-2xl sm:text-3xl font-serif font-bold text-ivory tracking-tight">{{ ventas_hoy_total }}</div>
-      <div class="text-[11px] text-ivory-dim mt-2">
+    <div class="bg-white border border-bg-border p-6 relative group hover:border-brand-black transition-colors">
+      <span class="text-[10px] uppercase tracking-widest text-text-dim font-medium block mb-1">Ingresos de Hoy</span>
+      <div class="text-2xl sm:text-3xl font-serif font-light text-text-main tracking-tight">{{ ventas_hoy_total }}</div>
+      <div class="text-[11px] text-text-muted mt-2 font-light">
         <span>{{ reservas_hoy_count }} citas agendadas para hoy</span>
       </div>
     </div>
 
     <!-- KPI 3: Ticket Promedio -->
-    <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark relative group hover:border-gold/60 transition-colors">
-      <span class="text-[10px] uppercase tracking-widest text-gold font-serif block mb-1">Ticket Promedio Servicio</span>
-      <div class="text-2xl sm:text-3xl font-serif font-bold text-ivory tracking-tight">{{ ticket_promedio }}</div>
-      <div class="text-[11px] text-ivory-dim mt-2">
+    <div class="bg-white border border-bg-border p-6 relative group hover:border-brand-black transition-colors">
+      <span class="text-[10px] uppercase tracking-widest text-text-dim font-medium block mb-1">Ticket Promedio Servicio</span>
+      <div class="text-2xl sm:text-3xl font-serif font-light text-text-main tracking-tight">{{ ticket_promedio }}</div>
+      <div class="text-[11px] text-text-muted mt-2 font-light">
         <span>Gasto medio por cliente atendido</span>
       </div>
     </div>
 
     <!-- KPI 4: Clientes Nuevos & Tasa Cancelación -->
-    <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark relative group hover:border-gold/60 transition-colors">
-      <span class="text-[10px] uppercase tracking-widest text-gold font-serif block mb-1">Clientes Nuevos &amp; Tasa</span>
-      <div class="text-2xl sm:text-3xl font-serif font-bold text-ivory tracking-tight">+{{ clientes_nuevos_count }}</div>
-      <div class="text-[11px] text-ivory-dim mt-2 flex justify-between">
+    <div class="bg-white border border-bg-border p-6 relative group hover:border-brand-black transition-colors">
+      <span class="text-[10px] uppercase tracking-widest text-text-dim font-medium block mb-1">Clientes Nuevos &amp; Tasa</span>
+      <div class="text-2xl sm:text-3xl font-serif font-light text-text-main tracking-tight">+{{ clientes_nuevos_count }}</div>
+      <div class="text-[11px] text-text-muted mt-2 flex justify-between font-light">
         <span>Tasa cancelación: {{ tasa_cancelacion }}%</span>
         <span>Pendientes: {{ citas_pendientes_count }}</span>
       </div>
     </div>
   </div>
 
-  <!-- 2. Gráficos Analíticos con Chart.js -->
+  <!-- 2. Gráficos Analíticos con Chart.js (Paleta Monocromática Editorial) -->
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
     <!-- Gráfico 1: Evolución de Ingresos Últimos 7 Días -->
-    <div class="lg:col-span-8 bg-bg-surface border border-bg-border p-6 shadow-card-dark">
+    <div class="lg:col-span-8 bg-white border border-bg-border p-6">
       <div class="flex items-center justify-between mb-4">
         <div>
-          <h3 class="text-sm font-serif font-bold text-ivory">Evolución de Ingresos Diarios (CLP)</h3>
-          <p class="text-[11px] text-ivory-dim">Ingresos combinados por servicios y ventas de productos</p>
+          <h3 class="text-sm font-serif font-medium text-text-main">Evolución de Ingresos Diarios (CLP)</h3>
+          <p class="text-[11px] text-text-muted font-light">Ingresos combinados por servicios y ventas de productos</p>
         </div>
-        <span class="text-xs font-bold text-gold">Últimos 7 días</span>
+        <span class="text-xs font-semibold text-text-main">Últimos 7 días</span>
       </div>
       <div class="h-64">
         <canvas id="chart-ingresos"></canvas>
@@ -100,10 +100,10 @@
     </div>
 
     <!-- Gráfico 2: Reservas por Sucursal -->
-    <div class="lg:col-span-4 bg-bg-surface border border-bg-border p-6 shadow-card-dark">
+    <div class="lg:col-span-4 bg-white border border-bg-border p-6">
       <div class="mb-4">
-        <h3 class="text-sm font-serif font-bold text-ivory">Distribución por Sucursal</h3>
-        <p class="text-[11px] text-ivory-dim">Volumen de reservas atendidas por sede</p>
+        <h3 class="text-sm font-serif font-medium text-text-main">Distribución por Sucursal</h3>
+        <p class="text-[11px] text-text-muted font-light">Volumen de reservas atendidas por sede</p>
       </div>
       <div class="h-64 flex items-center justify-center">
         <canvas id="chart-sucursales"></canvas>
@@ -111,10 +111,10 @@
     </div>
 
     <!-- Gráfico 3: Servicios Top 5 Más Vendidos -->
-    <div class="lg:col-span-6 bg-bg-surface border border-bg-border p-6 shadow-card-dark">
+    <div class="lg:col-span-6 bg-white border border-bg-border p-6">
       <div class="mb-4">
-        <h3 class="text-sm font-serif font-bold text-ivory">Servicios Más Solicitados</h3>
-        <p class="text-[11px] text-ivory-dim">Ranking de servicios preferidos por los clientes</p>
+        <h3 class="text-sm font-serif font-medium text-text-main">Servicios Más Solicitados</h3>
+        <p class="text-[11px] text-text-muted font-light">Ranking de servicios preferidos por los clientes</p>
       </div>
       <div class="h-60">
         <canvas id="chart-servicios"></canvas>
@@ -122,10 +122,10 @@
     </div>
 
     <!-- Gráfico 4: Rendimiento por Barbero -->
-    <div class="lg:col-span-6 bg-bg-surface border border-bg-border p-6 shadow-card-dark">
+    <div class="lg:col-span-6 bg-white border border-bg-border p-6">
       <div class="mb-4">
-        <h3 class="text-sm font-serif font-bold text-ivory">Rendimiento por Master Barber</h3>
-        <p class="text-[11px] text-ivory-dim">Cantidad total de citas ejecutadas</p>
+        <h3 class="text-sm font-serif font-medium text-text-main">Rendimiento por Master Barber</h3>
+        <p class="text-[11px] text-text-muted font-light">Cantidad total de citas ejecutadas</p>
       </div>
       <div class="h-60">
         <canvas id="chart-barberos"></canvas>
@@ -135,20 +135,20 @@
 
   <!-- 3. Comparativa entre Sucursales (Exclusivo Administrador Maestro en Vista Consolidada) -->
   {% if comparativa_sucursales %}
-  <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark space-y-4">
+  <div class="bg-white border border-bg-border p-6 space-y-4">
     <div class="flex items-center justify-between border-b border-bg-border pb-3">
       <div>
-        <h3 class="text-sm font-serif font-bold text-ivory">Comparativa de Rendimiento entre Sucursales</h3>
-        <p class="text-[11px] text-ivory-dim">Consolidado comercial multi-sede de los últimos 30 días</p>
+        <h3 class="text-sm font-serif font-medium text-text-main">Comparativa de Rendimiento entre Sucursales</h3>
+        <p class="text-[11px] text-text-muted font-light">Consolidado comercial multi-sede de los últimos 30 días</p>
       </div>
-      <span class="text-xs text-gold font-bold px-2 py-0.5 bg-gold/15 border border-gold/40 uppercase tracking-wider text-[10px]">
+      <span class="text-xs text-text-main font-semibold px-2 py-0.5 bg-bg-alt border border-bg-border uppercase tracking-wider text-[10px]">
         Exclusivo Maestro
       </span>
     </div>
 
     <div class="overflow-x-auto">
       <table class="w-full text-left text-xs divide-y divide-bg-border">
-        <thead class="bg-bg-elevated text-ivory-dim uppercase text-[10px] tracking-wider font-semibold">
+        <thead class="bg-bg-alt text-text-muted uppercase text-[10px] tracking-wider font-semibold">
           <tr>
             <th class="py-3 px-4">Sucursal</th>
             <th class="py-3 px-4">Ingresos Últimos 30 Días</th>
@@ -158,22 +158,22 @@
             <th class="py-3 px-4 text-right">Acción</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-bg-border text-ivory">
+        <tbody class="divide-y divide-bg-border text-text-main">
           {% for comp in comparativa_sucursales %}
-          <tr class="hover:bg-bg-elevated/40 transition-colors">
-            <td class="py-3 px-4 font-bold text-ivory">📍 {{ comp.sucursal.nombre }}</td>
-            <td class="py-3 px-4 font-mono font-bold text-gold">{{ comp.ingresos_mes }}</td>
+          <tr class="hover:bg-bg-alt transition-colors">
+            <td class="py-3 px-4 font-semibold text-text-main">📍 {{ comp.sucursal.nombre }}</td>
+            <td class="py-3 px-4 font-mono font-semibold text-text-main">{{ comp.ingresos_mes }}</td>
             <td class="py-3 px-4 font-mono">{{ comp.reservas_mes }} citas</td>
             <td class="py-3 px-4 font-mono">{{ comp.barberos_activos }} barberos</td>
             <td class="py-3 px-4 font-mono">
               {% if comp.stock_critico > 0 %}
-              <span class="text-status-warning font-bold">{{ comp.stock_critico }} en alerta</span>
+              <span class="text-status-warning font-semibold">{{ comp.stock_critico }} en alerta</span>
               {% else %}
-              <span class="text-status-success font-bold">Óptimo (0)</span>
+              <span class="text-status-success font-semibold">Óptimo (0)</span>
               {% endif %}
             </td>
             <td class="py-3 px-4 text-right">
-              <a href="{% url 'panel:cambiar_sucursal' %}?sucursal={{ comp.sucursal.id }}" class="px-2.5 py-1 text-[11px] font-bold uppercase border border-gold/40 text-gold hover:bg-gold/15 transition-colors">
+              <a href="{% url 'panel:cambiar_sucursal' %}?sucursal={{ comp.sucursal.id }}" class="px-2.5 py-1 text-[11px] font-semibold uppercase border border-brand-black text-brand-black hover:bg-neutral-100 transition-colors">
                 Filtrar Sede →
               </a>
             </td>
@@ -188,7 +188,7 @@
 {% endblock %}
 
 {% block extra_js %}
-<!-- Contenedor JSON para datos analíticos de Chart.js (evita errores de sintaxis en editores y XSS) -->
+<!-- Contenedor JSON para datos analíticos de Chart.js -->
 <script id="dashboard-charts-data" type="application/json">
 {
   "diasLabels": {{ chart_dias_labels|safe }},
@@ -204,12 +204,12 @@
 
 <script>
   document.addEventListener('DOMContentLoaded', () => {
-    // Paleta de Colores
-    const COLOR_GOLD = '#C9A24B';
-    const COLOR_GOLD_HOVER = '#DDB968';
-    const COLOR_BORDER = '#2A2A2A';
-    const COLOR_IVORY = '#F5F0E6';
-    const COLOR_MUTED = '#A8A294';
+    // Paleta Monocromática Editorial Requerida
+    const COLOR_BLACK = '#0A0A0A';
+    const COLOR_MUTED = '#5C5C58';
+    const COLOR_DIM = '#9A9A95';
+    const COLOR_LIGHT = '#D4D4D0';
+    const COLOR_GRID = '#E7E7E4';
 
     // Carga segura y parseo de datos analíticos
     const dataContainer = document.getElementById('dashboard-charts-data');
@@ -240,7 +240,7 @@
       });
     }
 
-    // 1. Gráfico de Ingresos Diarios
+    // 1. Gráfico de Ingresos Diarios (Línea Fina Monocromática)
     const elIngresos = document.getElementById('chart-ingresos');
     if (elIngresos) {
       new Chart(elIngresos.getContext('2d'), {
@@ -250,28 +250,35 @@
           datasets: [{
             label: 'Ingresos CLP',
             data: ingresosData,
-            borderColor: COLOR_GOLD,
-            backgroundColor: 'rgba(201, 162, 75, 0.15)',
+            borderColor: COLOR_BLACK,
+            backgroundColor: 'rgba(10, 10, 10, 0.04)',
             fill: true,
-            tension: 0.35,
-            borderWidth: 2,
-            pointBackgroundColor: COLOR_GOLD,
-            pointRadius: 4
+            tension: 0.3,
+            borderWidth: 1.5,
+            pointBackgroundColor: COLOR_BLACK,
+            pointRadius: 3.5
           }]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { display: false }
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: COLOR_BLACK,
+              titleColor: '#FFFFFF',
+              bodyColor: '#FFFFFF',
+              cornerRadius: 2,
+              padding: 10
+            }
           },
           scales: {
             x: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              grid: { color: COLOR_GRID },
               ticks: { color: COLOR_MUTED, font: { size: 10 } }
             },
             y: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              grid: { color: COLOR_GRID },
               ticks: {
                 color: COLOR_MUTED,
                 font: { size: 10 },
@@ -283,7 +290,7 @@
       });
     }
 
-    // 2. Gráfico por Sucursal (Dona)
+    // 2. Gráfico por Sucursal (Dona en Escala de Grises)
     const elSucursales = document.getElementById('chart-sucursales');
     if (elSucursales) {
       new Chart(elSucursales.getContext('2d'), {
@@ -292,8 +299,8 @@
           labels: sucursalesLabels,
           datasets: [{
             data: sucursalesData,
-            backgroundColor: ['#C9A24B', '#8C6C26', '#E6CD8C', '#F5F0E6'],
-            borderColor: '#141414',
+            backgroundColor: [COLOR_BLACK, COLOR_MUTED, COLOR_DIM, COLOR_LIGHT],
+            borderColor: '#FFFFFF',
             borderWidth: 2
           }]
         },
@@ -303,14 +310,21 @@
           plugins: {
             legend: {
               position: 'bottom',
-              labels: { color: COLOR_IVORY, font: { size: 10 }, boxWidth: 12 }
+              labels: { color: COLOR_BLACK, font: { size: 10 }, boxWidth: 12 }
+            },
+            tooltip: {
+              backgroundColor: COLOR_BLACK,
+              titleColor: '#FFFFFF',
+              bodyColor: '#FFFFFF',
+              cornerRadius: 2,
+              padding: 10
             }
           }
         }
       });
     }
 
-    // 3. Gráfico de Servicios Top (Barras horizontales)
+    // 3. Gráfico de Servicios Top (Barras Horizontales Negras)
     const elServicios = document.getElementById('chart-servicios');
     if (elServicios) {
       new Chart(elServicios.getContext('2d'), {
@@ -319,7 +333,7 @@
           labels: serviciosLabels,
           datasets: [{
             data: serviciosData,
-            backgroundColor: COLOR_GOLD,
+            backgroundColor: COLOR_BLACK,
             borderRadius: 2
           }]
         },
@@ -328,23 +342,30 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { display: false }
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: COLOR_BLACK,
+              titleColor: '#FFFFFF',
+              bodyColor: '#FFFFFF',
+              cornerRadius: 2,
+              padding: 10
+            }
           },
           scales: {
             x: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              grid: { color: COLOR_GRID },
               ticks: { color: COLOR_MUTED, font: { size: 10 } }
             },
             y: {
               grid: { display: false },
-              ticks: { color: COLOR_IVORY, font: { size: 10 } }
+              ticks: { color: COLOR_BLACK, font: { size: 10 } }
             }
           }
         }
       });
     }
 
-    // 4. Gráfico de Rendimiento por Barbero (Barras verticales)
+    // 4. Gráfico de Rendimiento por Barbero (Barras Verticales Grises)
     const elBarberos = document.getElementById('chart-barberos');
     if (elBarberos) {
       new Chart(elBarberos.getContext('2d'), {
@@ -354,7 +375,7 @@
           datasets: [{
             label: 'Citas Atendidas',
             data: barberosData,
-            backgroundColor: 'rgba(201, 162, 75, 0.8)',
+            backgroundColor: COLOR_MUTED,
             borderRadius: 2
           }]
         },
@@ -362,15 +383,22 @@
           responsive: true,
           maintainAspectRatio: false,
           plugins: {
-            legend: { display: false }
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: COLOR_BLACK,
+              titleColor: '#FFFFFF',
+              bodyColor: '#FFFFFF',
+              cornerRadius: 2,
+              padding: 10
+            }
           },
           scales: {
             x: {
               grid: { display: false },
-              ticks: { color: COLOR_IVORY, font: { size: 10 } }
+              ticks: { color: COLOR_BLACK, font: { size: 10 } }
             },
             y: {
-              grid: { color: 'rgba(255, 255, 255, 0.05)' },
+              grid: { color: COLOR_GRID },
               ticks: { color: COLOR_MUTED, font: { size: 10 } }
             }
           }

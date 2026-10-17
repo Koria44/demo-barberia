@@ -7,29 +7,29 @@
 <div class="space-y-6 max-w-7xl mx-auto">
 
   <!-- Encabezado con Botones de Acción -->
-  <div class="bg-bg-surface border border-bg-border p-5 shadow-card-dark flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+  <div class="bg-white border border-bg-border p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
     <div>
-      <h2 class="text-base font-serif font-bold text-ivory">Control de Inventario por Sucursal</h2>
-      <p class="text-xs text-ivory-dim mt-0.5">Gestión de existencias por sede, reposiciones, ajustes y traslados con auditoría inmutable.</p>
+      <h2 class="text-base font-serif font-medium text-text-main">Control de Inventario por Sucursal</h2>
+      <p class="text-xs text-text-muted mt-0.5 font-light">Gestión de existencias por sede, reposiciones, ajustes y traslados con auditoría inmutable.</p>
     </div>
 
     <div class="flex flex-wrap items-center gap-3">
       <!-- Botón Exportar CSV -->
-      <a href="{% url 'panel:exportar_movimientos_csv' %}" class="px-3 py-2 bg-bg-dark border border-bg-border hover:border-gold text-ivory text-xs font-bold uppercase transition-colors flex items-center gap-1.5">
+      <a href="{% url 'panel:exportar_movimientos_csv' %}" class="px-3 py-2 bg-white border border-brand-black hover:bg-neutral-100 text-brand-black text-xs font-semibold uppercase transition-colors flex items-center gap-1.5">
         <span>📥</span> Exportar Movimientos (CSV)
       </a>
 
       <!-- Botón Trasladar -->
-      <button onclick="document.getElementById('modal-trasladar-stock').classList.remove('hidden')" class="px-3 py-2 bg-bg-dark border border-gold/40 hover:bg-gold/15 text-gold text-xs font-bold uppercase transition-colors">
+      <button onclick="document.getElementById('modal-trasladar-stock').classList.remove('hidden')" class="px-3 py-2 bg-white border border-brand-black hover:bg-neutral-100 text-brand-black text-xs font-semibold uppercase transition-colors">
         ⇄ Trasladar Stock
       </button>
 
       {% if es_admin_maestro %}
-      <a href="{% url 'panel:categorias_producto' %}" class="px-3 py-2 bg-bg-dark border border-bg-border hover:border-gold text-ivory text-xs font-bold uppercase transition-colors">
+      <a href="{% url 'panel:categorias_producto' %}" class="px-3 py-2 bg-white border border-bg-border hover:border-brand-black text-text-muted hover:text-text-main text-xs font-semibold uppercase transition-colors">
         Categorías
       </a>
 
-      <a href="{% url 'panel:producto_crear' %}" class="px-4 py-2 bg-gold hover:bg-gold-light text-bg-dark font-bold uppercase tracking-wider text-xs shadow-gold-glow transition-all flex items-center gap-1.5">
+      <a href="{% url 'panel:producto_crear' %}" class="px-4 py-2 bg-brand-black hover:bg-neutral-800 text-white font-medium uppercase tracking-wider text-xs transition-colors flex items-center gap-1.5">
         <span>+</span> Nuevo Producto
       </a>
       {% endif %}
@@ -37,17 +37,17 @@
   </div>
 
   <!-- Barra de Filtros y Búsqueda -->
-  <div class="bg-bg-surface border border-bg-border p-4 shadow-card-dark">
+  <div class="bg-white border border-bg-border p-4">
     <form method="GET" class="flex flex-wrap items-center gap-3">
       <!-- Búsqueda -->
       <div class="flex-1 min-w-[200px]">
         <input type="text" name="q" value="{{ busqueda }}" placeholder="Buscar producto por nombre o SKU..."
-               class="w-full bg-bg-dark border border-bg-border px-3 py-2 text-ivory text-xs focus:border-gold focus:outline-none">
+               class="w-full bg-white border border-bg-border px-3 py-2 text-text-main text-xs focus:border-brand-black focus:outline-none placeholder:text-text-dim">
       </div>
 
       <!-- Filtro por Categoría -->
       <div>
-        <select name="categoria" onchange="this.form.submit()" class="bg-bg-dark border border-bg-border px-3 py-2 text-ivory text-xs focus:border-gold focus:outline-none cursor-pointer">
+        <select name="categoria" onchange="this.form.submit()" class="bg-white border border-bg-border px-3 py-2 text-text-main text-xs focus:border-brand-black focus:outline-none cursor-pointer">
           <option value="">Todas las Categorías</option>
           {% for c in categorias %}
           <option value="{{ c.id }}" {% if categoria_id == c.id|stringformat:"s" %}selected{% endif %}>{{ c.nombre }}</option>
@@ -57,7 +57,7 @@
 
       <!-- Filtro por Estado de Stock -->
       <div>
-        <select name="estado" onchange="this.form.submit()" class="bg-bg-dark border border-bg-border px-3 py-2 text-ivory text-xs focus:border-gold focus:outline-none cursor-pointer">
+        <select name="estado" onchange="this.form.submit()" class="bg-white border border-bg-border px-3 py-2 text-text-main text-xs focus:border-brand-black focus:outline-none cursor-pointer">
           <option value="">Todos los Estados</option>
           <option value="ok" {% if estado_filtro == 'ok' %}selected{% endif %}>OK (Stock Adecuado)</option>
           <option value="bajo" {% if estado_filtro == 'bajo' %}selected{% endif %}>Bajo (Alerta de Reposición)</option>
@@ -65,22 +65,22 @@
         </select>
       </div>
 
-      <button type="submit" class="px-4 py-2 bg-bg-dark border border-gold/40 hover:border-gold text-gold text-xs font-bold uppercase transition-colors">
+      <button type="submit" class="px-4 py-2 bg-brand-black hover:bg-neutral-800 text-white text-xs font-medium uppercase tracking-wider transition-colors">
         Filtrar
       </button>
 
       {% if busqueda or categoria_id or estado_filtro %}
-      <a href="{% url 'panel:productos_list' %}" class="px-3 py-2 text-ivory-dim hover:text-ivory text-xs">
+      <a href="{% url 'panel:productos_list' %}" class="px-3 py-2 text-text-muted hover:text-text-main text-xs underline">
         Limpiar
       </a>
       {% endif %}
     </form>
   </div>
 
-  <!-- Tabla de Stock por Sucursal -->
-  <div class="bg-bg-surface border border-bg-border shadow-card-dark overflow-x-auto">
+  <!-- Tabla de Stock por Sucursal B&W -->
+  <div class="bg-white border border-bg-border overflow-x-auto">
     <table class="w-full text-left text-xs divide-y divide-bg-border">
-      <thead class="bg-bg-elevated text-ivory-dim uppercase text-[10px] tracking-wider font-semibold">
+      <thead class="bg-bg-alt text-text-muted uppercase text-[10px] tracking-wider font-semibold">
         <tr>
           <th class="py-3 px-4">Producto</th>
           <th class="py-3 px-4">SKU</th>
@@ -92,51 +92,51 @@
           <th class="py-3 px-4 text-right">Acciones Rápidas</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-bg-border text-ivory">
+      <tbody class="divide-y divide-bg-border text-text-main">
         {% for s in stocks %}
-        <tr class="hover:bg-bg-elevated/50 transition-colors">
+        <tr class="hover:bg-bg-alt transition-colors">
           <td class="py-3 px-4">
             <div class="flex items-center gap-3">
-              <img src="{{ s.producto.imagen_url }}" class="w-9 h-9 object-cover border border-gold/40 shrink-0">
+              <img src="{{ s.producto.imagen_url }}" class="w-9 h-9 object-cover border border-bg-border img-editorial shrink-0">
               <div>
-                <span class="font-bold block text-ivory">{{ s.producto.nombre }}</span>
-                <span class="text-[11px] text-ivory-dim">{{ s.producto.categoria.nombre|default:"Sin categoría" }}</span>
+                <span class="font-semibold block text-text-main">{{ s.producto.nombre }}</span>
+                <span class="text-[11px] text-text-muted font-light">{{ s.producto.categoria.nombre|default:"Sin categoría" }}</span>
               </div>
             </div>
           </td>
-          <td class="py-3 px-4 font-mono text-ivory-dim">{{ s.producto.sku|default:"-" }}</td>
-          <td class="py-3 px-4 font-semibold text-ivory">📍 {{ s.sucursal.nombre }}</td>
-          <td class="py-3 px-4 font-mono font-bold text-sm {% if s.cantidad <= 0 %}text-status-error{% elif s.en_alerta %}text-status-warning{% else %}text-status-success{% endif %}">
+          <td class="py-3 px-4 font-mono text-text-dim">{{ s.producto.sku|default:"-" }}</td>
+          <td class="py-3 px-4 font-semibold text-text-main">📍 {{ s.sucursal.nombre }}</td>
+          <td class="py-3 px-4 font-mono font-semibold text-sm {% if s.cantidad <= 0 %}text-status-error{% elif s.en_alerta %}text-status-warning{% else %}text-status-success{% endif %}">
             {{ s.cantidad }} uds
           </td>
-          <td class="py-3 px-4 font-mono text-ivory-dim">{{ s.stock_minimo_alerta }} uds</td>
+          <td class="py-3 px-4 font-mono text-text-dim">{{ s.stock_minimo_alerta }} uds</td>
           <td class="py-3 px-4">
             {% if s.cantidad <= 0 %}
-            <span class="text-[10px] uppercase font-bold text-status-error px-2 py-0.5 bg-status-error/15 border border-status-error/40">Agotado</span>
+            <span class="text-[10px] uppercase font-semibold text-status-error px-2 py-0.5 bg-red-50 border border-red-200">Agotado</span>
             {% elif s.en_alerta %}
-            <span class="text-[10px] uppercase font-bold text-status-warning px-2 py-0.5 bg-status-warning/15 border border-status-warning/40">Bajo Stock</span>
+            <span class="text-[10px] uppercase font-semibold text-status-warning px-2 py-0.5 bg-amber-50 border border-amber-200">Bajo Stock</span>
             {% else %}
-            <span class="text-[10px] uppercase font-bold text-status-success px-2 py-0.5 bg-status-success/15 border border-status-success/40">OK</span>
+            <span class="text-[10px] uppercase font-semibold text-status-success px-2 py-0.5 bg-green-50 border border-green-200">OK</span>
             {% endif %}
           </td>
-          <td class="py-3 px-4 font-mono text-gold font-bold">{{ s.producto.precio_formateado }}</td>
+          <td class="py-3 px-4 font-mono font-semibold text-text-main">{{ s.producto.precio_formateado }}</td>
           <td class="py-3 px-4 text-right">
             <div class="flex items-center justify-end gap-2">
               <!-- Sumar Stock Rápido -->
               <button onclick="abrirModalMovimiento('ENTRADA', '{{ s.producto.id }}', '{{ s.producto.nombre }}', '{{ s.sucursal.id }}', '{{ s.sucursal.nombre }}')"
-                      class="px-2 py-1 text-[11px] font-bold uppercase bg-status-success/15 border border-status-success/40 text-status-success hover:bg-status-success/30 transition-colors" title="Sumar Stock (Entrada)">
+                      class="px-2 py-1 text-[11px] font-semibold uppercase bg-green-50 border border-green-200 text-status-success hover:bg-green-100 transition-colors" title="Sumar Stock (Entrada)">
                 + Sumar
               </button>
 
               <!-- Ajustar Stock -->
               <button onclick="abrirModalMovimiento('AJUSTE', '{{ s.producto.id }}', '{{ s.producto.nombre }}', '{{ s.sucursal.id }}', '{{ s.sucursal.nombre }}', '{{ s.cantidad }}')"
-                      class="px-2 py-1 text-[11px] font-bold uppercase bg-bg-dark border border-bg-border hover:border-gold text-ivory hover:text-gold transition-colors" title="Ajustar Inventario">
+                      class="px-2 py-1 text-[11px] font-semibold uppercase bg-white border border-brand-black text-brand-black hover:bg-neutral-100 transition-colors" title="Ajustar Inventario">
                 Ajustar
               </button>
 
               {% if es_admin_maestro %}
               <!-- Editar Producto Global -->
-              <a href="{% url 'panel:producto_editar' s.producto.id %}" class="px-2 py-1 text-[11px] font-bold uppercase border border-gold/40 text-gold hover:bg-gold/15 transition-colors" title="Editar Producto">
+              <a href="{% url 'panel:producto_editar' s.producto.id %}" class="px-2 py-1 text-[11px] font-semibold uppercase border border-bg-border hover:border-brand-black text-text-muted hover:text-text-main transition-colors" title="Editar Producto">
                 Editar
               </a>
               {% endif %}
@@ -145,7 +145,7 @@
         </tr>
         {% empty %}
         <tr>
-          <td colspan="8" class="py-8 text-center text-xs text-ivory-muted">
+          <td colspan="8" class="py-8 text-center text-xs text-text-muted font-light">
             No se encontraron productos en el inventario con los criterios seleccionados.
           </td>
         </tr>
@@ -155,15 +155,15 @@
   </div>
 
   <!-- Historial Reciente de Movimientos de Inventario -->
-  <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark space-y-4">
+  <div class="bg-white border border-bg-border p-6 space-y-4">
     <div class="flex items-center justify-between border-b border-bg-border pb-3">
-      <h3 class="text-sm font-serif font-bold text-ivory">Historial de Auditoría de Movimientos</h3>
-      <span class="text-xs text-gold font-bold">Últimos {{ movimientos|length }} registros</span>
+      <h3 class="text-sm font-serif font-medium text-text-main">Historial de Auditoría de Movimientos</h3>
+      <span class="text-xs text-text-muted font-semibold">Últimos {{ movimientos|length }} registros</span>
     </div>
 
     <div class="overflow-x-auto">
       <table class="w-full text-left text-xs divide-y divide-bg-border">
-        <thead class="bg-bg-elevated text-ivory-dim uppercase text-[10px] tracking-wider font-semibold">
+        <thead class="bg-bg-alt text-text-muted uppercase text-[10px] tracking-wider font-semibold">
           <tr>
             <th class="py-2.5 px-3">Fecha y Hora</th>
             <th class="py-2.5 px-3">Tipo</th>
@@ -175,34 +175,34 @@
             <th class="py-2.5 px-3">Motivo</th>
           </tr>
         </thead>
-        <tbody class="divide-y divide-bg-border text-ivory">
+        <tbody class="divide-y divide-bg-border text-text-main">
           {% for m in movimientos %}
-          <tr class="hover:bg-bg-elevated/30 transition-colors">
-            <td class="py-2.5 px-3 font-mono text-ivory-dim text-[11px]">{{ m.fecha|date:"d/m/Y H:i" }}</td>
+          <tr class="hover:bg-bg-alt transition-colors">
+            <td class="py-2.5 px-3 font-mono text-text-dim text-[11px]">{{ m.fecha|date:"d/m/Y H:i" }}</td>
             <td class="py-2.5 px-3">
-              <span class="text-[9px] uppercase font-bold px-1.5 py-0.5
-                {% if m.tipo == 'ENTRADA' or m.tipo == 'DEVOLUCION' %}bg-status-success/20 text-status-success border border-status-success/40
-                {% elif m.tipo == 'SALIDA' or m.tipo == 'VENTA' %}bg-status-error/20 text-status-error border border-status-error/40
-                {% elif m.tipo == 'TRASLADO' %}bg-gold/20 text-gold border border-gold/40
-                {% else %}bg-bg-elevated text-ivory border border-bg-border{% endif %}">
+              <span class="text-[9px] uppercase font-semibold px-1.5 py-0.5
+                {% if m.tipo == 'ENTRADA' or m.tipo == 'DEVOLUCION' %}bg-green-50 text-status-success border border-green-200
+                {% elif m.tipo == 'SALIDA' or m.tipo == 'VENTA' %}bg-red-50 text-status-error border border-red-200
+                {% elif m.tipo == 'TRASLADO' %}bg-neutral-100 text-text-main border border-neutral-300
+                {% else %}bg-bg-alt text-text-main border border-bg-border{% endif %}">
                 {{ m.get_tipo_display }}
               </span>
             </td>
             <td class="py-2.5 px-3 font-semibold">{{ m.producto.nombre }}</td>
-            <td class="py-2.5 px-3">
+            <td class="py-2.5 px-3 text-text-muted">
               {{ m.sucursal.nombre }}
               {% if m.sucursal_destino %} ➔ {{ m.sucursal_destino.nombre }}{% endif %}
             </td>
-            <td class="py-2.5 px-3 font-mono font-bold">
+            <td class="py-2.5 px-3 font-mono font-semibold">
               {% if m.tipo == 'ENTRADA' or m.tipo == 'DEVOLUCION' %}+{% elif m.tipo == 'SALIDA' or m.tipo == 'VENTA' or m.tipo == 'TRASLADO' %}-{% endif %}{{ m.cantidad }}
             </td>
-            <td class="py-2.5 px-3 font-mono text-ivory-dim">{{ m.stock_resultante }} uds</td>
-            <td class="py-2.5 px-3 text-[11px] text-ivory-dim">{{ m.usuario.get_full_name|default:m.usuario.email|default:"Sistema" }}</td>
-            <td class="py-2.5 px-3 text-[11px] text-ivory-dim truncate max-w-xs">{{ m.motivo }}</td>
+            <td class="py-2.5 px-3 font-mono text-text-dim">{{ m.stock_resultante }} uds</td>
+            <td class="py-2.5 px-3 text-[11px] text-text-muted">{{ m.usuario.get_full_name|default:m.usuario.email|default:"Sistema" }}</td>
+            <td class="py-2.5 px-3 text-[11px] text-text-muted truncate max-w-xs font-light">{{ m.motivo }}</td>
           </tr>
           {% empty %}
           <tr>
-            <td colspan="8" class="py-6 text-center text-xs text-ivory-muted">No se registran movimientos recientes de inventario.</td>
+            <td colspan="8" class="py-6 text-center text-xs text-text-muted font-light">No se registran movimientos recientes de inventario.</td>
           </tr>
           {% endfor %}
         </tbody>
@@ -211,11 +211,11 @@
   </div>
 
   <!-- Modal Genérico para Movimientos (Entrada / Ajuste) -->
-  <div id="modal-movimiento" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden">
-    <div class="bg-bg-surface border border-bg-border max-w-md w-full p-6 space-y-4 shadow-2xl">
+  <div id="modal-movimiento" class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white border border-bg-border max-w-md w-full p-6 space-y-4 shadow-soft">
       <div class="flex items-center justify-between border-b border-bg-border pb-3">
-        <h4 id="modal-mov-titulo" class="text-sm font-serif font-bold text-ivory">Registrar Movimiento</h4>
-        <button onclick="document.getElementById('modal-movimiento').classList.add('hidden')" class="text-ivory-dim hover:text-gold">✕</button>
+        <h4 id="modal-mov-titulo" class="text-sm font-serif font-medium text-text-main">Registrar Movimiento</h4>
+        <button onclick="document.getElementById('modal-movimiento').classList.add('hidden')" class="text-text-muted hover:text-text-main font-semibold">✕</button>
       </div>
 
       <form method="POST" action="{% url 'panel:registrar_movimiento' %}" class="space-y-4">
@@ -225,37 +225,37 @@
         <input type="hidden" name="tipo" id="modal-mov-tipo">
 
         <div>
-          <span class="text-xs text-ivory-dim block">Producto:</span>
-          <span id="modal-mov-producto-nombre" class="text-sm font-serif font-bold text-ivory block"></span>
+          <span class="text-xs text-text-muted block">Producto:</span>
+          <span id="modal-mov-producto-nombre" class="text-sm font-serif font-semibold text-text-main block"></span>
         </div>
 
         <div>
-          <span class="text-xs text-ivory-dim block">Sucursal:</span>
-          <span id="modal-mov-sucursal-nombre" class="text-xs font-bold text-gold block"></span>
+          <span class="text-xs text-text-muted block">Sucursal:</span>
+          <span id="modal-mov-sucursal-nombre" class="text-xs font-semibold text-text-main block"></span>
         </div>
 
         <div>
-          <label id="modal-mov-cantidad-label" class="block text-xs text-ivory-dim mb-1 font-semibold">Cantidad *</label>
+          <label id="modal-mov-cantidad-label" class="block text-xs text-text-muted mb-1 font-semibold">Cantidad *</label>
           <input type="number" name="cantidad" id="modal-mov-cantidad" required min="1"
-                 class="w-full bg-bg-dark border border-bg-border px-3 py-2 text-ivory text-xs focus:border-gold focus:outline-none">
+                 class="w-full bg-white border border-bg-border px-3 py-2 text-text-main text-xs focus:border-brand-black focus:outline-none">
         </div>
 
         <div>
-          <label class="block text-xs text-ivory-dim mb-1 font-semibold">Motivo del Movimiento *</label>
+          <label class="block text-xs text-text-muted mb-1 font-semibold">Motivo del Movimiento *</label>
           <input type="text" name="motivo" required placeholder="Ej: Compra proveedor Factura #1234, Merma..."
-                 class="w-full bg-bg-dark border border-bg-border px-3 py-2 text-ivory text-xs focus:border-gold focus:outline-none">
+                 class="w-full bg-white border border-bg-border px-3 py-2 text-text-main text-xs focus:border-brand-black focus:outline-none placeholder:text-text-dim">
         </div>
 
         <div>
-          <label class="block text-xs text-ivory-dim mb-1 font-semibold">Notas de Auditoría (Opcional)</label>
-          <textarea name="nota" rows="2" class="w-full bg-bg-dark border border-bg-border px-3 py-2 text-ivory text-xs focus:border-gold focus:outline-none"></textarea>
+          <label class="block text-xs text-text-muted mb-1 font-semibold">Notas de Auditoría (Opcional)</label>
+          <textarea name="nota" rows="2" class="w-full bg-white border border-bg-border px-3 py-2 text-text-main text-xs focus:border-brand-black focus:outline-none"></textarea>
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-3 border-t border-bg-border">
-          <button type="button" onclick="document.getElementById('modal-movimiento').classList.add('hidden')" class="px-4 py-2 border border-bg-border text-xs text-ivory uppercase font-bold">
+          <button type="button" onclick="document.getElementById('modal-movimiento').classList.add('hidden')" class="px-4 py-2 border border-brand-black text-xs text-brand-black uppercase font-semibold hover:bg-neutral-100 transition-colors">
             Cancelar
           </button>
-          <button type="submit" class="px-5 py-2 bg-gold hover:bg-gold-light text-bg-dark font-bold text-xs uppercase tracking-wider">
+          <button type="submit" class="px-5 py-2 bg-brand-black hover:bg-neutral-800 text-white font-medium text-xs uppercase tracking-wider transition-colors">
             Confirmar Movimiento
           </button>
         </div>
@@ -264,11 +264,11 @@
   </div>
 
   <!-- Modal Trasladar Stock entre Sucursales -->
-  <div id="modal-trasladar-stock" class="fixed inset-0 bg-black/80 flex items-center justify-center p-4 z-50 hidden">
-    <div class="bg-bg-surface border border-bg-border max-w-lg w-full p-6 space-y-4 shadow-2xl">
+  <div id="modal-trasladar-stock" class="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 hidden">
+    <div class="bg-white border border-bg-border max-w-lg w-full p-6 space-y-4 shadow-soft">
       <div class="flex items-center justify-between border-b border-bg-border pb-3">
-        <h4 class="text-sm font-serif font-bold text-ivory">Trasladar Stock entre Sedes</h4>
-        <button onclick="document.getElementById('modal-trasladar-stock').classList.add('hidden')" class="text-ivory-dim hover:text-gold">✕</button>
+        <h4 class="text-sm font-serif font-medium text-text-main">Trasladar Stock entre Sedes</h4>
+        <button onclick="document.getElementById('modal-trasladar-stock').classList.add('hidden')" class="text-text-muted hover:text-text-main font-semibold">✕</button>
       </div>
 
       <form method="POST" action="{% url 'panel:registrar_movimiento' %}" class="space-y-4">
@@ -276,8 +276,8 @@
         <input type="hidden" name="tipo" value="TRASLADO">
 
         <div>
-          <label class="block text-xs text-ivory-dim mb-1 font-semibold">Producto a Trasladar *</label>
-          <select name="producto_id" required class="w-full bg-bg-dark border border-bg-border px-3 py-2 text-ivory text-xs focus:border-gold focus:outline-none">
+          <label class="block text-xs text-text-muted mb-1 font-semibold">Producto a Trasladar *</label>
+          <select name="producto_id" required class="w-full bg-white border border-bg-border px-3 py-2 text-text-main text-xs focus:border-brand-black focus:outline-none">
             {% for s in stocks %}
             <option value="{{ s.producto.id }}">{{ s.producto.nombre }} (Stock en {{ s.sucursal.nombre }}: {{ s.cantidad }} uds)</option>
             {% endfor %}
@@ -286,8 +286,8 @@
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block text-xs text-ivory-dim mb-1 font-semibold">Sede Origen *</label>
-            <select name="sucursal_id" required class="w-full bg-bg-dark border border-bg-border px-3 py-2 text-ivory text-xs focus:border-gold focus:outline-none">
+            <label class="block text-xs text-text-muted mb-1 font-semibold">Sede Origen *</label>
+            <select name="sucursal_id" required class="w-full bg-white border border-bg-border px-3 py-2 text-text-main text-xs focus:border-brand-black focus:outline-none">
               {% for suc in sucursales %}
               <option value="{{ suc.id }}">{{ suc.nombre }}</option>
               {% endfor %}
@@ -295,8 +295,8 @@
           </div>
 
           <div>
-            <label class="block text-xs text-ivory-dim mb-1 font-semibold">Sede Destino *</label>
-            <select name="sucursal_destino_id" required class="w-full bg-bg-dark border border-bg-border px-3 py-2 text-ivory text-xs focus:border-gold focus:outline-none">
+            <label class="block text-xs text-text-muted mb-1 font-semibold">Sede Destino *</label>
+            <select name="sucursal_destino_id" required class="w-full bg-white border border-bg-border px-3 py-2 text-text-main text-xs focus:border-brand-black focus:outline-none">
               {% for suc in sucursales %}
               <option value="{{ suc.id }}">{{ suc.nombre }}</option>
               {% endfor %}
@@ -305,22 +305,22 @@
         </div>
 
         <div>
-          <label class="block text-xs text-ivory-dim mb-1 font-semibold">Cantidad de Unidades a Trasladar *</label>
+          <label class="block text-xs text-text-muted mb-1 font-semibold">Cantidad de Unidades a Trasladar *</label>
           <input type="number" name="cantidad" required min="1"
-                 class="w-full bg-bg-dark border border-bg-border px-3 py-2 text-ivory text-xs focus:border-gold focus:outline-none">
+                 class="w-full bg-white border border-bg-border px-3 py-2 text-text-main text-xs focus:border-brand-black focus:outline-none">
         </div>
 
         <div>
-          <label class="block text-xs text-ivory-dim mb-1 font-semibold">Motivo del Traslado</label>
+          <label class="block text-xs text-text-muted mb-1 font-semibold">Motivo del Traslado</label>
           <input type="text" name="motivo" placeholder="Ej: Balance de stock para fin de semana..."
-                 class="w-full bg-bg-dark border border-bg-border px-3 py-2 text-ivory text-xs focus:border-gold focus:outline-none">
+                 class="w-full bg-white border border-bg-border px-3 py-2 text-text-main text-xs focus:border-brand-black focus:outline-none placeholder:text-text-dim">
         </div>
 
         <div class="flex items-center justify-end gap-3 pt-3 border-t border-bg-border">
-          <button type="button" onclick="document.getElementById('modal-trasladar-stock').classList.add('hidden')" class="px-4 py-2 border border-bg-border text-xs text-ivory uppercase font-bold">
+          <button type="button" onclick="document.getElementById('modal-trasladar-stock').classList.add('hidden')" class="px-4 py-2 border border-brand-black text-xs text-brand-black uppercase font-semibold hover:bg-neutral-100 transition-colors">
             Cancelar
           </button>
-          <button type="submit" class="px-5 py-2 bg-gold hover:bg-gold-light text-bg-dark font-bold text-xs uppercase tracking-wider">
+          <button type="submit" class="px-5 py-2 bg-brand-black hover:bg-neutral-800 text-white font-medium text-xs uppercase tracking-wider transition-colors">
             Efectuar Traslado
           </button>
         </div>

@@ -5,17 +5,17 @@
 
 {% block content %}
 <div class="space-y-6 max-w-7xl mx-auto">
-  <div class="bg-bg-surface border border-bg-border p-5 shadow-card-dark flex items-center justify-between">
+  <div class="bg-white border border-bg-border p-5 flex items-center justify-between">
     <div>
-      <h2 class="text-base font-serif font-bold text-ivory">Clientes Registrados</h2>
-      <p class="text-xs text-ivory-muted">Historial de visitas, preferencias de corte y gasto acumulado.</p>
+      <h2 class="text-base font-serif font-medium text-text-main">Clientes Registrados</h2>
+      <p class="text-xs text-text-muted font-light">Historial de visitas, preferencias de corte y gasto acumulado.</p>
     </div>
-    <span class="text-xs text-gold font-bold">{{ clientes|length }} clientes registrados</span>
+    <span class="text-xs text-text-muted font-semibold">{{ clientes|length }} clientes registrados</span>
   </div>
 
-  <div class="bg-bg-surface border border-bg-border shadow-card-dark overflow-x-auto">
+  <div class="bg-white border border-bg-border overflow-x-auto">
     <table class="w-full text-left text-xs divide-y divide-bg-border">
-      <thead class="bg-bg-elevated text-ivory-dim uppercase text-[10px] tracking-wider font-semibold">
+      <thead class="bg-bg-alt text-text-muted uppercase text-[10px] tracking-wider font-semibold">
         <tr>
           <th class="py-3 px-4">Cliente</th>
           <th class="py-3 px-4">Email</th>
@@ -26,22 +26,22 @@
           <th class="py-3 px-4">Notas &amp; Preferencias</th>
         </tr>
       </thead>
-      <tbody class="divide-y divide-bg-border text-ivory">
+      <tbody class="divide-y divide-bg-border text-text-main">
         {% for c in clientes %}
-        <tr class="hover:bg-bg-elevated/50 transition-colors">
-          <td class="py-3 px-4 font-bold text-ivory">{{ c.get_full_name|default:c.email }}</td>
-          <td class="py-3 px-4 text-ivory-muted">{{ c.email }}</td>
-          <td class="py-3 px-4 text-ivory-muted">{{ c.telefono|default:"-" }}</td>
-          <td class="py-3 px-4 text-ivory-dim">{{ c.date_joined|date:"d/m/Y" }}</td>
-          <td class="py-3 px-4 font-mono font-bold text-gold">{{ c.total_citas }}</td>
-          <td class="py-3 px-4 font-mono font-bold">{{ c.gasto_total|default:0|clp }}</td>
-          <td class="py-3 px-4 text-[11px] text-ivory-muted max-w-xs truncate">
+        <tr class="hover:bg-bg-alt transition-colors">
+          <td class="py-3 px-4 font-semibold text-text-main">{{ c.get_full_name|default:c.email }}</td>
+          <td class="py-3 px-4 text-text-muted">{{ c.email }}</td>
+          <td class="py-3 px-4 text-text-muted">{{ c.telefono|default:"-" }}</td>
+          <td class="py-3 px-4 text-text-dim">{{ c.date_joined|date:"d/m/Y" }}</td>
+          <td class="py-3 px-4 font-mono font-semibold text-text-main">{{ c.total_citas }}</td>
+          <td class="py-3 px-4 font-mono font-semibold text-text-main">{{ c.gasto_total|default:0|clp }}</td>
+          <td class="py-3 px-4 text-[11px] text-text-muted max-w-xs truncate font-light">
             {{ c.notas_cliente|default:"Sin notas registradas" }}
           </td>
         </tr>
         {% empty %}
         <tr>
-          <td colspan="7" class="py-8 text-center text-ivory-muted">No hay clientes registrados aún.</td>
+          <td colspan="7" class="py-8 text-center text-text-muted font-light">No hay clientes registrados aún.</td>
         </tr>
         {% endfor %}
       </tbody>
