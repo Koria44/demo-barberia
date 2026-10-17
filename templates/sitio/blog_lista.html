@@ -1,0 +1,41 @@
+{% extends 'base.html' %}
+{% load static barber_tags %}
+
+{% block title %}Blog de Barbería &amp; Estilo — {{ sitio.nombre_negocio }}{% endblock %}
+
+{% block content %}
+<section class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
+  <div class="text-center mb-16">
+    <span class="text-xs uppercase tracking-widest text-gold font-serif block mb-2">Editorial &amp; Grooming</span>
+    <h1 class="text-3xl sm:text-5xl font-serif font-bold text-ivory">Blog de Estilo Masculino</h1>
+    <p class="text-xs sm:text-sm text-ivory-muted mt-2 max-w-lg mx-auto">Técnicas de afeitado, visagismo capilar y recomendaciones de nuestros Master Barbers.</p>
+    <div class="w-12 h-[1px] bg-gold mx-auto mt-4"></div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+    {% for art in articulos %}
+    <article class="bg-bg-surface border border-bg-border hover:border-gold/60 p-6 flex flex-col justify-between transition-all group shadow-card-dark">
+      <div>
+        <div class="relative h-52 overflow-hidden mb-5">
+          <img src="{{ art.imagen_url }}" alt="{{ art.titulo }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+          <span class="absolute bottom-2 left-2 bg-bg-dark/90 text-ivory-dim text-[10px] px-2 py-0.5">
+            {{ art.tiempo_lectura_minutos }} min de lectura
+          </span>
+        </div>
+        <span class="text-[10px] uppercase tracking-widest text-gold font-serif block mb-1">{{ art.creado_el|date:"d M, Y" }}</span>
+        <h2 class="text-lg font-serif font-bold text-ivory group-hover:text-gold transition-colors mb-3">
+          <a href="{% url 'sitio_publico:blog_detalle' art.slug %}">{{ art.titulo }}</a>
+        </h2>
+        <p class="text-xs text-ivory-muted leading-relaxed font-light mb-6">
+          {{ art.extracto }}
+        </p>
+      </div>
+
+      <a href="{% url 'sitio_publico:blog_detalle' art.slug %}" class="text-xs uppercase tracking-wider font-bold text-gold hover:underline inline-flex items-center gap-1">
+        Leer artículo →
+      </a>
+    </article>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

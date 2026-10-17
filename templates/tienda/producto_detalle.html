@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% load static barber_tags %}
+
+{% block title %}{{ producto.nombre }} — Tienda {{ sitio.nombre_negocio }}{% endblock %}
+{% block meta_description %}{{ producto.descripcion|truncatewords:25 }}{% endblock %}
+
+{% block extra_head %}
+<!-- Product Schema JSON-LD -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Product",
+  "name": "{{ producto.nombre }}",
+  "image": "{{ request.scheme }}://{{ request.get_host }}{{ producto.imagen_url }}",
+  "description": "{{ producto.descripcion|truncatewords:30 }}",
+  "offers": {
+    "@type": "Offer",
+    "priceCurrency": "CLP",
+    "price": "{{ producto.precio }}",
+    "availability": "{% if producto.stock > 0 %}https://schema.org/InStock{% else %}https://schema.org/OutOfStock{% endif %}"
+  }
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<section class="py-20 px-4 sm:px-6 lg:px-8 max-w-6xl mx-auto min-h-[80vh]">
+  <a href="{% url 'tienda:catalogo' %}" class="text-xs uppercase tracking-widest text-gold hover:underline inline-flex items-center gap-1 mb-8">
+    ← Volver al Catálogo
+  </a>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-start mb-16">
+    <!-- Imagen del Producto -->
+    <div class="relative bg-bg-surface border border-bg-border overflow-hidden shadow-card-dark">
+      <img src="{{ producto.imagen_url }}" alt="{{ producto.nombre }}" class="w-full h-auto object-cover">
+      {% if producto.destacado %}
+      <span class="absolute top-4 left-4 bg-bg-dark/90 text-gold text-xs font-bold uppercase tracking-wider px-3 py-1 border border-gold/40">
+        Destacado del Club
+      </span>
+      {% endif %}
+    </div>
+
+    <!-- Información y Compra -->
+    <div class="space-y-6">
+      <div>
+        <span class="text-xs uppercase tracking-widest text-gold font-serif block mb-2">{{ producto.categoria.nombre|default:"Cuidado Masculino" }}</span>
+        <h1 class="text-2xl sm:text-4xl font-serif font-bold text-ivory leading-tight mb-3">{{ producto.nombre }}</h1>
+        <p class="text-2xl sm:text-3xl font-serif font-bold text-gold">{{ producto.precio_formateado }}</p>
+      </div>
+
+      <div class="border-y border-bg-border py-6 text-xs sm:text-sm text-ivory-muted leading-relaxed font-light">
+        {{ producto.descripcion }}
+      </div>
+
+      <div class="text-xs space-y-2">
+        <div class="flex items-center gap-2">
+          <span class="text-ivory-dim uppercase tracking-wider">Disponibilidad:</span>
+          {% if producto.stock > 0 %}
+          <span class="text-status-success font-bold">En Stock ({% if producto.stock <= 5 %}¡Últimas {{ producto.stock }} unidades!{% else %}Disponible para retiro inmediato{% endif %})</span>
+          {% else %}
+          <span class="text-status-error font-bold">Agotado temporalmente</span>
+          {% endif %}
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="text-ivory-dim uppercase tracking-wider">Retiro:</span>
+          <span class="text-ivory">En sucursales Providencia, Las Condes o Vitacura</span>
+        </div>
+      </div>
+
+      {% if producto.stock > 0 %}
+      <form method="POST" action="{% url 'tienda:agregar_carrito' producto.id %}" class="flex gap-4 pt-4">
+        {% csrf_token %}
+        <div class="w-24">
+          <input type="number" name="cantidad" value="1" min="1" max="{{ producto.stock }}" class="w-full bg-bg-surface border border-bg-border focus:border-gold text-ivory px-3 py-3 text-center text-sm font-bold">
+        </div>
+        <button type="submit" class="flex-1 btn-shimmer-effect bg-gold hover:bg-gold-hover text-bg-dark font-bold text-xs uppercase tracking-widest py-3.5 shadow-gold-glow transition-all">
+          Agregar al Carrito
+        </button>
+      </form>
+      {% endif %}
+    </div>
+  </div>
+
+  <!-- Productos Relacionados -->
+  {% if relacionados %}
+  <div class="border-t border-bg-border pt-16">
+    <h3 class="text-xl font-serif font-bold text-ivory mb-8">También te puede interesar</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+      {% for rel in relacionados %}
+      <div class="bg-bg-surface border border-bg-border p-4">
+        <a href="{% url 'tienda:producto_detalle' rel.slug %}" class="block h-36 overflow-hidden mb-3">
+          <img src="{{ rel.imagen_url }}" alt="{{ rel.nombre }}" class="w-full h-full object-cover">
+        </a>
+        <h4 class="text-xs font-serif font-bold text-ivory truncate mb-1">
+          <a href="{% url 'tienda:producto_detalle' rel.slug %}">{{ rel.nombre }}</a>
+        </h4>
+        <span class="text-xs font-bold text-gold">{{ rel.precio_formateado }}</span>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

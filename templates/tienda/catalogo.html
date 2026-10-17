@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static barber_tags %}
+
+{% block title %}Tienda Oficial de Cuidado Masculino — {{ sitio.nombre_negocio }}{% endblock %}
+
+{% block content %}
+<section class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto min-h-[85vh]">
+  <div class="text-center mb-12">
+    <span class="text-xs uppercase tracking-widest text-gold font-serif block mb-2">Exclusivo Demo Barber</span>
+    <h1 class="text-3xl sm:text-5xl font-serif font-bold text-ivory">Grooming &amp; Styling Club</h1>
+    <p class="text-xs sm:text-sm text-ivory-muted mt-2 max-w-lg mx-auto">Pomadas base agua, aceites botánicos puros y accesorios profesionales para caballeros.</p>
+    <div class="w-12 h-[1px] bg-gold mx-auto mt-4"></div>
+  </div>
+
+  <!-- Filtro por Categorías -->
+  <div class="flex flex-wrap justify-center gap-2 sm:gap-3 mb-12">
+    <a href="{% url 'tienda:catalogo' %}" 
+       class="px-4 py-2 text-xs uppercase tracking-wider font-bold transition-all border
+       {% if not categoria_activa %}bg-gold text-bg-dark border-gold{% else %}bg-bg-surface text-ivory-muted border-bg-border hover:border-gold/60{% endif %}">
+      Todos los Productos
+    </a>
+    {% for cat in categorias %}
+    <a href="{% url 'tienda:catalogo' %}?categoria={{ cat.slug }}" 
+       class="px-4 py-2 text-xs uppercase tracking-wider font-bold transition-all border
+       {% if categoria_activa and categoria_activa.slug == cat.slug %}bg-gold text-bg-dark border-gold{% else %}bg-bg-surface text-ivory-muted border-bg-border hover:border-gold/60{% endif %}">
+      {{ cat.nombre }}
+    </a>
+    {% endfor %}
+  </div>
+
+  <!-- Rejilla de Productos -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+    {% for prod in productos %}
+    <div class="bg-bg-surface border border-bg-border hover:border-gold/60 p-5 flex flex-col justify-between transition-all group shadow-card-dark">
+      <div>
+        <a href="{% url 'tienda:producto_detalle' prod.slug %}" class="block relative h-52 overflow-hidden mb-4 bg-bg-dark border border-bg-border/60">
+          <img src="{{ prod.imagen_url }}" alt="{{ prod.nombre }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
+          {% if prod.destacado %}
+          <span class="absolute top-2 left-2 bg-bg-dark/90 text-gold text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 border border-gold/40">
+            Destacado
+          </span>
+          {% endif %}
+          {% if prod.en_alerta_stock %}
+          <span class="absolute bottom-2 right-2 bg-status-warning/90 text-bg-dark text-[9px] font-bold uppercase px-1.5 py-0.5">
+            Últimas {{ prod.stock }} unidades
+          </span>
+          {% endif %}
+        </a>
+
+        <span class="text-[10px] uppercase tracking-wider text-gold font-serif block mb-1">{{ prod.categoria.nombre|default:"Cuidado" }}</span>
+        <h3 class="text-sm font-serif font-bold text-ivory group-hover:text-gold transition-colors mb-2">
+          <a href="{% url 'tienda:producto_detalle' prod.slug %}">{{ prod.nombre }}</a>
+        </h3>
+        <p class="text-base font-serif font-bold text-gold mb-4">{{ prod.precio_formateado }}</p>
+      </div>
+
+      <div class="flex gap-2">
+        <a href="{% url 'tienda:producto_detalle' prod.slug %}" class="flex-1 text-center py-2.5 border border-bg-border text-ivory-muted hover:text-ivory text-xs uppercase tracking-wider font-semibold transition-colors">
+          Detalle
+        </a>
+        <form method="POST" action="{% url 'tienda:agregar_carrito' prod.id %}" class="flex-1">
+          {% csrf_token %}
+          <button type="submit" class="w-full py-2.5 bg-gold hover:bg-gold-hover text-bg-dark text-xs uppercase tracking-wider font-bold transition-all shadow-gold-glow">
+            Comprar
+          </button>
+        </form>
+      </div>
+    </div>
+    {% empty %}
+    <div class="col-span-full py-16 text-center text-ivory-muted text-sm">
+      No hay productos disponibles en esta categoría actualmente.
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
