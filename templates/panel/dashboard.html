@@ -9,7 +9,7 @@
   <div class="bg-bg-surface border border-bg-border p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
     <div class="flex items-center gap-2">
       <span class="text-xs uppercase tracking-wider text-ivory-dim font-bold">Filtrar por Sede:</span>
-      <select onchange="window.location.href='{% url 'panel:cambiar_sucursal' %}?sucursal=' + this.value" class="bg-bg-dark border border-bg-border focus:border-gold text-ivory text-xs px-3 py-1.5 cursor-pointer">
+      <select id="filtro-sede-dashboard" data-url="{% url 'panel:cambiar_sucursal' %}" class="bg-bg-dark border border-bg-border focus:border-gold text-ivory text-xs px-3 py-1.5 cursor-pointer">
         {% if es_admin_maestro %}
         <option value="0" {% if not panel_sucursal_activa_id %}selected{% endif %}>🏢 Todas las Sedes (Consolidado)</option>
         {% endif %}
@@ -228,6 +228,17 @@
     const serviciosData = chartsData.serviciosData || [];
     const barberosLabels = chartsData.barberosLabels || [];
     const barberosData = chartsData.barberosData || [];
+
+    // Manejador del filtro de sucursal
+    const selectSede = document.getElementById('filtro-sede-dashboard');
+    if (selectSede) {
+      selectSede.addEventListener('change', function () {
+        const baseUrl = this.getAttribute('data-url');
+        if (baseUrl) {
+          window.location.href = `${baseUrl}?sucursal=${encodeURIComponent(this.value)}`;
+        }
+      });
+    }
 
     // 1. Gráfico de Ingresos Diarios
     const elIngresos = document.getElementById('chart-ingresos');
