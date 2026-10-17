@@ -1,0 +1,44 @@
+{% extends 'panel/base_panel.html' %}
+{% load static barber_tags %}
+
+{% block header_title %}Sedes &amp; Sucursales{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-7xl mx-auto">
+  <div class="bg-bg-surface border border-bg-border p-5 shadow-card-dark flex items-center justify-between">
+    <div>
+      <h2 class="text-base font-serif font-bold text-ivory">Sedes Físicas de la Barbería</h2>
+      <p class="text-xs text-ivory-muted">Ubicaciones, teléfonos y horarios de atención al público.</p>
+    </div>
+    <span class="text-xs text-gold font-bold">{{ sucursales|length }} sedes operativas</span>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    {% for s in sucursales %}
+    <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark flex flex-col justify-between">
+      <div>
+        <div class="h-36 overflow-hidden mb-4 border border-bg-border">
+          <img src="{{ s.imagen_url }}" alt="{{ s.nombre }}" class="w-full h-full object-cover">
+        </div>
+        <h3 class="text-lg font-serif font-bold text-ivory">{{ s.nombre }}</h3>
+        <p class="text-xs text-gold font-serif mt-0.5 mb-2">{{ s.comuna }}, Santiago</p>
+        <p class="text-xs text-ivory-muted leading-relaxed mb-4">{{ s.direccion }}</p>
+
+        <div class="space-y-1.5 text-[11px] text-ivory-dim border-t border-bg-border/60 pt-3 mb-4">
+          <div><strong class="text-ivory">Horario:</strong> {{ s.horario_atencion }}</div>
+          <div><strong class="text-ivory">Teléfono:</strong> {{ s.telefono }}</div>
+          <div><strong class="text-ivory">WhatsApp:</strong> {{ s.whatsapp|default:"-" }}</div>
+        </div>
+      </div>
+
+      <div class="pt-3 border-t border-bg-border/60 flex items-center justify-between text-xs">
+        <span class="text-status-success font-bold uppercase text-[10px]">Operativa</span>
+        <a href="{% url 'sitio_publico:sucursal_detalle' s.slug %}" target="_blank" class="text-gold hover:underline text-[11px]">
+          Ver Landing SEO →
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+</div>
+{% endblock %}

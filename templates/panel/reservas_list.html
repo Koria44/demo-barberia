@@ -1,0 +1,115 @@
+{% extends 'panel/base_panel.html' %}
+{% load static barber_tags %}
+
+{% block header_title %}Gestión Integral de Reservas{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-7xl mx-auto">
+  <!-- Barra de Filtros y Búsqueda -->
+  <div class="bg-bg-surface border border-bg-border p-5 shadow-card-dark flex flex-col lg:flex-row items-center justify-between gap-4">
+    <form method="GET" class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
+      <!-- Buscador -->
+      <input type="text" name="q" value="{{ busqueda }}" placeholder="Buscar cliente, código o teléfono..." class="bg-bg-dark border border-bg-border focus:border-gold text-ivory text-xs px-3 py-2 w-full sm:w-64 placeholder-ivory-dim">
+
+      <!-- Filtro Sucursal -->
+      <select name="sucursal" class="bg-bg-dark border border-bg-border focus:border-gold text-ivory text-xs px-3 py-2 cursor-pointer">
+        <option value="">Todas las Sedes</option>
+        {% for s in sucursales %}
+        <option value="{{ s.id }}" {% if sucursal_filtro == s.id|stringformat:"s" %}selected{% endif %}>{{ s.nombre }}</option>
+        {% endfor %}
+      </select>
+
+      <!-- Filtro Barbero -->
+      <select name="barbero" class="bg-bg-dark border border-bg-border focus:border-gold text-ivory text-xs px-3 py-2 cursor-pointer">
+        <option value="">Todos los Barberos</option>
+        {% for b in barberos %}
+        <option value="{{ b.id }}" {% if barbero_filtro == b.id|stringformat:"s" %}selected{% endif %}>{{ b.nombre_profesional }}</option>
+        {% endfor %}
+      </select>
+
+      <!-- Filtro Estado -->
+      <select name="estado" class="bg-bg-dark border border-bg-border focus:border-gold text-ivory text-xs px-3 py-2 cursor-pointer">
+        <option value="">Todos los Estados</option>
+        <option value="PENDIENTE" {% if estado_filtro == 'PENDIENTE' %}selected{% endif %}>Pendiente</option>
+        <option value="CONFIRMADA" {% if estado_filtro == 'CONFIRMADA' %}selected{% endif %}>Confirmada</option>
+        <option value="COMPLETADA" {% if estado_filtro == 'COMPLETADA' %}selected{% endif %}>Completada</option>
+        <option value="CANCELADA" {% if estado_filtro == 'CANCELADA' %}selected{% endif %}>Cancelada</option>
+        <option value="NO_ASISTIO" {% if estado_filtro == 'NO_ASISTIO' %}selected{% endif %}>No Asistió</option>
+      </select>
+
+      <button type="submit" class="px-4 py-2 bg-gold hover:bg-gold-hover text-bg-dark text-xs font-bold uppercase tracking-wider">
+        Filtrar
+      </button>
+      {% if busqueda or estado_filtro or sucursal_filtro or barbero_filtro %}
+      <a href="{% url 'panel:reservas_list' %}" class="text-xs text-ivory-dim hover:text-ivory underline">Limpiar</a>
+      {% endif %}
+    </form>
+
+    <a href="{% url 'panel:exportar_reservas_csv' %}" class="px-4 py-2 border border-gold/40 text-gold hover:bg-gold hover:text-bg-dark text-xs font-bold uppercase tracking-wider transition-colors shrink-0">
+      📥 Exportar a CSV (Excel)
+    </a>
+  </div>
+
+  <!-- Tabla de Reservas -->
+  <div class="bg-bg-surface border border-bg-border shadow-card-dark overflow-x-auto">
+    <table class="w-full text-left text-xs divide-y divide-bg-border">
+      <thead class="bg-bg-elevated text-ivory-dim uppercase text-[10px] tracking-wider font-semibold">
+        <tr>
+          <th class="py-3 px-4">Código</th>
+          <th class="py-3 px-4">Fecha y Hora</th>
+          <th class="py-3 px-4">Cliente</th>
+          <th class="py-3 px-4">Sede</th>
+          <th class="py-3 px-4">Barbero</th>
+          <th class="py-3 px-4">Servicio</th>
+          <th class="py-3 px-4">Monto</th>
+          <th class="py-3 px-4">Estado</th>
+          <th class="py-3 px-4 text-right">Acción</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-bg-border text-ivory">
+        {% for r in reservas %}
+        <tr class="hover:bg-bg-elevated/50 transition-colors">
+          <td class="py-3 px-4 font-mono font-bold text-gold">{{ r.codigo_reserva }}</td>
+          <td class="py-3 px-4 whitespace-nowrap">{{ r.fecha_hora_inicio|date:"d/m/Y H:i" }}</td>
+          <td class="py-3 px-4">
+            <span class="font-bold block text-ivory">{{ r.cliente_nombre }}</span>
+            <span class="text-[10px] text-ivory-dim">{{ r.cliente_telefono }}</span>
+          </td>
+          <td class="py-3 px-4 text-ivory-muted whitespace-nowrap">{{ r.sucursal.nombre }}</td>
+          <td class="py-3 px-4 font-medium text-gold whitespace-nowrap">{{ r.barbero.nombre_profesional }}</td>
+          <td class="py-3 px-4 text-ivory-muted whitespace-nowrap">{{ r.servicio.nombre }}</td>
+          <td class="py-3 px-4 font-mono font-bold">{{ r.precio|clp }}</td>
+          <td class="py-3 px-4 whitespace-nowrap">
+            <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 border
+              {% if r.estado == 'CONFIRMADA' %}bg-status-success/15 border-status-success text-status-success
+              {% elif r.estado == 'PENDIENTE' %}bg-status-warning/15 border-status-warning text-status-warning
+              {% elif r.estado == 'COMPLETADA' %}bg-gold/15 border-gold text-gold
+              {% elif r.estado == 'CANCELADA' %}bg-status-error/15 border-status-error text-status-error
+              {% else %}bg-bg-elevated border-bg-border text-ivory-dim{% endif %}">
+              {{ r.get_estado_display }}
+            </span>
+          </td>
+          <td class="py-3 px-4 text-right whitespace-nowrap">
+            <!-- Cambio de Estado Rápido -->
+            <form method="POST" action="{% url 'panel:cambiar_estado_reserva' r.codigo_reserva %}" class="inline-flex items-center gap-1">
+              {% csrf_token %}
+              <select name="nuevo_estado" onchange="this.form.submit()" class="bg-bg-dark border border-bg-border text-[11px] text-ivory px-2 py-1 cursor-pointer">
+                <option value="">Cambiar...</option>
+                <option value="CONFIRMADA">Confirmar</option>
+                <option value="COMPLETADA">Completar</option>
+                <option value="CANCELADA">Cancelar</option>
+                <option value="NO_ASISTIO">No Asistió</option>
+              </select>
+            </form>
+          </td>
+        </tr>
+        {% empty %}
+        <tr>
+          <td colspan="9" class="py-8 text-center text-ivory-muted">No se encontraron reservas con los filtros seleccionados.</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

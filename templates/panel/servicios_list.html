@@ -1,0 +1,54 @@
+{% extends 'panel/base_panel.html' %}
+{% load static barber_tags %}
+
+{% block header_title %}Catálogo de Servicios{% endblock %}
+
+{% block content %}
+<div class="space-y-6 max-w-7xl mx-auto">
+  <div class="bg-bg-surface border border-bg-border p-5 shadow-card-dark flex items-center justify-between">
+    <div>
+      <h2 class="text-base font-serif font-bold text-ivory">Servicios de Barbería Activos</h2>
+      <p class="text-xs text-ivory-muted">Gestiona precios base, duración y etiquetas de promoción.</p>
+    </div>
+    <span class="text-xs text-gold font-bold">{{ servicios|length }} servicios configurados</span>
+  </div>
+
+  <div class="bg-bg-surface border border-bg-border shadow-card-dark overflow-x-auto">
+    <table class="w-full text-left text-xs divide-y divide-bg-border">
+      <thead class="bg-bg-elevated text-ivory-dim uppercase text-[10px] tracking-wider font-semibold">
+        <tr>
+          <th class="py-3 px-4">Orden</th>
+          <th class="py-3 px-4">Servicio</th>
+          <th class="py-3 px-4">Categoría</th>
+          <th class="py-3 px-4">Duración</th>
+          <th class="py-3 px-4">Precio CLP</th>
+          <th class="py-3 px-4">Etiqueta</th>
+          <th class="py-3 px-4">Estado</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-bg-border text-ivory">
+        {% for s in servicios %}
+        <tr class="hover:bg-bg-elevated/50 transition-colors">
+          <td class="py-3 px-4 font-mono text-ivory-dim">{{ s.orden }}</td>
+          <td class="py-3 px-4">
+            <span class="font-bold block text-ivory">{{ s.nombre }}</span>
+            <span class="text-[11px] text-ivory-muted line-clamp-1">{{ s.descripcion }}</span>
+          </td>
+          <td class="py-3 px-4 text-ivory-muted">{{ s.categoria.nombre|default:"General" }}</td>
+          <td class="py-3 px-4 font-mono">{{ s.duracion_minutos }} min</td>
+          <td class="py-3 px-4 font-mono font-bold text-gold">{{ s.precio_formateado }}</td>
+          <td class="py-3 px-4">
+            {% if s.etiqueta %}
+            <span class="text-[10px] bg-gold/15 border border-gold/40 text-gold px-2 py-0.5">{{ s.etiqueta }}</span>
+            {% else %}-{% endif %}
+          </td>
+          <td class="py-3 px-4">
+            <span class="text-[10px] uppercase font-bold text-status-success">Activo</span>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

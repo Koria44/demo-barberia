@@ -1,0 +1,279 @@
+{% extends 'panel/base_panel.html' %}
+{% load static barber_tags %}
+
+{% block header_title %}Métricas &amp; Rendimiento Comercial{% endblock %}
+
+{% block content %}
+<div class="space-y-8 max-w-7xl mx-auto">
+  <!-- Filtro por Sucursal -->
+  <div class="bg-bg-surface border border-bg-border p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+    <div class="flex items-center gap-2">
+      <span class="text-xs uppercase tracking-wider text-ivory-dim font-bold">Filtrar por Sede:</span>
+      <form method="GET" class="flex items-center gap-2">
+        <select name="sucursal" onchange="this.form.submit()" class="bg-bg-dark border border-bg-border focus:border-gold text-ivory text-xs px-3 py-1.5 cursor-pointer">
+          <option value="">Todas las Sucursales</option>
+          {% for s in sucursales %}
+          <option value="{{ s.id }}" {% if sucursal_seleccionada == s.id|stringformat:"s" %}selected{% endif %}>{{ s.nombre }}</option>
+          {% endfor %}
+        </select>
+      </form>
+    </div>
+    <div class="flex items-center gap-3">
+      <a href="{% url 'panel:exportar_reservas_csv' %}" class="px-3 py-1.5 border border-bg-border hover:border-gold text-xs uppercase tracking-wider font-semibold text-ivory transition-colors">
+        📥 Exportar Citas CSV
+      </a>
+      <a href="{% url 'panel:exportar_ventas_csv' %}" class="px-3 py-1.5 border border-bg-border hover:border-gold text-xs uppercase tracking-wider font-semibold text-ivory transition-colors">
+        📥 Exportar Ventas CSV
+      </a>
+    </div>
+  </div>
+
+  <!-- Alerta de Stock Bajo (Si aplica) -->
+  {% if productos_alerta_stock %}
+  <div class="p-4 bg-status-warning/10 border-l-4 border-status-warning flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-status-warning font-bold text-lg">⚠</span>
+      <div class="text-xs">
+        <strong class="text-ivory block">Atención: Hay {{ productos_alerta_stock|length }} producto(s) con stock crítico.</strong>
+        <span class="text-ivory-muted">{% for p in productos_alerta_stock %}{{ p.nombre }} ({{ p.stock }} un.){% if not forloop.last %}, {% endif %}{% endfor %}</span>
+      </div>
+    </div>
+    <a href="{% url 'panel:productos_list' %}" class="text-xs text-status-warning font-bold underline whitespace-nowrap">Gestionar Stock →</a>
+  </div>
+  {% endif %}
+
+  <!-- 1. Tarjetas de KPIs Comerciales -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+    <!-- KPI 1: Ventas del Mes -->
+    <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark relative group hover:border-gold/60 transition-colors">
+      <span class="text-[10px] uppercase tracking-widest text-gold font-serif block mb-1">Ventas Últimos 30 Días</span>
+      <div class="text-2xl sm:text-3xl font-serif font-bold text-ivory tracking-tight">{{ ventas_mes_total }}</div>
+      <div class="text-[11px] text-ivory-dim mt-2 flex justify-between">
+        <span>Servicios: {{ ventas_mes_servicios }}</span>
+        <span>Tienda: {{ ventas_mes_productos }}</span>
+      </div>
+    </div>
+
+    <!-- KPI 2: Ventas de Hoy -->
+    <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark relative group hover:border-gold/60 transition-colors">
+      <span class="text-[10px] uppercase tracking-widest text-gold font-serif block mb-1">Ingresos de Hoy</span>
+      <div class="text-2xl sm:text-3xl font-serif font-bold text-ivory tracking-tight">{{ ventas_hoy_total }}</div>
+      <div class="text-[11px] text-ivory-dim mt-2">
+        <span>{{ reservas_hoy_count }} citas agendadas para hoy</span>
+      </div>
+    </div>
+
+    <!-- KPI 3: Ticket Promedio -->
+    <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark relative group hover:border-gold/60 transition-colors">
+      <span class="text-[10px] uppercase tracking-widest text-gold font-serif block mb-1">Ticket Promedio Servicio</span>
+      <div class="text-2xl sm:text-3xl font-serif font-bold text-ivory tracking-tight">{{ ticket_promedio }}</div>
+      <div class="text-[11px] text-ivory-dim mt-2">
+        <span>Gasto medio por cliente atendido</span>
+      </div>
+    </div>
+
+    <!-- KPI 4: Clientes Nuevos & Tasa Cancelación -->
+    <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark relative group hover:border-gold/60 transition-colors">
+      <span class="text-[10px] uppercase tracking-widest text-gold font-serif block mb-1">Clientes Nuevos &amp; Tasa</span>
+      <div class="text-2xl sm:text-3xl font-serif font-bold text-ivory tracking-tight">+{{ clientes_nuevos_count }}</div>
+      <div class="text-[11px] text-ivory-dim mt-2 flex justify-between">
+        <span>Tasa cancelación: {{ tasa_cancelacion }}%</span>
+        <span>Pendientes: {{ citas_pendientes_count }}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Gráficos Analíticos con Chart.js -->
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <!-- Gráfico 1: Evolución de Ingresos Últimos 7 Días -->
+    <div class="lg:col-span-8 bg-bg-surface border border-bg-border p-6 shadow-card-dark">
+      <div class="flex items-center justify-between mb-4">
+        <div>
+          <h3 class="text-sm font-serif font-bold text-ivory">Evolución de Ingresos Diarios (CLP)</h3>
+          <p class="text-[11px] text-ivory-dim">Ingresos combinados por servicios y ventas de productos</p>
+        </div>
+        <span class="text-xs font-bold text-gold">Últimos 7 días</span>
+      </div>
+      <div class="h-64">
+        <canvas id="chart-ingresos"></canvas>
+      </div>
+    </div>
+
+    <!-- Gráfico 2: Reservas por Sucursal -->
+    <div class="lg:col-span-4 bg-bg-surface border border-bg-border p-6 shadow-card-dark">
+      <div class="mb-4">
+        <h3 class="text-sm font-serif font-bold text-ivory">Distribución por Sucursal</h3>
+        <p class="text-[11px] text-ivory-dim">Volumen de reservas atendidas por sede</p>
+      </div>
+      <div class="h-64 flex items-center justify-center">
+        <canvas id="chart-sucursales"></canvas>
+      </div>
+    </div>
+
+    <!-- Gráfico 3: Servicios Top 5 Más Vendidos -->
+    <div class="lg:col-span-6 bg-bg-surface border border-bg-border p-6 shadow-card-dark">
+      <div class="mb-4">
+        <h3 class="text-sm font-serif font-bold text-ivory">Servicios Más Solicitados</h3>
+        <p class="text-[11px] text-ivory-dim">Ranking de servicios preferidos por los clientes</p>
+      </div>
+      <div class="h-60">
+        <canvas id="chart-servicios"></canvas>
+      </div>
+    </div>
+
+    <!-- Gráfico 4: Rendimiento por Barbero -->
+    <div class="lg:col-span-6 bg-bg-surface border border-bg-border p-6 shadow-card-dark">
+      <div class="mb-4">
+        <h3 class="text-sm font-serif font-bold text-ivory">Rendimiento por Master Barber</h3>
+        <p class="text-[11px] text-ivory-dim">Cantidad total de citas ejecutadas</p>
+      </div>
+      <div class="h-60">
+        <canvas id="chart-barberos"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    // Paleta de Colores
+    const COLOR_GOLD = '#C9A24B';
+    const COLOR_GOLD_HOVER = '#DDB968';
+    const COLOR_BORDER = '#2A2A2A';
+    const COLOR_IVORY = '#F5F0E6';
+    const COLOR_MUTED = '#A8A294';
+
+    // 1. Gráfico de Ingresos
+    const ctxIngresos = document.getElementById('chart-ingresos').getContext('2d');
+    new Chart(ctxIngresos, {
+      type: 'line',
+      data: {
+        labels: {{ chart_dias_labels|safe }},
+        datasets: [{
+          label: 'Ingresos CLP',
+          data: {{ chart_ingresos_data|safe }},
+          borderColor: COLOR_GOLD,
+          backgroundColor: 'rgba(201, 162, 75, 0.15)',
+          fill: true,
+          tension: 0.35,
+          borderWidth: 2,
+          pointBackgroundColor: COLOR_GOLD,
+          pointRadius: 4
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: COLOR_MUTED, font: { size: 10 } }
+          },
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: {
+              color: COLOR_MUTED,
+              font: { size: 10 },
+              callback: val => '$' + val.toLocaleString('es-CL')
+            }
+          }
+        }
+      }
+    });
+
+    // 2. Gráfico por Sucursal (Dona)
+    const ctxSucursales = document.getElementById('chart-sucursales').getContext('2d');
+    new Chart(ctxSucursales, {
+      type: 'doughnut',
+      data: {
+        labels: {{ chart_sucursales_labels|safe }},
+        datasets: [{
+          data: {{ chart_sucursales_data|safe }},
+          backgroundColor: ['#C9A24B', '#8C6C26', '#E6CD8C', '#F5F0E6'],
+          borderColor: '#141414',
+          borderWidth: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: {
+            position: 'bottom',
+            labels: { color: COLOR_IVORY, font: { size: 10 }, boxWidth: 12 }
+          }
+        }
+      }
+    });
+
+    // 3. Gráfico de Servicios Top (Barras horizontales)
+    const ctxServicios = document.getElementById('chart-servicios').getContext('2d');
+    new Chart(ctxServicios, {
+      type: 'bar',
+      data: {
+        labels: {{ chart_servicios_labels|safe }},
+        datasets: [{
+          data: {{ chart_servicios_data|safe }},
+          backgroundColor: COLOR_GOLD,
+          borderRadius: 2
+        }]
+      },
+      options: {
+        indexAxis: 'y',
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: COLOR_MUTED, font: { size: 10 } }
+          },
+          y: {
+            grid: { display: false },
+            ticks: { color: COLOR_IVORY, font: { size: 10 } }
+          }
+        }
+      }
+    });
+
+    // 4. Gráfico de Rendimiento por Barbero (Barras verticales)
+    const ctxBarberos = document.getElementById('chart-barberos').getContext('2d');
+    new Chart(ctxBarberos, {
+      type: 'bar',
+      data: {
+        labels: {{ chart_barberos_labels|safe }},
+        datasets: [{
+          label: 'Citas Atendidas',
+          data: {{ chart_barberos_data|safe }},
+          backgroundColor: 'rgba(201, 162, 75, 0.8)',
+          borderRadius: 2
+        }]
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false }
+        },
+        scales: {
+          x: {
+            grid: { display: false },
+            ticks: { color: COLOR_IVORY, font: { size: 10 } }
+          },
+          y: {
+            grid: { color: 'rgba(255, 255, 255, 0.05)' },
+            ticks: { color: COLOR_MUTED, font: { size: 10 } }
+          }
+        }
+      }
+    });
+  });
+</script>
+{% endblock %}
