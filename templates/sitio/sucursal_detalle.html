@@ -39,17 +39,17 @@
 {% block content %}
 <section class="py-20 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
   <!-- Cabecera de la Sucursal -->
-  <div class="mb-12">
-    <a href="{% url 'sitio_publico:inicio' %}#sucursales" class="text-xs uppercase tracking-widest text-gold hover:underline inline-flex items-center gap-1 mb-4">
+  <div class="mb-12 border-b border-bg-border pb-8">
+    <a href="{% url 'sitio_publico:inicio' %}#sucursales" class="text-xs uppercase tracking-widest text-text-muted hover:text-text-main inline-flex items-center gap-1 mb-4 transition-colors">
       ← Volver a todas las sucursales
     </a>
     <div class="flex flex-col lg:flex-row lg:items-end justify-between gap-6">
       <div>
-        <span class="text-xs uppercase tracking-widest text-gold font-serif block mb-1">Sede {{ sucursal.comuna }}</span>
-        <h1 class="text-3xl sm:text-5xl font-serif font-bold text-ivory">{{ sucursal.nombre }}</h1>
-        <p class="text-sm text-ivory-muted mt-2 max-w-2xl">{{ sucursal.direccion }} • Santiago, Chile</p>
+        <span class="text-xs uppercase tracking-widest text-text-muted font-sans font-medium block mb-1">Sede {{ sucursal.comuna }}</span>
+        <h1 class="text-3xl sm:text-5xl font-serif font-light text-text-main tracking-tight">{{ sucursal.nombre }}</h1>
+        <p class="text-sm text-text-muted mt-2 max-w-2xl">{{ sucursal.direccion }} • Santiago, Chile</p>
       </div>
-      <a href="{% url 'reservas:agendar' %}?sucursal={{ sucursal.slug }}" class="btn-shimmer-effect bg-gold hover:bg-gold-hover text-bg-dark font-bold text-xs uppercase tracking-widest px-8 py-3.5 shadow-gold-glow">
+      <a href="{% url 'reservas:agendar' %}?sucursal={{ sucursal.slug }}" class="inline-block bg-brand-black hover:bg-neutral-800 text-white font-medium text-xs uppercase tracking-widest px-8 py-3.5 transition-colors text-center">
         Agendar en esta Sede
       </a>
     </div>
@@ -58,49 +58,49 @@
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-12">
     <!-- Información e Instalaciones -->
     <div class="lg:col-span-7 space-y-8">
-      <div class="relative h-80 sm:h-96 overflow-hidden border border-bg-border shadow-card-dark">
-        <img src="{{ sucursal.imagen_url }}" alt="{{ sucursal.nombre }}" class="w-full h-full object-cover">
+      <div class="relative h-80 sm:h-96 overflow-hidden border border-bg-border bg-bg-alt">
+        <img src="{{ sucursal.imagen_url }}" alt="{{ sucursal.nombre }}" class="w-full h-full object-cover img-editorial">
       </div>
 
-      <div class="bg-bg-surface border border-bg-border p-8 shadow-card-dark">
-        <h2 class="text-xl font-serif font-bold text-ivory mb-4">Sobre esta Sucursal</h2>
-        <p class="text-xs sm:text-sm text-ivory-muted leading-relaxed font-light mb-6">
+      <div class="bg-white border border-bg-border p-8">
+        <h2 class="text-xl font-serif font-medium text-text-main mb-4">Sobre esta Sucursal</h2>
+        <p class="text-xs sm:text-sm text-text-muted leading-relaxed font-light mb-6">
           {{ sucursal.descripcion }}
         </p>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 border-t border-bg-border pt-6 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 border-t border-bg-border pt-6 text-xs">
           <div>
-            <span class="text-gold font-bold uppercase tracking-wider block mb-1">Horario de Atención</span>
-            <span class="text-ivory">{{ sucursal.horario_atencion }}</span>
+            <span class="text-text-main font-semibold uppercase tracking-wider block mb-1">Horario de Atención</span>
+            <span class="text-text-muted">{{ sucursal.horario_atencion }}</span>
           </div>
           <div>
-            <span class="text-gold font-bold uppercase tracking-wider block mb-1">Teléfono Directo</span>
-            <span class="text-ivory">{{ sucursal.telefono }}</span>
+            <span class="text-text-main font-semibold uppercase tracking-wider block mb-1">Teléfono Directo</span>
+            <span class="text-text-muted">{{ sucursal.telefono }}</span>
           </div>
           <div>
-            <span class="text-gold font-bold uppercase tracking-wider block mb-1">WhatsApp</span>
-            <a href="https://wa.me/{{ sucursal.whatsapp|cut:' '|cut:'+' }}" class="text-ivory hover:text-gold">{{ sucursal.whatsapp }}</a>
+            <span class="text-text-main font-semibold uppercase tracking-wider block mb-1">WhatsApp</span>
+            <a href="https://wa.me/{{ sucursal.whatsapp|cut:' '|cut:'+' }}" class="text-text-muted hover:text-text-main underline">{{ sucursal.whatsapp }}</a>
           </div>
           <div>
-            <span class="text-gold font-bold uppercase tracking-wider block mb-1">Correo Electrónico</span>
-            <span class="text-ivory">{{ sucursal.email|default:sitio.email_contacto }}</span>
+            <span class="text-text-main font-semibold uppercase tracking-wider block mb-1">Correo Electrónico</span>
+            <span class="text-text-muted">{{ sucursal.email|default:sitio.email_contacto }}</span>
           </div>
         </div>
       </div>
 
       <!-- Barberos de la Sede -->
       <div>
-        <h2 class="text-2xl font-serif font-bold text-ivory mb-6">Master Barbers en {{ sucursal.nombre }}</h2>
+        <h2 class="text-2xl font-serif font-light text-text-main mb-6">Master Barbers en {{ sucursal.nombre }}</h2>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
           {% for b in barberos %}
-          <div class="bg-bg-surface border border-bg-border p-5 flex items-center gap-4">
-            <div class="w-16 h-16 rounded-full overflow-hidden shrink-0 border border-gold/40">
-              <img src="{{ b.imagen_url }}" alt="{{ b.nombre_profesional }}" class="w-full h-full object-cover">
+          <div class="bg-white border border-bg-border p-5 flex items-center gap-4 hover:border-brand-black transition-colors">
+            <div class="w-16 h-16 rounded-none overflow-hidden shrink-0 border border-bg-border bg-bg-alt">
+              <img src="{{ b.imagen_url }}" alt="{{ b.nombre_profesional }}" class="w-full h-full object-cover img-editorial">
             </div>
             <div class="flex-1">
-              <h3 class="text-sm font-serif font-bold text-ivory">{{ b.nombre_profesional }}</h3>
-              <p class="text-[11px] text-gold">{{ b.especialidad_principal }}</p>
-              <a href="{% url 'reservas:agendar' %}?sucursal={{ sucursal.slug }}&barbero={{ b.slug }}" class="text-[11px] text-ivory-dim hover:text-gold underline mt-1 inline-block">
+              <h3 class="text-sm font-serif font-medium text-text-main">{{ b.nombre_profesional }}</h3>
+              <p class="text-[11px] text-text-muted">{{ b.especialidad_principal }}</p>
+              <a href="{% url 'reservas:agendar' %}?sucursal={{ sucursal.slug }}&barbero={{ b.slug }}" class="text-[11px] text-text-main hover:underline mt-1 inline-block font-medium">
                 Reservar con él →
               </a>
             </div>
@@ -110,27 +110,27 @@
       </div>
     </div>
 
-    <!-- Panel Lateral: Reservas Directas y Mapa -->
+    <!-- Panel Lateral: Reservas Directas y Servicios -->
     <div class="lg:col-span-5 space-y-6">
-      <div class="bg-bg-surface border border-gold/40 p-6 shadow-card-dark">
-        <h3 class="text-lg font-serif font-bold text-ivory mb-2">Reserva tu Turno</h3>
-        <p class="text-xs text-ivory-muted mb-6">Atención puntual en sillones Takara Belmont con café de bienvenida.</p>
-        <a href="{% url 'reservas:agendar' %}?sucursal={{ sucursal.slug }}" class="w-full block text-center py-3.5 bg-gold hover:bg-gold-hover text-bg-dark font-bold text-xs uppercase tracking-widest shadow-gold-glow">
+      <div class="bg-bg-alt border border-bg-border p-6">
+        <h3 class="text-lg font-serif font-medium text-text-main mb-2">Reserva tu Turno</h3>
+        <p class="text-xs text-text-muted mb-6">Atención puntual en sillones Takara Belmont con café de especialidad de cortesía.</p>
+        <a href="{% url 'reservas:agendar' %}?sucursal={{ sucursal.slug }}" class="w-full block text-center py-3.5 bg-brand-black hover:bg-neutral-800 text-white font-medium text-xs uppercase tracking-widest transition-colors">
           Iniciar Agendamiento
         </a>
       </div>
 
       <!-- Servicios Disponibles -->
-      <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark">
-        <h3 class="text-sm font-serif font-bold text-ivory uppercase tracking-wider mb-4 text-gold">Servicios en esta Sede</h3>
+      <div class="bg-white border border-bg-border p-6">
+        <h3 class="text-xs font-sans font-semibold text-text-main uppercase tracking-widest mb-4">Servicios en esta Sede</h3>
         <div class="space-y-3">
           {% for s in servicios %}
-          <div class="flex justify-between items-center text-xs pb-2 border-b border-bg-border/60">
+          <div class="flex justify-between items-center text-xs pb-2 border-b border-bg-border">
             <div>
-              <span class="text-ivory font-medium block">{{ s.nombre }}</span>
-              <span class="text-[10px] text-ivory-dim">{{ s.duracion_minutos }} min</span>
+              <span class="text-text-main font-medium block">{{ s.nombre }}</span>
+              <span class="text-[10px] text-text-muted">{{ s.duracion_minutos }} min</span>
             </div>
-            <span class="text-gold font-bold">{{ s.precio_formateado }}</span>
+            <span class="text-text-main font-semibold">{{ s.precio_formateado }}</span>
           </div>
           {% endfor %}
         </div>

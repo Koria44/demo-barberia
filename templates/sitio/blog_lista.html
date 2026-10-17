@@ -6,32 +6,32 @@
 {% block content %}
 <section class="py-24 px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto">
   <div class="text-center mb-16">
-    <span class="text-xs uppercase tracking-widest text-gold font-serif block mb-2">Editorial &amp; Grooming</span>
-    <h1 class="text-3xl sm:text-5xl font-serif font-bold text-ivory">Blog de Estilo Masculino</h1>
-    <p class="text-xs sm:text-sm text-ivory-muted mt-2 max-w-lg mx-auto">Técnicas de afeitado, visagismo capilar y recomendaciones de nuestros Master Barbers.</p>
-    <div class="w-12 h-[1px] bg-gold mx-auto mt-4"></div>
+    <span class="text-xs uppercase tracking-widest text-text-muted font-sans font-medium block mb-2">Editorial &amp; Grooming</span>
+    <h1 class="text-3xl sm:text-5xl font-serif font-light text-text-main tracking-tight">Blog de Estilo Masculino</h1>
+    <p class="text-xs sm:text-sm text-text-muted mt-2 max-w-lg mx-auto">Técnicas de afeitado, visagismo capilar y recomendaciones de nuestros Master Barbers.</p>
+    <div class="w-12 h-[1px] bg-brand-black mx-auto mt-4"></div>
   </div>
 
   <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
     {% for art in articulos %}
-    <article class="bg-bg-surface border border-bg-border hover:border-gold/60 p-6 flex flex-col justify-between transition-all group shadow-card-dark">
+    <article class="bg-white border border-bg-border hover:border-brand-black p-6 flex flex-col justify-between transition-all group">
       <div>
-        <div class="relative h-52 overflow-hidden mb-5">
-          <img src="{{ art.imagen_url }}" alt="{{ art.titulo }}" class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105" loading="lazy">
-          <span class="absolute bottom-2 left-2 bg-bg-dark/90 text-ivory-dim text-[10px] px-2 py-0.5">
+        <div class="relative h-52 overflow-hidden mb-5 bg-bg-alt border border-bg-border">
+          <img src="{{ art.imagen_url }}" alt="{{ art.titulo }}" class="w-full h-full object-cover img-editorial transition-transform duration-500 group-hover:scale-105" loading="lazy">
+          <span class="absolute bottom-2 left-2 bg-brand-black text-white text-[10px] px-2 py-0.5 tracking-wider uppercase font-medium">
             {{ art.tiempo_lectura_minutos }} min de lectura
           </span>
         </div>
-        <span class="text-[10px] uppercase tracking-widest text-gold font-serif block mb-1">{{ art.creado_el|date:"d M, Y" }}</span>
-        <h2 class="text-lg font-serif font-bold text-ivory group-hover:text-gold transition-colors mb-3">
+        <span class="text-[10px] uppercase tracking-widest text-text-dim block mb-1">{{ art.creado_el|date:"d M, Y" }}</span>
+        <h2 class="text-lg font-serif font-medium text-text-main group-hover:underline transition-colors mb-3">
           <a href="{% url 'sitio_publico:blog_detalle' art.slug %}">{{ art.titulo }}</a>
         </h2>
-        <p class="text-xs text-ivory-muted leading-relaxed font-light mb-6">
+        <p class="text-xs text-text-muted leading-relaxed font-light mb-6">
           {{ art.extracto }}
         </p>
       </div>
 
-      <a href="{% url 'sitio_publico:blog_detalle' art.slug %}" class="text-xs uppercase tracking-wider font-bold text-gold hover:underline inline-flex items-center gap-1">
+      <a href="{% url 'sitio_publico:blog_detalle' art.slug %}" class="text-xs uppercase tracking-wider font-semibold text-text-main hover:underline inline-flex items-center gap-1">
         Leer artículo →
       </a>
     </article>
