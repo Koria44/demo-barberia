@@ -1,0 +1,463 @@
+{% load static barber_tags %}
+<!DOCTYPE html>
+<html lang="es-CL" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}{{ sitio.nombre_negocio|default:"Demo Barber Club" }} — El Arte de la Barbería Tradicional & Contemporánea{% endblock %}</title>
+  <meta name="description" content="{% block meta_description %}{{ sitio.descripcion_corta|default:'Atelier de barbería premium en Santiago de Chile. Cortes de cabello de autor, afeitado tradicional con toalla caliente y reservas online.' }}{% endblock %}">
+  
+  <!-- Favicon y Web Manifest -->
+  <link rel="icon" type="image/svg+xml" href="{% static 'img/favicon/favicon.svg' %}">
+  <link rel="apple-touch-icon" href="{% static 'img/favicon/apple-touch-icon.png' %}">
+  <link rel="manifest" href="{% static 'img/favicon/site.webmanifest' %}">
+  <meta name="theme-color" content="{{ sitio.color_acento|default:'#C9A24B' }}">
+
+  <!-- Open Graph / Redes Sociales -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="{{ sitio.nombre_negocio|default:'Demo Barber Club' }}">
+  <meta property="og:title" content="{% block og_title %}{{ sitio.nombre_negocio }} — Barbería Clásica & de Autor{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ sitio.descripcion_corta }}{% endblock %}">
+  <meta property="og:image" content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'img/og/og-image.webp' %}{% endblock %}">
+  <meta property="og:url" content="{{ request.build_absolute_uri }}">
+
+  <!-- Google Fonts: Playfair Display (Serif de lujo) & Inter (Sans legible moderna) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400;1,600&display=swap" rel="stylesheet">
+
+  <!-- Estilos compilados de Tailwind CSS -->
+  <link rel="stylesheet" href="{% static 'css/output.css' %}">
+
+  {% block extra_head %}{% endblock %}
+</head>
+<body class="bg-bg-dark text-ivory font-sans antialiased selection:bg-gold selection:text-bg-dark min-h-screen flex flex-col relative overflow-x-hidden">
+
+  <!-- Enlace accesible para lectores de pantalla -->
+  <a href="#contenido-principal" class="sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-gold focus:text-bg-dark focus:font-bold">
+    Saltar al contenido principal
+  </a>
+
+  <!-- Preloader de lujo breve -->
+  <div id="site-preloader" class="fixed inset-0 z-50 bg-bg-dark flex flex-col items-center justify-center transition-opacity duration-500">
+    <div class="relative w-20 h-20 mb-4 flex items-center justify-center">
+      <div class="absolute inset-0 rounded-full border-2 border-gold/30 border-t-gold animate-spin"></div>
+      <!-- Tijeras en cruz decorativas -->
+      <svg class="w-8 h-8 text-gold animate-pulse" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M14.121 14.121L19 19m-7-7l7-7m-7 7l-2.879 2.879a3 3 0 11-4.242-4.242L12 12m0 0L9.121 9.121a3 3 0 10-4.242 4.242L12 12" />
+      </svg>
+    </div>
+    <span class="text-xs uppercase tracking-widest text-ivory-muted font-serif">Demo Barber Club</span>
+  </div>
+
+  <!-- Barra de progreso de scroll superior -->
+  <div id="reading-progress" class="fixed top-0 left-0 w-full h-[2px] bg-gradient-to-r from-gold via-gold-hover to-gold z-50 pointer-events-none"></div>
+
+  <!-- Banner de Anuncio Superior (Editable y descartable) -->
+  {% if sitio.banner_anuncio_activo and sitio.banner_anuncio_texto %}
+  <div id="promo-banner" class="bg-bg-surface border-b border-gold/20 text-xs py-2 px-4 text-center relative z-40 flex items-center justify-center gap-3">
+    <a href="{{ sitio.banner_anuncio_link|default:'#reservas' }}" class="text-ivory-muted hover:text-gold transition-colors font-medium tracking-wide flex items-center gap-2">
+      <span>{{ sitio.banner_anuncio_texto }}</span>
+      <svg class="w-3.5 h-3.5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+    </a>
+    <button onclick="document.getElementById('promo-banner').style.display='none'" class="text-ivory-dim hover:text-ivory p-1" aria-label="Cerrar anuncio">
+      <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/></svg>
+    </button>
+  </div>
+  {% endif %}
+
+  <!-- Header fijo con efecto scroll transparente a sólido -->
+  <header id="main-header" class="fixed top-0 left-0 right-0 z-30 transition-all duration-300 {% if sitio.banner_anuncio_activo and sitio.banner_anuncio_texto %}mt-8{% endif %}">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between h-20 transition-all duration-300" id="header-inner">
+        <!-- Logo -->
+        <a href="{% url 'sitio_publico:inicio' %}" class="flex items-center gap-3 group focus:outline-none focus:ring-1 focus:ring-gold">
+          <div class="w-40 sm:w-48 transition-transform duration-300 group-hover:scale-105">
+            <img src="{% static 'img/logo/logo.svg' %}" alt="{{ sitio.nombre_negocio|default:'Demo Barber Club' }}" class="w-full h-auto">
+          </div>
+        </a>
+
+        <!-- Navegación de Escritorio -->
+        <nav class="hidden lg:flex items-center space-x-7 text-xs uppercase tracking-widest text-ivory-muted font-medium">
+          <a href="{% url 'sitio_publico:inicio' %}#filosofia" class="hover:text-gold transition-colors">Nosotros</a>
+          <a href="{% url 'sitio_publico:inicio' %}#servicios" class="hover:text-gold transition-colors">Servicios</a>
+          <a href="{% url 'sitio_publico:inicio' %}#sucursales" class="hover:text-gold transition-colors">Sucursales</a>
+          <a href="{% url 'sitio_publico:inicio' %}#barberos" class="hover:text-gold transition-colors">Barberos</a>
+          <a href="{% url 'tienda:catalogo' %}" class="hover:text-gold transition-colors flex items-center gap-1.5">
+            <span>Tienda</span>
+            {% if carrito_items_count > 0 %}
+            <span class="bg-gold text-bg-dark text-[10px] font-bold px-1.5 py-0.2 rounded-full">{{ carrito_items_count }}</span>
+            {% endif %}
+          </a>
+          <a href="{% url 'sitio_publico:inicio' %}#galeria" class="hover:text-gold transition-colors">Galería</a>
+          <a href="{% url 'sitio_publico:inicio' %}#blog" class="hover:text-gold transition-colors">Blog</a>
+          <a href="{% url 'sitio_publico:inicio' %}#contacto" class="hover:text-gold transition-colors">Contacto</a>
+        </nav>
+
+        <!-- Botones de Acción Derecha (Cuenta + Carrito + Agendar) -->
+        <div class="hidden sm:flex items-center space-x-4">
+          <!-- Carrito de compras -->
+          <a href="{% url 'tienda:ver_carrito' %}" class="relative p-2 text-ivory-muted hover:text-gold transition-colors" title="Ver carrito">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" />
+            </svg>
+            {% if carrito_items_count > 0 %}
+            <span class="absolute top-1 right-1 bg-gold text-bg-dark text-[10px] font-extrabold w-4 h-4 rounded-full flex items-center justify-center">
+              {{ carrito_items_count }}
+            </span>
+            {% endif %}
+          </a>
+
+          <!-- Mi Cuenta / Login / Panel -->
+          {% if user.is_authenticated %}
+            {% if user.es_administrador %}
+              <a href="{% url 'panel:dashboard' %}" class="text-xs uppercase tracking-wider px-3 py-2 border border-gold/40 text-gold rounded hover:bg-gold/10 transition-colors">
+                Dashboard
+              </a>
+            {% elif user.es_barbero %}
+              <a href="{% url 'panel:agenda_barbero' %}" class="text-xs uppercase tracking-wider px-3 py-2 border border-gold/40 text-gold rounded hover:bg-gold/10 transition-colors">
+                Mi Agenda
+              </a>
+            {% else %}
+              <a href="{% url 'cuentas:mi_cuenta' %}" class="text-xs uppercase tracking-wider px-3 py-2 text-ivory-muted hover:text-gold transition-colors">
+                Mi Cuenta
+              </a>
+            {% endif %}
+            <a href="{% url 'cuentas:logout' %}" class="text-xs text-ivory-dim hover:text-status-error transition-colors" title="Cerrar sesión">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+            </a>
+          {% else %}
+            <a href="{% url 'cuentas:login' %}" class="text-xs uppercase tracking-widest text-ivory-muted hover:text-gold transition-colors font-medium px-2">
+              Ingresar
+            </a>
+          {% endif %}
+
+          <!-- Botón Agendar Principal (Dorado con brillo shimmer) -->
+          <a href="{% url 'reservas:agendar' %}" class="btn-shimmer-effect bg-gold hover:bg-gold-hover text-bg-dark text-xs uppercase tracking-widest font-bold px-5 py-3 rounded-none shadow-gold-glow hover:shadow-gold-glow-lg transition-all duration-300">
+            Agendar Hora
+          </a>
+        </div>
+
+        <!-- Botón Menú Móvil -->
+        <div class="flex items-center space-x-2 lg:hidden">
+          <a href="{% url 'reservas:agendar' %}" class="bg-gold text-bg-dark text-xs uppercase font-bold px-3 py-2 rounded-none">
+            Agendar
+          </a>
+          <button id="mobile-menu-btn" class="p-2 text-ivory focus:outline-none" aria-label="Abrir menú de navegación">
+            <svg id="menu-icon-bars" class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+            <svg id="menu-icon-close" class="w-6 h-6 hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Menú Desplegable Móvil -->
+    <div id="mobile-menu" class="hidden lg:hidden bg-bg-surface/98 border-b border-bg-border backdrop-blur-md px-6 py-6 transition-all duration-300">
+      <nav class="flex flex-col space-y-4 text-sm uppercase tracking-widest text-ivory font-medium">
+        <a href="{% url 'sitio_publico:inicio' %}#filosofia" class="mobile-nav-link hover:text-gold">Nosotros</a>
+        <a href="{% url 'sitio_publico:inicio' %}#servicios" class="mobile-nav-link hover:text-gold">Servicios</a>
+        <a href="{% url 'sitio_publico:inicio' %}#sucursales" class="mobile-nav-link hover:text-gold">Sucursales</a>
+        <a href="{% url 'sitio_publico:inicio' %}#barberos" class="mobile-nav-link hover:text-gold">Nuestros Barberos</a>
+        <a href="{% url 'tienda:catalogo' %}" class="mobile-nav-link hover:text-gold flex items-center justify-between">
+          <span>Tienda de Productos</span>
+          {% if carrito_items_count > 0 %}
+          <span class="bg-gold text-bg-dark text-xs font-bold px-2 py-0.5 rounded-full">{{ carrito_items_count }}</span>
+          {% endif %}
+        </a>
+        <a href="{% url 'sitio_publico:inicio' %}#galeria" class="mobile-nav-link hover:text-gold">Galería de Resultados</a>
+        <a href="{% url 'sitio_publico:inicio' %}#blog" class="mobile-nav-link hover:text-gold">Blog de Estilo</a>
+        <a href="{% url 'sitio_publico:inicio' %}#contacto" class="mobile-nav-link hover:text-gold">Contacto y Ubicaciones</a>
+        <hr class="border-bg-border my-2">
+        {% if user.is_authenticated %}
+          {% if user.es_administrador %}
+            <a href="{% url 'panel:dashboard' %}" class="text-gold font-bold">Dashboard de Administración</a>
+          {% elif user.es_barbero %}
+            <a href="{% url 'panel:agenda_barbero' %}" class="text-gold font-bold">Mi Agenda del Día</a>
+          {% else %}
+            <a href="{% url 'cuentas:mi_cuenta' %}" class="text-gold">Mi Cuenta & Reservas</a>
+          {% endif %}
+          <a href="{% url 'cuentas:logout' %}" class="text-status-error text-xs">Cerrar Sesión ({{ user.email }})</a>
+        {% else %}
+          <div class="flex gap-4 pt-2">
+            <a href="{% url 'cuentas:login' %}" class="flex-1 text-center py-2.5 border border-gold/40 text-gold font-bold text-xs uppercase tracking-wider">Iniciar Sesión</a>
+            <a href="{% url 'cuentas:registro' %}" class="flex-1 text-center py-2.5 bg-gold text-bg-dark font-bold text-xs uppercase tracking-wider">Crear Cuenta</a>
+          </div>
+        {% endif %}
+      </nav>
+    </div>
+  </header>
+
+  <!-- Mensajes Flash de Django -->
+  {% if messages %}
+  <div class="fixed top-24 right-4 z-50 max-w-md w-full space-y-2 pointer-events-none">
+    {% for message in messages %}
+    <div class="pointer-events-auto p-4 rounded-none border shadow-card-dark text-sm flex items-start gap-3 transition-transform duration-300
+      {% if message.tags == 'success' %}bg-bg-surface border-status-success text-ivory
+      {% elif message.tags == 'error' %}bg-bg-surface border-status-error text-ivory
+      {% elif message.tags == 'warning' %}bg-bg-surface border-status-warning text-ivory
+      {% else %}bg-bg-surface border-gold text-ivory{% endif %}">
+      <div class="shrink-0 mt-0.5">
+        {% if message.tags == 'success' %}
+          <span class="text-status-success font-bold">✓</span>
+        {% elif message.tags == 'error' %}
+          <span class="text-status-error font-bold">✕</span>
+        {% else %}
+          <span class="text-gold font-bold">ℹ</span>
+        {% endif %}
+      </div>
+      <div class="flex-1">{{ message }}</div>
+      <button onclick="this.parentElement.remove()" class="text-ivory-dim hover:text-ivory text-xs">✕</button>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  <!-- Contenedor Principal -->
+  <main id="contenido-principal" class="flex-1">
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Botones Flotantes Fijos de WhatsApp e Instagram (Esquina inferior derecha) -->
+  <aside id="floating-social-buttons" class="fixed bottom-6 right-6 z-40 flex flex-col items-end space-y-3 opacity-0 translate-y-6 transition-all duration-700 pointer-events-none" aria-label="Canales de atención directa">
+    
+    <!-- Botón Flotante Instagram -->
+    {% if sitio.instagram_usuario %}
+    <a href="https://instagram.com/{{ sitio.instagram_usuario }}" 
+       target="_blank" 
+       rel="noopener noreferrer"
+       class="pointer-events-auto group relative w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg transition-transform duration-300 hover:scale-110 focus:outline-none focus:ring-2 focus:ring-gold"
+       style="background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);"
+       aria-label="Síguenos en Instagram @{{ sitio.instagram_usuario }}">
+      <!-- Tooltip -->
+      <span class="absolute right-14 bg-bg-surface border border-bg-border text-ivory text-xs px-3 py-1.5 rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+        Síguenos en Instagram
+      </span>
+      <!-- Ícono Oficial Instagram SVG -->
+      <svg class="w-6 h-6 fill-current" viewBox="0 0 24 24">
+        <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+      </svg>
+    </a>
+    {% endif %}
+
+    <!-- Botón Flotante WhatsApp con Pulso y Tooltip -->
+    {% if sitio.whatsapp_numero %}
+    <a href="https://wa.me/{{ sitio.whatsapp_numero|cut:' '|cut:'+'|cut:'-' }}?text={{ sitio.whatsapp_mensaje|urlencode }}" 
+       target="_blank" 
+       rel="noopener noreferrer"
+       class="pointer-events-auto group relative w-14 h-14 rounded-full bg-[#25D366] text-white flex items-center justify-center shadow-xl transition-transform duration-300 hover:scale-110 animate-pulse-subtle focus:outline-none focus:ring-2 focus:ring-white"
+       aria-label="Escríbenos directamente por WhatsApp">
+      <!-- Tooltip -->
+      <span class="absolute right-16 bg-bg-surface border border-bg-border text-ivory text-xs px-3 py-1.5 rounded shadow-lg whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none">
+        Escríbenos por WhatsApp
+      </span>
+      <!-- Ícono Oficial WhatsApp SVG -->
+      <svg class="w-7 h-7 fill-current" viewBox="0 0 24 24">
+        <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+      </svg>
+    </a>
+    {% endif %}
+  </aside>
+
+  <!-- Footer de Lujo Editorial -->
+  <footer class="bg-bg-surface border-t border-bg-border pt-16 pb-12 mt-20 relative">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+        <!-- Columna 1: Marca y Filosofía -->
+        <div>
+          <div class="w-48 mb-4">
+            <img src="{% static 'img/logo/logo.svg' %}" alt="{{ sitio.nombre_negocio }}" class="w-full h-auto">
+          </div>
+          <p class="text-xs text-ivory-muted leading-relaxed mb-4">
+            {{ sitio.descripcion_corta }}
+          </p>
+          <div class="flex items-center space-x-3 text-gold">
+            {% if sitio.whatsapp_numero %}
+            <a href="https://wa.me/{{ sitio.whatsapp_numero|cut:' '|cut:'+'|cut:'-' }}" target="_blank" rel="noopener noreferrer" class="p-2 border border-bg-border rounded hover:border-gold hover:text-gold-hover transition-colors" title="WhatsApp">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981z"/></svg>
+            </a>
+            {% endif %}
+            {% if sitio.instagram_usuario %}
+            <a href="https://instagram.com/{{ sitio.instagram_usuario }}" target="_blank" rel="noopener noreferrer" class="p-2 border border-bg-border rounded hover:border-gold hover:text-gold-hover transition-colors" title="Instagram">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069z"/></svg>
+            </a>
+            {% endif %}
+            {% if sitio.facebook_url %}
+            <a href="{{ sitio.facebook_url }}" target="_blank" rel="noopener noreferrer" class="p-2 border border-bg-border rounded hover:border-gold hover:text-gold-hover transition-colors" title="Facebook">
+              <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+            </a>
+            {% endif %}
+          </div>
+        </div>
+
+        <!-- Columna 2: Enlaces Rápidos -->
+        <div>
+          <h4 class="text-xs uppercase tracking-widest text-gold font-bold mb-4 font-serif">Navegación</h4>
+          <ul class="space-y-2 text-xs text-ivory-muted">
+            <li><a href="{% url 'sitio_publico:inicio' %}#servicios" class="hover:text-gold transition-colors">Carta de Servicios</a></li>
+            <li><a href="{% url 'sitio_publico:inicio' %}#sucursales" class="hover:text-gold transition-colors">Sedes y Direcciones</a></li>
+            <li><a href="{% url 'sitio_publico:inicio' %}#barberos" class="hover:text-gold transition-colors">Equipo de Master Barbers</a></li>
+            <li><a href="{% url 'tienda:catalogo' %}" class="hover:text-gold transition-colors">Tienda Online de Cuidado</a></li>
+            <li><a href="{% url 'sitio_publico:inicio' %}#faq" class="hover:text-gold transition-colors">Preguntas Frecuentes</a></li>
+            <li><a href="{% url 'reservas:agendar' %}" class="text-gold font-semibold hover:underline">Reservar Cita Online</a></li>
+          </ul>
+        </div>
+
+        <!-- Columna 3: Horarios y Sucursales -->
+        <div>
+          <h4 class="text-xs uppercase tracking-widest text-gold font-bold mb-4 font-serif">Horarios & Atención</h4>
+          <p class="text-xs text-ivory-muted mb-2 font-medium">Lunes a Sábado: 10:00 a 20:00 hrs</p>
+          <p class="text-xs text-ivory-dim mb-4">Domingo & Feriados: Cerrado</p>
+          <h5 class="text-[11px] uppercase tracking-wider text-ivory font-bold mb-2">Sucursales Santiago</h5>
+          <p class="text-xs text-ivory-muted">• Providencia (Metro Los Leones)</p>
+          <p class="text-xs text-ivory-muted">• Las Condes (Metro Escuela Militar)</p>
+          <p class="text-xs text-ivory-muted">• Vitacura (Alonso de Córdova)</p>
+        </div>
+
+        <!-- Columna 4: Contacto Directo & Agendamiento -->
+        <div>
+          <h4 class="text-xs uppercase tracking-widest text-gold font-bold mb-4 font-serif">Contacto Directo</h4>
+          <p class="text-xs text-ivory-muted mb-2">
+            <span class="text-gold font-semibold">Tel:</span> {{ sitio.telefono_principal }}
+          </p>
+          <p class="text-xs text-ivory-muted mb-4">
+            <span class="text-gold font-semibold">Email:</span> {{ sitio.email_contacto }}
+          </p>
+          <a href="{% url 'reservas:agendar' %}" class="inline-block w-full text-center bg-gold/10 hover:bg-gold text-gold hover:text-bg-dark border border-gold/40 text-xs uppercase tracking-widest font-bold py-3 transition-all duration-300">
+            Agendar tu Visita
+          </a>
+        </div>
+      </div>
+
+      <!-- Barra de Copyright y Políticas -->
+      <div class="border-t border-bg-border/60 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-[11px] text-ivory-dim">
+        <p>© 2026 {{ sitio.nombre_negocio }}. Todos los derechos reservados. Diseñado para barberías de alta gama.</p>
+        <div class="flex space-x-6">
+          <a href="#terminos" class="hover:text-gold transition-colors">Términos del Servicio</a>
+          <a href="#privacidad" class="hover:text-gold transition-colors">Política de Privacidad</a>
+          <a href="{% url 'panel:dashboard' %}" class="text-ivory-dim hover:text-gold" title="Acceso de Administración">Panel</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts Globales (Animaciones, Header Scroll, Menú Móvil) -->
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // 1. Ocultar preloader con fade suave
+      const preloader = document.getElementById('site-preloader');
+      if (preloader) {
+        setTimeout(() => {
+          preloader.classList.add('opacity-0', 'pointer-events-none');
+          setTimeout(() => preloader.remove(), 600);
+        }, 300);
+      }
+
+      // 2. Aparición de botones flotantes tras 2 segundos
+      setTimeout(() => {
+        const floatBtns = document.getElementById('floating-social-buttons');
+        if (floatBtns) {
+          floatBtns.classList.remove('opacity-0', 'translate-y-6');
+          floatBtns.classList.add('opacity-100', 'translate-y-0');
+        }
+      }, 2000);
+
+      // 3. Barra de lectura superior y Header Scroll (transparente a sólido)
+      const progressBar = document.getElementById('reading-progress');
+      const header = document.getElementById('main-header');
+      const headerInner = document.getElementById('header-inner');
+
+      window.addEventListener('scroll', () => {
+        const scrollTop = window.scrollY || document.documentElement.scrollTop;
+        const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const progress = scrollHeight > 0 ? scrollTop / scrollHeight : 0;
+
+        if (progressBar) {
+          progressBar.style.transform = `scaleX(${progress})`;
+        }
+
+        if (header) {
+          if (scrollTop > 50) {
+            header.classList.add('bg-bg-dark/95', 'backdrop-blur-md', 'shadow-card-dark', 'border-b', 'border-bg-border');
+            header.classList.remove('mt-8');
+            if (headerInner) headerInner.classList.replace('h-20', 'h-16');
+          } else {
+            header.classList.remove('bg-bg-dark/95', 'backdrop-blur-md', 'shadow-card-dark', 'border-b', 'border-bg-border');
+            if (headerInner) headerInner.classList.replace('h-16', 'h-20');
+          }
+        }
+      }, { passive: true });
+
+      // 4. Menú Móvil toggle
+      const mobileBtn = document.getElementById('mobile-menu-btn');
+      const mobileMenu = document.getElementById('mobile-menu');
+      const barsIcon = document.getElementById('menu-icon-bars');
+      const closeIcon = document.getElementById('menu-icon-close');
+
+      if (mobileBtn && mobileMenu) {
+        mobileBtn.addEventListener('click', () => {
+          const isHidden = mobileMenu.classList.contains('hidden');
+          if (isHidden) {
+            mobileMenu.classList.remove('hidden');
+            barsIcon.classList.add('hidden');
+            closeIcon.classList.remove('hidden');
+          } else {
+            mobileMenu.classList.add('hidden');
+            barsIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+          }
+        });
+
+        // Cerrar menú al hacer clic en un link
+        document.querySelectorAll('.mobile-nav-link').forEach(link => {
+          link.addEventListener('click', () => {
+            mobileMenu.classList.add('hidden');
+            barsIcon.classList.remove('hidden');
+            closeIcon.classList.add('hidden');
+          });
+        });
+      }
+
+      // 5. Intersection Observer para animaciones Reveal-on-scroll
+      const observerOptions = {
+        threshold: 0.15,
+        rootMargin: '0px 0px -50px 0px'
+      };
+
+      const revealObserver = new IntersectionObserver((entries, observer) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-visible');
+            // Animar contadores si existen
+            const counters = entry.target.querySelectorAll('[data-target-counter]');
+            counters.forEach(counter => {
+              const target = +counter.getAttribute('data-target-counter');
+              let count = 0;
+              const speed = target / 40;
+              const updateCount = () => {
+                count += speed;
+                if (count < target) {
+                  counter.innerText = Math.ceil(count).toLocaleString('es-CL');
+                  requestAnimationFrame(updateCount);
+                } else {
+                  counter.innerText = target.toLocaleString('es-CL');
+                }
+              };
+              updateCount();
+            });
+            observer.unobserve(entry.target);
+          }
+        });
+      }, observerOptions);
+
+      document.querySelectorAll('.reveal-on-scroll, .draw-gold-line').forEach(el => {
+        revealObserver.observe(el);
+      });
+    });
+  </script>
+  {% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+
+{% block title %}Recuperar Contraseña — {{ sitio.nombre_negocio }}{% endblock %}
+
+{% block content %}
+<section class="min-h-[75vh] flex items-center justify-center py-24 px-4 sm:px-6 lg:px-8">
+  <div class="max-w-md w-full bg-bg-surface border border-bg-border p-8 sm:p-10 shadow-card-dark reveal-on-scroll">
+    <div class="text-center mb-8">
+      <span class="text-xs uppercase tracking-widest text-gold font-serif block mb-2">Seguridad</span>
+      <h1 class="text-2xl font-serif font-bold text-ivory">Recuperar Acceso</h1>
+      <p class="text-xs text-ivory-muted mt-2">Ingresa tu correo registrado y te enviaremos un enlace para restablecer tu contraseña.</p>
+      <div class="w-12 h-[1px] bg-gold mx-auto mt-4"></div>
+    </div>
+
+    <form method="POST" class="space-y-5">
+      {% csrf_token %}
+      <div>
+        <label for="{{ form.email.id_for_label }}" class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1.5">
+          Correo Electrónico
+        </label>
+        {{ form.email }}
+        {% if form.email.errors %}
+          <p class="text-[11px] text-status-error mt-1">{{ form.email.errors.0 }}</p>
+        {% endif %}
+      </div>
+
+      <button type="submit" class="w-full bg-gold hover:bg-gold-hover text-bg-dark font-bold text-xs uppercase tracking-widest py-3.5 shadow-gold-glow transition-all">
+        Enviar Enlace de Recuperación
+      </button>
+    </form>
+
+    <div class="mt-8 pt-6 border-t border-bg-border/60 text-center">
+      <a href="{% url 'cuentas:login' %}" class="text-xs text-ivory-muted hover:text-gold transition-colors">
+        ← Volver al inicio de sesión
+      </a>
+    </div>
+  </div>
+</section>
+{% endblock %}
