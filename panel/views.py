@@ -205,10 +205,23 @@ def reservas_list_view(request):
     })
 
 
-@admin_requerido
+@barbero_requerido
 def cambiar_estado_reserva(request, codigo_reserva):
-    """Acción rápida para cambiar el estado de una cita"""
+    """
+    Acción rápida para cambiar el estado de una cita.
+    Permitido para ADMINISTRADOR (cualquier reserva) y BARBERO (solo sus citas).
+    """
     reserva = get_object_or_404(Reserva, codigo_reserva=codigo_reserva)
+    usuario = request.user
+    es_admin = (usuario.rol == Usuario.Rol.ADMINISTRADOR or usuario.is_superuser)
+
+    # Si es barbero, verificar que la cita le pertenezca
+    if not es_admin:
+        barbero_perfil = getattr(usuario, 'perfil_barbero', None)
+        if not barbero_perfil or reserva.barbero != barbero_perfil:
+            messages.error(request, 'No tienes permisos para modificar citas asignadas a otro barbero.')
+            return redirect(request.META.get('HTTP_REFERER', 'panel:agenda_barbero'))
+
     if request.method == 'POST':
         nuevo_estado = request.POST.get('nuevo_estado')
         if nuevo_estado in dict(Reserva.Estado.choices):
@@ -221,23 +234,19 @@ def cambiar_estado_reserva(request, codigo_reserva):
 @barbero_requerido
 def agenda_barbero_view(request):
     """
-    Vista dedicada para el barbero autenticado:
-    - Su agenda del día y próximos días
-    - Marcar cita como completada o no asistió
-    - Bloquear sus propias horas
+    Vista de agenda de citas:
+    - Si el usuario es ADMINISTRADOR (o superuser):
+      Permite seleccionar sucursal y barbero (y fecha con navegación día/semana).
+      Muestra las citas correspondientes con opciones para cambiar estado y crear bloqueos.
+    - Si el usuario es BARBERO:
+      Muestra únicamente su agenda personal. Un barbero nunca puede ver la agenda de otro.
+    - Si el usuario no tiene perfil de barbero (caso de excepción para barbero),
+      se maneja amigablemente sin romper la página.
     """
     usuario = request.user
-    barbero = getattr(usuario, 'perfil_barbero', None)
+    es_admin = (usuario.rol == Usuario.Rol.ADMINISTRADOR or usuario.is_superuser)
 
-    if not barbero and not usuario.is_superuser:
-        messages.error(request, 'No tienes un perfil de barbero asociado.')
-        return redirect('sitio_publico:inicio')
-
-    # Si es superusuario sin perfil específico, tomar el primer barbero
-    if not barbero:
-        barbero = Barbero.objects.first()
-
-    hoy = timezone.now().date()
+    hoy = timezone.localdate()
     fecha_filtro_str = request.GET.get('fecha')
     if fecha_filtro_str:
         try:
@@ -247,21 +256,82 @@ def agenda_barbero_view(request):
     else:
         fecha_filtro = hoy
 
-    citas_hoy = Reserva.objects.filter(
+    fecha_anterior = fecha_filtro - timedelta(days=1)
+    fecha_siguiente = fecha_filtro + timedelta(days=1)
+
+    barbero = None
+    sucursales_disponibles = Sucursal.objects.filter(activa=True).order_by('orden')
+    barberos_disponibles = Barbero.objects.filter(activo=True).order_by('orden')
+    sucursal_filtro_id = request.GET.get('sucursal')
+    sucursal_seleccionada = None
+
+    if sucursal_filtro_id:
+        sucursal_seleccionada = Sucursal.objects.filter(id=sucursal_filtro_id, activa=True).first()
+        if sucursal_seleccionada:
+            barberos_disponibles = barberos_disponibles.filter(sucursales=sucursal_seleccionada)
+
+    if es_admin:
+        # Administrador puede ver cualquier barbero
+        barbero_id_param = request.GET.get('barbero')
+        if barbero_id_param:
+            barbero = Barbero.objects.filter(id=barbero_id_param, activo=True).first()
+
+        # Si no seleccionó barbero o no existe, toma el primero de la lista disponible
+        if not barbero:
+            barbero = barberos_disponibles.first()
+    else:
+        # Es barbero: solo puede ver su propia agenda
+        barbero = getattr(usuario, 'perfil_barbero', None)
+        if not barbero:
+            # Manejar caso de usuario con rol BARBERO pero sin perfil asociado
+            return render(request, 'panel/agenda_barbero.html', {
+                'es_admin': False,
+                'barbero': None,
+                'citas': [],
+                'fecha_filtro': fecha_filtro,
+                'fecha_anterior': fecha_anterior,
+                'fecha_siguiente': fecha_siguiente,
+                'bloqueos': [],
+                'mensaje_sin_perfil': 'Tu cuenta de usuario tiene asignado el rol de barbero pero aún no se le ha vinculado un perfil profesional. Contacta al administrador del sistema.'
+            })
+
+    # Si aún no hay ningún barbero registrado en el sistema
+    if not barbero:
+        return render(request, 'panel/agenda_barbero.html', {
+            'es_admin': es_admin,
+            'barbero': None,
+            'citas': [],
+            'fecha_filtro': fecha_filtro,
+            'fecha_anterior': fecha_anterior,
+            'fecha_siguiente': fecha_siguiente,
+            'bloqueos': [],
+            'sucursales': sucursales_disponibles,
+            'barberos': barberos_disponibles,
+            'sucursal_seleccionada': sucursal_filtro_id,
+            'barbero_seleccionado': None,
+            'mensaje_sin_perfil': 'No se encontraron barberos activos registrados en el sistema.'
+        })
+
+    # Citas para el barbero en la fecha seleccionada
+    citas_qs = Reserva.objects.filter(
         barbero=barbero,
         fecha_hora_inicio__date=fecha_filtro
-    ).select_related('sucursal', 'servicio', 'cliente').order_by('fecha_hora_inicio')
+    )
+    if sucursal_seleccionada:
+        citas_qs = citas_qs.filter(sucursal=sucursal_seleccionada)
+
+    citas_hoy = citas_qs.select_related('sucursal', 'servicio', 'cliente').order_by('fecha_hora_inicio')
 
     bloqueos_barbero = Bloqueo.objects.filter(
         barbero=barbero,
         fecha_inicio__date__gte=hoy
     ).order_by('fecha_inicio')
 
-    # Gestión de nuevo bloqueo por parte del barbero
+    # Gestión de nuevo bloqueo por parte del barbero o administrador
     if request.method == 'POST' and 'crear_bloqueo' in request.POST:
         f_ini_str = request.POST.get('fecha_inicio')
         f_fin_str = request.POST.get('fecha_fin')
-        motivo = request.POST.get('motivo', 'Bloqueo personal')
+        motivo = request.POST.get('motivo', 'Bloqueo administrativo' if es_admin else 'Bloqueo personal')
         if f_ini_str and f_fin_str:
             try:
                 dt_ini = timezone.make_aware(datetime.strptime(f_ini_str, '%Y-%m-%dT%H:%M'))
@@ -273,16 +343,28 @@ def agenda_barbero_view(request):
                     tipo=Bloqueo.TipoBloqueo.BLOQUEO_MANUAL,
                     motivo=motivo
                 )
-                messages.success(request, 'Horas bloqueadas exitosamente en tu agenda.')
-                return redirect('panel:agenda_barbero')
+                messages.success(request, f'Horas bloqueadas exitosamente para {barbero.nombre_profesional}.')
+                redirect_url = request.path + f"?fecha={fecha_filtro.strftime('%Y-%m-%d')}"
+                if es_admin and barbero:
+                    redirect_url += f"&barbero={barbero.id}"
+                if es_admin and sucursal_filtro_id:
+                    redirect_url += f"&sucursal={sucursal_filtro_id}"
+                return redirect(redirect_url)
             except Exception as e:
-                messages.error(request, f'Error en fechas: {str(e)}')
+                messages.error(request, f'Error al registrar bloqueo: {str(e)}')
 
     return render(request, 'panel/agenda_barbero.html', {
+        'es_admin': es_admin,
         'barbero': barbero,
         'citas': citas_hoy,
         'fecha_filtro': fecha_filtro,
+        'fecha_anterior': fecha_anterior,
+        'fecha_siguiente': fecha_siguiente,
         'bloqueos': bloqueos_barbero,
+        'sucursales': sucursales_disponibles,
+        'barberos': barberos_disponibles,
+        'sucursal_seleccionada': sucursal_filtro_id,
+        'barbero_seleccionado': str(barbero.id) if barbero else '',
     })
 
 

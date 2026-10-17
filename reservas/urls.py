@@ -14,6 +14,7 @@ urlpatterns = [
     # Endpoints JSON para agendamiento interactivo sin recarga
     path('api/servicios/', views.api_servicios_sucursal, name='api_servicios'),
     path('api/barberos/', views.api_barberos_disponibles, name='api_barberos'),
+    path('api/dias-disponibles/', views.api_dias_disponibles, name='api_dias_disponibles'),
     path('api/horarios/', views.api_horarios_disponibles, name='api_horarios'),
     path('api/confirmar/', views.api_confirmar_reserva, name='api_confirmar'),
 ]

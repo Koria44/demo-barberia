@@ -109,6 +109,48 @@ def api_barberos_disponibles(request):
 
 
 @require_GET
+def api_dias_disponibles(request):
+    """Devuelve los días de la semana activos y rango de fechas válidas para sucursal y barbero"""
+    sucursal_id = request.GET.get('sucursal_id')
+    barbero_id = request.GET.get('barbero_id')
+    servicio_id = request.GET.get('servicio_id')
+
+    if not sucursal_id:
+        return JsonResponse({'error': 'sucursal_id es obligatorio'}, status=400)
+
+    sucursal = get_object_or_404(Sucursal, id=sucursal_id)
+    config = ConfiguracionSitio.get_solo()
+    hoy_local = timezone.localdate()
+    fecha_max = hoy_local + timedelta(days=config.dias_maximos_futuro)
+
+    servicio = None
+    if servicio_id:
+        servicio = Servicio.objects.filter(id=servicio_id, activo=True).first()
+
+    barbero = None
+    if barbero_id and barbero_id != 'cualquiera' and barbero_id != '':
+        barbero = Barbero.objects.filter(id=barbero_id, activo=True).first()
+
+    if barbero:
+        barberos_elegibles = [barbero]
+    else:
+        barberos_elegibles = list(obtener_barberos_elegibles(sucursal, servicio))
+
+    from reservas.models import HorarioTrabajo
+    dias_activos = list(HorarioTrabajo.objects.filter(
+        sucursal=sucursal,
+        barbero__in=barberos_elegibles,
+        activo=True
+    ).values_list('dia_semana', flat=True).distinct())
+
+    return JsonResponse({
+        'dias_semana_activos': sorted(dias_activos),
+        'fecha_min': hoy_local.strftime('%Y-%m-%d'),
+        'fecha_max': fecha_max.strftime('%Y-%m-%d')
+    })
+
+
+@require_GET
 def api_horarios_disponibles(request):
     """Calcula y devuelve los slots de horario disponibles para una fecha"""
     sucursal_id = request.GET.get('sucursal_id')

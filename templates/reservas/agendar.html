@@ -153,20 +153,41 @@
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
-        <!-- Selector de Fecha (Próximos días en tira o input) -->
+        <!-- Selector de Fecha (Tira interactiva de días + input calendario) -->
         <div class="lg:col-span-5 border-r border-bg-border/60 lg:pr-8">
-          <label class="block text-xs uppercase tracking-wider text-gold font-bold mb-3 font-serif">Selecciona el Día</label>
-          <input type="date" id="input-fecha-reserva" class="w-full bg-bg-dark border border-bg-border focus:border-gold text-ivory px-4 py-3 text-sm rounded-none mb-4 cursor-pointer">
+          <div class="flex items-center justify-between mb-2">
+            <label class="block text-xs uppercase tracking-wider text-gold font-bold font-serif">Selecciona el Día</label>
+            <span id="label-dia-seleccionado" class="text-[11px] text-ivory font-mono"></span>
+          </div>
+
+          <!-- Tira de próximos 14 días con selector visual -->
+          <div class="mb-4">
+            <span class="text-[10px] uppercase tracking-wider text-ivory-dim block mb-2">Próximos Días Disponibles</span>
+            <div id="dias-strip-container" class="grid grid-cols-4 sm:grid-cols-7 gap-1.5 max-h-[160px] overflow-y-auto pr-1">
+              <!-- Renderizado interactivo de días -->
+            </div>
+          </div>
+
+          <!-- Input nativo de fecha para selección libre -->
+          <div class="mt-4 pt-3 border-t border-bg-border/50">
+            <label for="input-fecha-reserva" class="block text-[10px] uppercase tracking-wider text-ivory-dim mb-1.5">O elige directamente en el calendario:</label>
+            <input type="date" id="input-fecha-reserva" class="w-full bg-bg-dark border border-bg-border focus:border-gold text-ivory px-4 py-2.5 text-xs rounded-none cursor-pointer">
+            <p id="aviso-fecha-invalida" class="hidden text-[11px] text-status-warning mt-2 bg-status-warning/10 p-2 border border-status-warning/30"></p>
+          </div>
           
-          <div class="text-[11px] text-ivory-dim space-y-1.5">
+          <div class="text-[11px] text-ivory-dim space-y-1.5 mt-4">
             <p>• Los domingos nuestras sucursales permanecen cerradas.</p>
             <p>• Disponibilidad calculada considerando pausas y sanitización.</p>
+            <p>• Duración del servicio: <strong id="lbl-duracion-resumen" class="text-gold"></strong></p>
           </div>
         </div>
 
         <!-- Botones de Horarios Disponibles -->
         <div class="lg:col-span-7">
-          <label class="block text-xs uppercase tracking-wider text-gold font-bold mb-3 font-serif">Horarios Libres para el Día Elegido</label>
+          <div class="flex items-center justify-between mb-3">
+            <label class="block text-xs uppercase tracking-wider text-gold font-bold font-serif">Horarios Libres para el Día Elegido</label>
+            <span id="slots-contador" class="text-[11px] text-gold font-mono"></span>
+          </div>
           <div id="horarios-grid" class="grid grid-cols-3 sm:grid-cols-4 gap-2.5 max-h-[320px] overflow-y-auto pr-2">
             <!-- Renderizado dinámico de slots horarios -->
             <p class="text-xs text-ivory-muted col-span-full py-8 text-center">Selecciona una fecha para ver horarios disponibles.</p>
@@ -283,28 +304,50 @@
     barbero: null,
     fecha: null,
     hora: null,
+    diasActivos: [0, 1, 2, 3, 4, 5], // Días con turnos laborales (0=Lunes, 6=Domingo)
+    fechaMin: null,
+    fechaMax: null,
     cliente: JSON.parse('{{ cliente_inicial|safe }}')
   };
 
-  document.addEventListener('DOMContentLoaded', () => {
-    // Inicializar fecha mínima en el selector (hoy)
-    const hoyStr = new Date().toISOString().split('T')[0];
-    const inputFecha = document.getElementById('input-fecha-reserva');
-    inputFecha.min = hoyStr;
-    inputFecha.value = hoyStr;
-    state.fecha = hoyStr;
+  // Obtener fecha local en formato YYYY-MM-DD sin desfase UTC
+  function getFechaLocalStr(d = new Date()) {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    const day = String(d.getDate()).padStart(2, '0');
+    return `${y}-${m}-${day}`;
+  }
 
-    inputFecha.addEventListener('change', (e) => {
-      state.fecha = e.target.value;
-      cargarHorarios();
-    });
+  document.addEventListener('DOMContentLoaded', () => {
+    const hoyStr = getFechaLocalStr();
+    state.fecha = hoyStr;
+    state.fechaMin = hoyStr;
+
+    const inputFecha = document.getElementById('input-fecha-reserva');
+    if (inputFecha) {
+      inputFecha.min = hoyStr;
+      inputFecha.value = hoyStr;
+
+      const manejarCambioFecha = (e) => {
+        const nuevaFecha = e.target.value;
+        if (!nuevaFecha) return;
+        seleccionarFecha(nuevaFecha, false);
+      };
+
+      inputFecha.addEventListener('change', manejarCambioFecha);
+      inputFecha.addEventListener('input', manejarCambioFecha);
+    }
 
     // Rellenar datos si el cliente está autenticado
     if (state.cliente.autenticado) {
-      document.getElementById('cli-nombre').value = state.cliente.nombre || '';
-      document.getElementById('cli-email').value = state.cliente.email || '';
-      document.getElementById('cli-telefono').value = state.cliente.telefono || '';
-      document.getElementById('cli-notas').value = state.cliente.notas || '';
+      const elNom = document.getElementById('cli-nombre');
+      const elEmail = document.getElementById('cli-email');
+      const elTel = document.getElementById('cli-telefono');
+      const elNotas = document.getElementById('cli-notas');
+      if (elNom) elNom.value = state.cliente.nombre || '';
+      if (elEmail) elEmail.value = state.cliente.email || '';
+      if (elTel) elTel.value = state.cliente.telefono || '';
+      if (elNotas) elNotas.value = state.cliente.notas || '';
     }
 
     // Listener para tarjetas de sucursal
@@ -316,6 +359,10 @@
           nombre: card.dataset.nombre,
           direccion: card.dataset.direccion
         };
+        // Resetear selecciones posteriores para evitar inconsistencias
+        state.servicio = null;
+        state.barbero = null;
+        state.hora = null;
         cargarServicios();
         irAPaso(2);
       });
@@ -331,6 +378,7 @@
 
   function toggleLoading(show) {
     const el = document.getElementById('booking-loading');
+    if (!el) return;
     if (show) el.classList.remove('hidden');
     else el.classList.add('hidden');
   }
@@ -343,11 +391,13 @@
 
     // Actualizar barra de progreso visual
     const pct = ((paso - 1) / 5) * 100;
-    document.getElementById('progress-bar-fill').style.width = `${pct}%`;
+    const barFill = document.getElementById('progress-bar-fill');
+    if (barFill) barFill.style.width = `${pct}%`;
 
     document.querySelectorAll('.step-indicator').forEach(ind => {
       const p = parseInt(ind.dataset.step);
       const circle = ind.querySelector('.step-circle');
+      if (!circle) return;
       if (p <= paso) {
         circle.classList.add('bg-gold', 'text-bg-dark');
         circle.classList.remove('bg-bg-elevated', 'border', 'border-bg-border', 'text-ivory-dim');
@@ -362,6 +412,7 @@
 
   // 1. Cargar Servicios para la sucursal elegida
   async function cargarServicios() {
+    if (!state.sucursal) return;
     toggleLoading(true);
     try {
       const resp = await fetch(`/reservas/api/servicios/?sucursal_id=${state.sucursal.id}`);
@@ -390,13 +441,17 @@
         `;
         item.addEventListener('click', () => {
           state.servicio = s;
+          state.barbero = null;
+          state.hora = null;
+          const durEl = document.getElementById('lbl-duracion-resumen');
+          if (durEl) durEl.innerText = `${s.duracion} minutos`;
           cargarBarberos();
           irAPaso(3);
         });
         grid.appendChild(item);
       });
     } catch (err) {
-      alert('Error cargando servicios.');
+      alert('Error cargando servicios para la sede seleccionada.');
     } finally {
       toggleLoading(false);
     }
@@ -404,6 +459,7 @@
 
   // 2. Cargar Barberos para sucursal + servicio
   async function cargarBarberos() {
+    if (!state.sucursal || !state.servicio) return;
     toggleLoading(true);
     try {
       const resp = await fetch(`/reservas/api/barberos/?sucursal_id=${state.sucursal.id}&servicio_id=${state.servicio.id}`);
@@ -413,11 +469,15 @@
 
       // Configurar listener para "Cualquiera"
       const btnCualquiera = document.querySelector('.barbero-card[data-id="cualquiera"]');
-      btnCualquiera.onclick = () => {
-        state.barbero = { id: 'cualquiera', nombre: 'Cualquier Barbero Disponible' };
-        cargarHorarios();
-        irAPaso(4);
-      };
+      if (btnCualquiera) {
+        btnCualquiera.onclick = async () => {
+          state.barbero = { id: 'cualquiera', nombre: 'Cualquier Barbero Disponible' };
+          state.hora = null;
+          await actualizarDiasDisponibles();
+          irAPaso(4);
+          cargarHorarios();
+        };
+      }
 
       data.barberos.forEach(b => {
         const item = document.createElement('div');
@@ -435,54 +495,237 @@
             Reservar con él
           </button>
         `;
-        item.addEventListener('click', () => {
+        item.addEventListener('click', async () => {
           state.barbero = { id: b.id, nombre: b.nombre };
-          cargarHorarios();
+          state.hora = null;
+          await actualizarDiasDisponibles();
           irAPaso(4);
+          cargarHorarios();
         });
         cont.appendChild(item);
       });
     } catch (err) {
-      alert('Error cargando barberos.');
+      alert('Error cargando barberos disponibles.');
     } finally {
       toggleLoading(false);
     }
   }
 
-  // 3. Cargar Horarios Disponibles
-  async function cargarHorarios() {
-    if (!state.fecha) return;
-    toggleLoading(true);
+  // 3. Consultar y renderizar días laborales activos y tira de fechas
+  async function actualizarDiasDisponibles() {
+    if (!state.sucursal) return;
     try {
-      const url = `/reservas/api/horarios/?sucursal_id=${state.sucursal.id}&servicio_id=${state.servicio.id}&fecha=${state.fecha}&barbero_id=${state.barbero ? state.barbero.id : ''}`;
+      const barbParam = state.barbero ? state.barbero.id : '';
+      const srvParam = state.servicio ? state.servicio.id : '';
+      const url = `/reservas/api/dias-disponibles/?sucursal_id=${state.sucursal.id}&barbero_id=${barbParam}&servicio_id=${srvParam}`;
       const resp = await fetch(url);
+      if (resp.ok) {
+        const data = await resp.json();
+        state.diasActivos = data.dias_semana_activos || [0, 1, 2, 3, 4, 5];
+        state.fechaMin = data.fecha_min;
+        state.fechaMax = data.fecha_max;
+
+        const inputFecha = document.getElementById('input-fecha-reserva');
+        if (inputFecha) {
+          inputFecha.min = state.fechaMin;
+          inputFecha.max = state.fechaMax;
+        }
+      }
+    } catch (e) {
+      console.warn('No se pudo obtener dias-disponibles, usando configuración por defecto:', e);
+    }
+    renderizarTiraDias();
+  }
+
+  // Renderizar selector de próximos 14 días
+  function renderizarTiraDias() {
+    const cont = document.getElementById('dias-strip-container');
+    if (!cont) return;
+    cont.innerHTML = '';
+
+    const nombresDias = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+    const nombresMeses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+
+    let primeraFechaValida = null;
+    let fechaActualEsValida = false;
+
+    // Generar próximos 14 días a partir de hoy local
+    const base = new Date();
+    for (let i = 0; i < 14; i++) {
+      const d = new Date(base.getFullYear(), base.getMonth(), base.getDate() + i);
+      const fStr = getFechaLocalStr(d);
+      const jsDay = d.getDay(); // 0=Dom, 1=Lun...
+      const pyDay = (jsDay + 6) % 7; // Convertir a 0=Lun, 6=Dom
+
+      const esDomingo = (jsDay === 0);
+      const tieneTurno = state.diasActivos.includes(pyDay);
+      const estaHabilitado = !esDomingo && tieneTurno;
+
+      if (estaHabilitado && !primeraFechaValida) {
+        primeraFechaValida = fStr;
+      }
+      if (fStr === state.fecha && estaHabilitado) {
+        fechaActualEsValida = true;
+      }
+
+      const pill = document.createElement('button');
+      pill.type = 'button';
+      pill.dataset.fecha = fStr;
+
+      if (!estaHabilitado) {
+        pill.disabled = true;
+        pill.className = 'dia-pill p-2 border border-bg-border/30 bg-bg-dark/40 text-ivory-dim/30 opacity-35 cursor-not-allowed text-center flex flex-col items-center justify-center';
+        pill.innerHTML = `
+          <span class="text-[9px] uppercase tracking-wider block">${nombresDias[jsDay]}</span>
+          <span class="text-xs font-mono font-bold line-through">${d.getDate()}</span>
+          <span class="text-[8px] text-status-error/60 mt-0.5">${esDomingo ? 'Cerrado' : 'Sin turno'}</span>
+        `;
+      } else {
+        pill.className = `dia-pill p-2 border transition-all text-center flex flex-col items-center justify-center cursor-pointer ${
+          fStr === state.fecha
+            ? 'border-gold bg-gold text-bg-dark font-bold shadow-gold-glow'
+            : 'border-bg-border bg-bg-dark hover:border-gold/60 text-ivory hover:text-gold'
+        }`;
+        pill.innerHTML = `
+          <span class="text-[9px] uppercase tracking-wider block">${nombresDias[jsDay]}</span>
+          <span class="text-xs font-mono font-bold">${d.getDate()}</span>
+          <span class="text-[8px] opacity-75 mt-0.5">${nombresMeses[d.getMonth()]}</span>
+        `;
+        pill.addEventListener('click', () => {
+          seleccionarFecha(fStr, true);
+        });
+      }
+      cont.appendChild(pill);
+    }
+
+    // Si la fecha actual seleccionada cae en día cerrado o sin turno, auto-avanzar a la primera fecha válida
+    if (!fechaActualEsValida && primeraFechaValida) {
+      seleccionarFecha(primeraFechaValida, true);
+    } else {
+      actualizarLabelFecha();
+    }
+  }
+
+  function seleccionarFecha(fStr, actualizarInput = true) {
+    state.fecha = fStr;
+    const inputFecha = document.getElementById('input-fecha-reserva');
+    if (inputFecha && actualizarInput) {
+      inputFecha.value = fStr;
+    }
+
+    // Validar si es día inválido (ej. seleccionado por input date nativo)
+    const aviso = document.getElementById('aviso-fecha-invalida');
+    const partes = fStr.split('-');
+    const dObj = new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+    const pyDay = (dObj.getDay() + 6) % 7;
+    const esDom = (dObj.getDay() === 0);
+    const tieneTurno = state.diasActivos.includes(pyDay);
+
+    if (esDom || !tieneTurno) {
+      if (aviso) {
+        aviso.innerText = esDom
+          ? 'Nuestras sucursales están cerradas los domingos. Por favor selecciona de lunes a sábado.'
+          : 'El profesional o la sede seleccionada no tienen turnos laborales configurados para este día de la semana.';
+        aviso.classList.remove('hidden');
+      }
+    } else {
+      if (aviso) aviso.classList.add('hidden');
+    }
+
+    // Actualizar estilos activos de las píldoras
+    document.querySelectorAll('.dia-pill').forEach(p => {
+      if (p.dataset.fecha === fStr && !p.disabled) {
+        p.classList.add('border-gold', 'bg-gold', 'text-bg-dark', 'font-bold', 'shadow-gold-glow');
+        p.classList.remove('border-bg-border', 'bg-bg-dark', 'text-ivory');
+      } else if (!p.disabled) {
+        p.classList.remove('border-gold', 'bg-gold', 'text-bg-dark', 'font-bold', 'shadow-gold-glow');
+        p.classList.add('border-bg-border', 'bg-bg-dark', 'text-ivory');
+      }
+    });
+
+    actualizarLabelFecha();
+    cargarHorarios();
+  }
+
+  function actualizarLabelFecha() {
+    const lbl = document.getElementById('label-dia-seleccionado');
+    if (lbl && state.fecha) {
+      const partes = state.fecha.split('-');
+      lbl.innerText = `${partes[2]}/${partes[1]}/${partes[0]}`;
+    }
+  }
+
+  // 4. Cargar Horarios Disponibles para la fecha seleccionada
+  async function cargarHorarios() {
+    if (!state.fecha || !state.sucursal || !state.servicio) return;
+    const grid = document.getElementById('horarios-grid');
+    const contador = document.getElementById('slots-contador');
+    if (!grid) return;
+    if (contador) contador.innerText = '';
+
+    // Estado visible: Cargando horarios...
+    grid.innerHTML = `
+      <div class="col-span-full py-12 flex flex-col items-center justify-center gap-2 text-gold">
+        <div class="w-6 h-6 rounded-full border-2 border-gold/30 border-t-gold animate-spin"></div>
+        <span class="text-xs font-mono uppercase tracking-widest">Cargando horarios disponibles...</span>
+      </div>
+    `;
+
+    try {
+      const barbParam = state.barbero ? state.barbero.id : '';
+      const url = `/reservas/api/horarios/?sucursal_id=${state.sucursal.id}&servicio_id=${state.servicio.id}&fecha=${state.fecha}&barbero_id=${barbParam}`;
+      const resp = await fetch(url);
+      if (!resp.ok) {
+        throw new Error(`HTTP ${resp.status}`);
+      }
       const data = await resp.json();
-      const grid = document.getElementById('horarios-grid');
       grid.innerHTML = '';
 
       if (!data.horarios || data.horarios.length === 0) {
-        grid.innerHTML = '<p class="text-xs text-status-warning col-span-full py-8 text-center">No hay horarios disponibles para esta fecha. Por favor selecciona otro día.</p>';
+        grid.innerHTML = `
+          <div class="col-span-full py-8 px-4 text-center border border-status-warning/40 bg-status-warning/10 text-status-warning">
+            <p class="text-xs font-bold mb-1">No hay horarios disponibles este día, prueba otra fecha</p>
+            <p class="text-[11px] opacity-80">Todos los cupos están reservados, el horario laboral ha finalizado por hoy o la sede no abre este día.</p>
+          </div>
+        `;
         return;
+      }
+
+      if (contador) {
+        contador.innerText = `${data.horarios.length} horarios disponibles`;
       }
 
       data.horarios.forEach(h => {
         const btn = document.createElement('button');
         btn.type = 'button';
-        btn.className = 'p-3 bg-bg-surface hover:bg-gold hover:text-bg-dark border border-bg-border hover:border-gold text-xs font-mono font-bold text-ivory rounded-none transition-all flex flex-col items-center justify-center';
+        btn.className = 'slot-btn p-3 bg-bg-surface hover:bg-gold hover:text-bg-dark border border-bg-border hover:border-gold text-xs font-mono font-bold text-ivory rounded-none transition-all flex flex-col items-center justify-center focus:outline-none';
         btn.innerHTML = `
-          <span>${h.hora}</span>
+          <span class="text-xs font-bold">${h.hora}</span>
           <span class="text-[9px] font-sans opacity-70 mt-0.5">${h.barberos_count} libre${h.barberos_count > 1 ? 's' : ''}</span>
         `;
         btn.addEventListener('click', () => {
+          document.querySelectorAll('.slot-btn').forEach(b => {
+            b.classList.remove('bg-gold', 'text-bg-dark', 'border-gold', 'ring-2', 'ring-gold');
+            b.classList.add('bg-bg-surface', 'text-ivory');
+          });
+          btn.classList.remove('bg-bg-surface', 'text-ivory');
+          btn.classList.add('bg-gold', 'text-bg-dark', 'border-gold', 'ring-2', 'ring-gold');
+
           state.hora = h.hora;
-          irAPaso(5);
+          setTimeout(() => irAPaso(5), 180);
         });
         grid.appendChild(btn);
       });
     } catch (err) {
-      alert('Error consultando horarios.');
-    } finally {
-      toggleLoading(false);
+      grid.innerHTML = `
+        <div class="col-span-full py-8 px-4 text-center border border-status-error/40 bg-status-error/10 text-status-error">
+          <p class="text-xs font-bold mb-1">Error al consultar horarios disponibles</p>
+          <p class="text-[11px] opacity-80 mb-3">Ocurrió un problema de comunicación con el servidor (${err.message || 'Error'}).</p>
+          <button type="button" onclick="cargarHorarios()" class="px-3 py-1.5 border border-status-error text-status-error hover:bg-status-error hover:text-white text-xs font-bold uppercase tracking-wider transition-colors">
+            Reintentar
+          </button>
+        </div>
+      `;
     }
   }
 

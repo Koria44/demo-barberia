@@ -292,50 +292,65 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("[OK] 5 Barberos profesionales creados y asignados a sucursales."))
 
         # 5. Horarios de Trabajo por Barbero y Sucursal
-        # Para cada barbero y sus sucursales asignadas, definimos turnos semanales de Lunes a Sábado de 10:00 a 20:00
-        # repartiendo días o turnos para no solapar.
+        # Para garantizar cobertura completa en todas las sedes de Lunes a Sábado (10:00 - 20:00),
+        # asignamos turnos semanales equilibrados sin que ningún barbero se solape en dos sedes el mismo día.
         HorarioTrabajo.objects.all().delete()
+        
+        # Mapeo de barberos por slug a sus turnos semanales por sucursal
+        dias_lun_mie_vie = [DiaSemana.LUNES, DiaSemana.MIERCOLES, DiaSemana.VIERNES]
+        dias_mar_jue_sab = [DiaSemana.MARTES, DiaSemana.JUEVES, DiaSemana.SABADO]
+
+        distribucion_turnos = {
+            "matias-silva": [
+                (suc_prov, dias_lun_mie_vie),
+                (suc_condes, dias_mar_jue_sab)
+            ],
+            "rodrigo-valenzuela": [
+                (suc_prov, dias_lun_mie_vie),
+                (suc_vita, dias_mar_jue_sab)
+            ],
+            "ignacio-castro": [
+                (suc_condes, dias_lun_mie_vie),
+                (suc_vita, dias_mar_jue_sab)
+            ],
+            "diego-morales": [
+                (suc_condes, dias_lun_mie_vie),
+                (suc_prov, dias_mar_jue_sab)
+            ],
+            "camilo-fuentes": [
+                (suc_vita, dias_lun_mie_vie),
+                (suc_prov, dias_mar_jue_sab)
+            ],
+        }
+
         for barb in barbero_objs:
-            sucursales_del_barbero = list(barb.sucursales.all())
-            # Si trabaja en 2 sucursales: sucursal 1 (Lunes, Miércoles, Viernes), sucursal 2 (Martes, Jueves, Sábado)
-            if len(sucursales_del_barbero) > 1:
-                dias_suc1 = [DiaSemana.LUNES, DiaSemana.MIERCOLES, DiaSemana.VIERNES]
-                dias_suc2 = [DiaSemana.MARTES, DiaSemana.JUEVES, DiaSemana.SABADO]
-                for d in dias_suc1:
-                    HorarioTrabajo.objects.create(
-                        barbero=barb,
-                        sucursal=sucursales_del_barbero[0],
-                        dia_semana=d,
-                        hora_inicio=time(10, 0),
-                        hora_fin=time(20, 0),
-                        pausa_inicio=time(14, 0),
-                        pausa_fin=time(15, 0),
-                        activo=True
-                    )
-                for d in dias_suc2:
-                    HorarioTrabajo.objects.create(
-                        barbero=barb,
-                        sucursal=sucursales_del_barbero[1],
-                        dia_semana=d,
-                        hora_inicio=time(10, 0),
-                        hora_fin=time(20, 0),
-                        pausa_inicio=time(14, 0),
-                        pausa_fin=time(15, 0),
-                        activo=True
-                    )
+            if barb.slug in distribucion_turnos:
+                for suc_turno, dias_asignados in distribucion_turnos[barb.slug]:
+                    for d in dias_asignados:
+                        HorarioTrabajo.objects.create(
+                            barbero=barb,
+                            sucursal=suc_turno,
+                            dia_semana=d,
+                            hora_inicio=time(10, 0),
+                            hora_fin=time(20, 0),
+                            pausa_inicio=time(14, 0),
+                            pausa_fin=time(15, 0),
+                            activo=True
+                        )
             else:
-                for d in [DiaSemana.LUNES, DiaSemana.MARTES, DiaSemana.MIERCOLES, DiaSemana.JUEVES, DiaSemana.VIERNES, DiaSemana.SABADO]:
-                    HorarioTrabajo.objects.create(
-                        barbero=barb,
-                        sucursal=sucursales_del_barbero[0],
-                        dia_semana=d,
-                        hora_inicio=time(10, 0),
-                        hora_fin=time(20, 0),
-                        pausa_inicio=time(14, 0),
-                        pausa_fin=time(15, 0),
-                        activo=True
-                    )
-        self.stdout.write(self.style.SUCCESS("[OK] Horarios laborales semanales asignados."))
+                for suc_del_barbero in barb.sucursales.all():
+                    for d in [DiaSemana.LUNES, DiaSemana.MARTES, DiaSemana.MIERCOLES, DiaSemana.JUEVES, DiaSemana.VIERNES, DiaSemana.SABADO]:
+                        HorarioTrabajo.objects.create(
+                            barbero=barb,
+                            sucursal=suc_del_barbero,
+                            dia_semana=d,
+                            hora_inicio=time(10, 0),
+                            hora_fin=time(20, 0),
+                            pausa_inicio=time(14, 0),
+                            pausa_fin=time(15, 0),
+                            activo=True
+                        )
+        self.stdout.write(self.style.SUCCESS("[OK] Horarios laborales semanales asignados equitativamente."))
 
         # 6. Categorías y 6 Servicios de Catálogo
         cat_corte, _ = CategoriaServicio.objects.get_or_create(nombre="Cortes de Cabello", defaults={"orden": 1})

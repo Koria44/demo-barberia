@@ -43,11 +43,12 @@ def calcular_horarios_disponibles(sucursal, servicio, fecha_consulta, barbero=No
     - Anticipación mínima en horas (no ofrecer citas en el pasado inmediato)
     """
     config = ConfiguracionSitio.get_solo()
-    ahora = timezone.now()
+    hoy_local = timezone.localdate()
+    ahora_local = timezone.localtime(timezone.now())
 
-    # Validar límite máximo de días a futuro
-    limite_futuro = (ahora + timedelta(days=config.dias_maximos_futuro)).date()
-    if fecha_consulta > limite_futuro or fecha_consulta < ahora.date():
+    # Validar límite máximo de días a futuro considerando la fecha local de Santiago
+    limite_futuro = hoy_local + timedelta(days=config.dias_maximos_futuro)
+    if fecha_consulta > limite_futuro or fecha_consulta < hoy_local:
         return []
 
     dia_semana = fecha_consulta.weekday()
@@ -103,7 +104,7 @@ def calcular_horarios_disponibles(sucursal, servicio, fecha_consulta, barbero=No
                 slot_fin = slot_inicio + timedelta(minutes=duracion)
 
                 # Validar que no esté en el pasado ni con menos de X horas de anticipación
-                minimo_permitido = ahora + timedelta(hours=config.horas_minimas_anticipacion)
+                minimo_permitido = ahora_local + timedelta(hours=config.horas_minimas_anticipacion)
                 if slot_inicio < minimo_permitido:
                     hora_actual_dt += intervalo_paso
                     continue
@@ -169,7 +170,7 @@ def asignar_barbero_menor_carga(sucursal, servicio, slot_inicio, slot_fin):
     """
     config = ConfiguracionSitio.get_solo()
     descanso = timedelta(minutes=config.tiempo_descanso_entre_citas_minutos)
-    fecha_consulta = slot_inicio.date()
+    fecha_consulta = timezone.localdate(slot_inicio)
 
     barberos_elegibles = obtener_barberos_elegibles(sucursal, servicio)
     barberos_candidatos = []

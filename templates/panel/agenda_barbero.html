@@ -1,36 +1,98 @@
 {% extends 'panel/base_panel.html' %}
 {% load static barber_tags %}
 
-{% block header_title %}Mi Agenda de Barbero — {{ barbero.nombre_profesional }}{% endblock %}
+{% block header_title %}
+  {% if es_admin %}Agenda General de Barberos — Panel Administrativo{% else %}Mi Agenda de Citas — {{ barbero.nombre_profesional|default:"Mi Perfil" }}{% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="space-y-8 max-w-7xl mx-auto">
-  <!-- Perfil del Barbero y Selector de Fecha -->
-  <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark flex flex-col md:flex-row items-center justify-between gap-6">
+
+  {% if mensaje_sin_perfil %}
+  <div class="bg-status-warning/15 border border-status-warning p-6 text-status-warning text-xs flex items-center gap-3">
+    <svg class="w-5 h-5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+    <span>{{ mensaje_sin_perfil }}</span>
+  </div>
+  {% endif %}
+
+  <!-- Barra de Filtros y Navegación de Fecha -->
+  <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
+    {% if es_admin %}
+    <!-- Vista Administrador: Selector de Sucursal y Barbero -->
+    <form method="GET" class="flex flex-wrap items-center gap-3">
+      <div>
+        <label class="block text-[10px] text-ivory-dim uppercase tracking-wider font-bold mb-1">Sucursal:</label>
+        <select name="sucursal" onchange="this.form.submit()" class="bg-bg-dark border border-bg-border focus:border-gold text-ivory text-xs px-3 py-2 cursor-pointer rounded-none">
+          <option value="">Todas las sucursales</option>
+          {% for s in sucursales %}
+          <option value="{{ s.id }}" {% if sucursal_seleccionada == s.id|stringformat:"s" %}selected{% endif %}>{{ s.nombre }}</option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <div>
+        <label class="block text-[10px] text-ivory-dim uppercase tracking-wider font-bold mb-1">Barbero:</label>
+        <select name="barbero" onchange="this.form.submit()" class="bg-bg-dark border border-bg-border focus:border-gold text-ivory text-xs px-3 py-2 cursor-pointer rounded-none">
+          {% for b in barberos %}
+          <option value="{{ b.id }}" {% if barbero_seleccionado == b.id|stringformat:"s" %}selected{% endif %}>{{ b.nombre_profesional }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <input type="hidden" name="fecha" value="{{ fecha_filtro|date:'Y-m-d' }}">
+    </form>
+    {% else %}
+    <!-- Vista Barbero: Identificación Personal -->
+    {% if barbero %}
     <div class="flex items-center gap-4">
-      <div class="w-16 h-16 rounded-full overflow-hidden border-2 border-gold/40 shrink-0">
+      <div class="w-14 h-14 rounded-full overflow-hidden border-2 border-gold/40 shrink-0">
         <img src="{{ barbero.imagen_url }}" alt="{{ barbero.nombre_profesional }}" class="w-full h-full object-cover">
       </div>
       <div>
-        <h2 class="text-lg font-serif font-bold text-ivory">{{ barbero.nombre_profesional }}</h2>
+        <h2 class="text-base font-serif font-bold text-ivory">{{ barbero.nombre_profesional }}</h2>
         <p class="text-xs text-gold font-serif">{{ barbero.especialidad_principal }}</p>
-        <span class="text-[11px] text-ivory-dim">Atiende en: {% for s in barbero.sucursales.all %}{{ s.nombre }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
+        <span class="text-[11px] text-ivory-dim">Sedes: {% for s in barbero.sucursales.all %}{{ s.nombre }}{% if not forloop.last %}, {% endif %}{% endfor %}</span>
       </div>
     </div>
+    {% endif %}
+    {% endif %}
 
-    <!-- Selector de Día -->
-    <form method="GET" class="flex items-center gap-2">
-      <label class="text-xs text-ivory-muted uppercase tracking-wider font-bold">Ver Día:</label>
-      <input type="date" name="fecha" value="{{ fecha_filtro|date:'Y-m-d' }}" onchange="this.form.submit()" class="bg-bg-dark border border-bg-border focus:border-gold text-ivory text-xs px-3 py-2 cursor-pointer">
-    </form>
+    <!-- Navegación de Fecha (Día Anterior, Hoy, Siguiente) -->
+    <div class="flex flex-wrap items-center gap-2">
+      <a href="?fecha={{ fecha_anterior|date:'Y-m-d' }}{% if es_admin %}{% if barbero %}&barbero={{ barbero.id }}{% endif %}{% if sucursal_seleccionada %}&sucursal={{ sucursal_seleccionada }}{% endif %}{% endif %}"
+         class="px-3 py-2 bg-bg-dark hover:bg-gold hover:text-bg-dark border border-bg-border hover:border-gold text-ivory text-xs font-bold uppercase transition-colors flex items-center gap-1">
+        ← Ant.
+      </a>
+
+      <form method="GET" class="flex items-center">
+        {% if es_admin and barbero %}
+        <input type="hidden" name="barbero" value="{{ barbero.id }}">
+        {% endif %}
+        {% if es_admin and sucursal_seleccionada %}
+        <input type="hidden" name="sucursal" value="{{ sucursal_seleccionada }}">
+        {% endif %}
+        <input type="date" name="fecha" value="{{ fecha_filtro|date:'Y-m-d' }}" onchange="this.form.submit()" class="bg-bg-dark border border-bg-border focus:border-gold text-ivory text-xs px-3 py-2 cursor-pointer rounded-none">
+      </form>
+
+      <a href="?fecha={{ fecha_siguiente|date:'Y-m-d' }}{% if es_admin %}{% if barbero %}&barbero={{ barbero.id }}{% endif %}{% if sucursal_seleccionada %}&sucursal={{ sucursal_seleccionada }}{% endif %}{% endif %}"
+         class="px-3 py-2 bg-bg-dark hover:bg-gold hover:text-bg-dark border border-bg-border hover:border-gold text-ivory text-xs font-bold uppercase transition-colors flex items-center gap-1">
+        Sig. →
+      </a>
+    </div>
   </div>
 
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
     <!-- Citas del Día (Línea de Tiempo) -->
     <div class="lg:col-span-8 space-y-4">
       <div class="flex items-center justify-between mb-2">
-        <h3 class="text-base font-serif font-bold text-ivory">Citas para el {{ fecha_filtro|date:"l d de F, Y" }}</h3>
-        <span class="text-xs text-gold font-bold">{{ citas|length }} citas programadas</span>
+        <div>
+          <h3 class="text-base font-serif font-bold text-ivory">
+            Citas de {{ barbero.nombre_profesional|default:"Barbero" }} para el {{ fecha_filtro|date:"l, d \d\e F \d\e Y" }}
+          </h3>
+          <p class="text-[11px] text-ivory-dim mt-0.5">Gestión de turnos, asistencias y notas de clientes.</p>
+        </div>
+        <span class="text-xs text-gold font-bold px-3 py-1 bg-gold/10 border border-gold/30">
+          {{ citas|length }} cita{{ citas|length|pluralize }} programada{{ citas|length|pluralize }}
+        </span>
       </div>
 
       {% if citas %}
@@ -55,51 +117,76 @@
               </div>
             </div>
 
-            <!-- Acciones de Estado del Barbero -->
+            <!-- Acciones de Estado del Barbero / Administrador -->
             <div class="flex flex-col sm:items-end gap-2 shrink-0 w-full sm:w-auto">
               <span class="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 border
                 {% if c.estado == 'CONFIRMADA' %}bg-status-success/15 border-status-success text-status-success
                 {% elif c.estado == 'COMPLETADA' %}bg-gold/15 border-gold text-gold
                 {% elif c.estado == 'CANCELADA' %}bg-status-error/15 border-status-error text-status-error
-                {% else %}bg-bg-elevated border-bg-border text-ivory-dim{% endif %}">
+                {% elif c.estado == 'NO_ASISTIO' %}bg-bg-elevated border-bg-border text-ivory-dim
+                {% else %}bg-gold/10 border-gold/30 text-gold{% endif %}">
                 {{ c.get_estado_display }}
               </span>
 
-              {% if c.estado == 'CONFIRMADA' or c.estado == 'PENDIENTE' %}
-              <div class="flex gap-2 mt-1">
+              <div class="flex flex-wrap gap-1.5 mt-1">
+                {% if c.estado == 'PENDIENTE' %}
+                <form method="POST" action="{% url 'panel:cambiar_estado_reserva' c.codigo_reserva %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="nuevo_estado" value="CONFIRMADA">
+                  <button type="submit" class="px-2.5 py-1 bg-status-success/20 hover:bg-status-success text-status-success hover:text-white border border-status-success text-[10px] font-bold uppercase transition-colors" title="Confirmar Cita">
+                    ✓ Confirmar
+                  </button>
+                </form>
+                {% endif %}
+
+                {% if c.estado == 'CONFIRMADA' or c.estado == 'PENDIENTE' %}
                 <form method="POST" action="{% url 'panel:cambiar_estado_reserva' c.codigo_reserva %}">
                   {% csrf_token %}
                   <input type="hidden" name="nuevo_estado" value="COMPLETADA">
-                  <button type="submit" class="px-2.5 py-1 bg-status-success/20 hover:bg-status-success text-status-success hover:text-white border border-status-success text-[10px] font-bold uppercase transition-colors">
+                  <button type="submit" class="px-2.5 py-1 bg-gold/20 hover:bg-gold text-gold hover:text-bg-dark border border-gold text-[10px] font-bold uppercase transition-colors" title="Marcar como atendido">
                     ✓ Atendido
                   </button>
                 </form>
                 <form method="POST" action="{% url 'panel:cambiar_estado_reserva' c.codigo_reserva %}">
                   {% csrf_token %}
                   <input type="hidden" name="nuevo_estado" value="NO_ASISTIO">
-                  <button type="submit" class="px-2.5 py-1 bg-bg-dark hover:bg-status-error text-ivory-dim hover:text-white border border-bg-border text-[10px] font-bold uppercase transition-colors">
+                  <button type="submit" class="px-2.5 py-1 bg-bg-dark hover:bg-bg-elevated text-ivory-dim hover:text-white border border-bg-border text-[10px] font-bold uppercase transition-colors" title="Marcar que el cliente no se presentó">
                     ✕ No Asistió
                   </button>
                 </form>
+                <form method="POST" action="{% url 'panel:cambiar_estado_reserva' c.codigo_reserva %}">
+                  {% csrf_token %}
+                  <input type="hidden" name="nuevo_estado" value="CANCELADA">
+                  <button type="submit" class="px-2 py-1 bg-status-error/15 hover:bg-status-error text-status-error hover:text-white border border-status-error/40 text-[10px] font-bold uppercase transition-colors" title="Cancelar Reserva">
+                    Cancelar
+                  </button>
+                </form>
+                {% endif %}
               </div>
-              {% endif %}
             </div>
           </div>
           {% endfor %}
         </div>
       {% else %}
         <div class="bg-bg-surface border border-bg-border p-12 text-center text-ivory-muted">
-          <p class="text-xs">No hay citas registradas para este día.</p>
+          <p class="text-xs">No hay citas registradas para este barbero en esta fecha.</p>
         </div>
       {% endif %}
     </div>
 
-    <!-- Panel Lateral: Bloquear Horas Personales -->
+    <!-- Panel Lateral: Bloquear Horas -->
     <div class="lg:col-span-4 space-y-6">
       <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark">
         <h3 class="text-sm font-serif font-bold text-gold uppercase tracking-wider mb-2">Bloquear Horas</h3>
-        <p class="text-[11px] text-ivory-muted mb-4">Si necesitas ausentarte por trámite o permiso, bloquea tu horario para que el motor no ofrezca citas.</p>
+        <p class="text-[11px] text-ivory-muted mb-4">
+          {% if es_admin %}
+          Bloquea intervalos de tiempo para {{ barbero.nombre_profesional|default:"el barbero" }}. El motor de reservas no ofrecerá citas durante este período.
+          {% else %}
+          Si necesitas ausentarte por trámite, permiso o descanso, bloquea tu horario para evitar que se agenden citas.
+          {% endif %}
+        </p>
 
+        {% if barbero %}
         <form method="POST" class="space-y-3 text-xs">
           {% csrf_token %}
           <input type="hidden" name="crear_bloqueo" value="1">
@@ -116,29 +203,32 @@
 
           <div>
             <label class="block text-ivory-dim uppercase text-[10px] mb-1">Motivo</label>
-            <input type="text" name="motivo" placeholder="Ej. Permiso médico, colación extendida" class="w-full bg-bg-dark border border-bg-border focus:border-gold text-ivory p-2 rounded-none">
+            <input type="text" name="motivo" placeholder="Ej. Permiso personal, trámite, almuerzo extendido" class="w-full bg-bg-dark border border-bg-border focus:border-gold text-ivory p-2 rounded-none">
           </div>
 
           <button type="submit" class="w-full py-2.5 bg-gold hover:bg-gold-hover text-bg-dark font-bold uppercase text-[11px] tracking-wider transition-all mt-2">
             Bloquear Intervalo
           </button>
         </form>
+        {% else %}
+        <p class="text-xs text-status-warning">Selecciona un barbero para poder registrar bloqueos.</p>
+        {% endif %}
       </div>
 
       <!-- Bloqueos Próximos -->
       <div class="bg-bg-surface border border-bg-border p-6 shadow-card-dark">
-        <h4 class="text-xs font-serif font-bold text-ivory uppercase tracking-wider mb-3">Tus Bloqueos Activos</h4>
+        <h4 class="text-xs font-serif font-bold text-ivory uppercase tracking-wider mb-3">Bloqueos Activos ({{ barbero.nombre_profesional|default:"Sin barbero" }})</h4>
         {% if bloqueos %}
           <div class="space-y-2 text-xs">
             {% for b in bloqueos %}
             <div class="p-3 bg-bg-dark border border-bg-border">
-              <span class="text-status-warning font-bold block">{{ b.motivo|default:"Bloqueo personal" }}</span>
+              <span class="text-status-warning font-bold block">{{ b.motivo|default:"Bloqueo" }}</span>
               <span class="text-[11px] text-ivory-dim">{{ b.fecha_inicio|date:"d/m H:i" }} hasta {{ b.fecha_fin|date:"d/m H:i" }}</span>
             </div>
             {% endfor %}
           </div>
         {% else %}
-          <p class="text-[11px] text-ivory-dim">No tienes bloqueos programados.</p>
+          <p class="text-[11px] text-ivory-dim">No hay bloqueos futuros programados para este barbero.</p>
         {% endif %}
       </div>
     </div>
