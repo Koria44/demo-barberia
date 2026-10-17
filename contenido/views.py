@@ -101,3 +101,14 @@ def contacto_submit_view(request):
             messages.error(request, 'Por favor completa todos los campos requeridos del formulario de contacto.')
 
     return redirect('sitio_publico:inicio')
+
+
+def error_404_view(request, exception=None):
+    """Manejador personalizado de error 404"""
+    return render(request, '404.html', status=404)
+
+
+def error_500_view(request):
+    """Manejador personalizado de error 500"""
+    return render(request, '500.html', status=500)
+

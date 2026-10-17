@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block title %}Error Inesperado (500) — {{ sitio.nombre_negocio }}{% endblock %}
+
+{% block content %}
+<section class="min-h-[75vh] flex flex-col items-center justify-center py-24 px-4 text-center">
+  <span class="text-xs uppercase tracking-widest text-status-error font-serif block mb-2">Error 500</span>
+  <h1 class="text-4xl sm:text-6xl font-serif font-bold text-ivory mb-4">Inconveniente Técnico</h1>
+  <p class="text-xs sm:text-sm text-ivory-muted max-w-md mx-auto mb-8 font-light">
+    Estamos experimentando un inconveniente temporal en nuestros servidores. Por favor intenta recargar la página o contáctanos por WhatsApp.
+  </p>
+  <div class="flex gap-4">
+    <a href="{% url 'sitio_publico:inicio' %}" class="px-6 py-3 border border-gold/40 text-gold hover:bg-gold hover:text-bg-dark font-bold text-xs uppercase tracking-wider transition-colors">
+      Volver al Inicio
+    </a>
+    {% if sitio.whatsapp_numero %}
+    <a href="https://wa.me/{{ sitio.whatsapp_numero|cut:' '|cut:'+' }}" class="px-6 py-3 bg-[#25D366] text-white font-bold text-xs uppercase tracking-wider">
+      Escribir por WhatsApp
+    </a>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

@@ -199,6 +199,6 @@ class EntradaBlog(models.Model):
 
     @property
     def imagen_url(self):
-        if self.imagen:
-            return self.imagen.url
+        if self.imagen_portada:
+            return self.imagen_portada.url
         return f"/static/{self.foto_estatica_demo}"
