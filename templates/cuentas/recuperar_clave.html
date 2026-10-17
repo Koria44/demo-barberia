@@ -4,18 +4,18 @@
 
 {% block content %}
 <section class="min-h-[75vh] flex items-center justify-center py-24 px-4 sm:px-6 lg:px-8">
-  <div class="max-w-md w-full bg-bg-surface border border-bg-border p-8 sm:p-10 shadow-card-dark reveal-on-scroll">
+  <div class="max-w-md w-full bg-white border border-bg-border p-8 sm:p-10">
     <div class="text-center mb-8">
-      <span class="text-xs uppercase tracking-widest text-gold font-serif block mb-2">Seguridad</span>
-      <h1 class="text-2xl font-serif font-bold text-ivory">Recuperar Acceso</h1>
-      <p class="text-xs text-ivory-muted mt-2">Ingresa tu correo registrado y te enviaremos un enlace para restablecer tu contraseña.</p>
-      <div class="w-12 h-[1px] bg-gold mx-auto mt-4"></div>
+      <span class="text-xs uppercase tracking-widest text-text-muted font-sans font-medium block mb-2">Seguridad</span>
+      <h1 class="text-2xl font-serif font-light text-text-main tracking-tight">Recuperar Acceso</h1>
+      <p class="text-xs text-text-muted mt-2 font-light">Ingresa tu correo registrado y te enviaremos un enlace para restablecer tu contraseña.</p>
+      <div class="w-12 h-[1px] bg-brand-black mx-auto mt-4"></div>
     </div>
 
     <form method="POST" class="space-y-5">
       {% csrf_token %}
       <div>
-        <label for="{{ form.email.id_for_label }}" class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1.5">
+        <label for="{{ form.email.id_for_label }}" class="block text-xs uppercase tracking-wider text-text-muted font-medium mb-1.5">
           Correo Electrónico
         </label>
         {{ form.email }}
@@ -24,13 +24,13 @@
         {% endif %}
       </div>
 
-      <button type="submit" class="w-full bg-gold hover:bg-gold-hover text-bg-dark font-bold text-xs uppercase tracking-widest py-3.5 shadow-gold-glow transition-all">
+      <button type="submit" class="w-full bg-brand-black hover:bg-neutral-800 text-white font-medium text-xs uppercase tracking-widest py-3.5 transition-colors">
         Enviar Enlace de Recuperación
       </button>
     </form>
 
-    <div class="mt-8 pt-6 border-t border-bg-border/60 text-center">
-      <a href="{% url 'cuentas:login' %}" class="text-xs text-ivory-muted hover:text-gold transition-colors">
+    <div class="mt-8 pt-6 border-t border-bg-border text-center">
+      <a href="{% url 'cuentas:login' %}" class="text-xs text-text-muted hover:text-text-main transition-colors font-medium">
         ← Volver al inicio de sesión
       </a>
     </div>

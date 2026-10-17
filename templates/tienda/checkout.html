@@ -6,39 +6,39 @@
 {% block content %}
 <section class="py-20 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto min-h-[75vh]">
   <div class="mb-8">
-    <a href="{% url 'tienda:ver_carrito' %}" class="text-xs uppercase tracking-widest text-gold hover:underline inline-flex items-center gap-1 mb-2">
+    <a href="{% url 'tienda:ver_carrito' %}" class="text-xs uppercase tracking-widest text-text-muted hover:text-text-main inline-flex items-center gap-1 mb-2 transition-colors">
       ← Volver al Carrito
     </a>
-    <h1 class="text-2xl sm:text-4xl font-serif font-bold text-ivory">Finalizar Pedido</h1>
-    <p class="text-xs text-ivory-muted mt-1">Completa tus datos para coordinar el retiro en la sede más cercana.</p>
-    <div class="w-12 h-[1px] bg-gold mt-3"></div>
+    <h1 class="text-2xl sm:text-4xl font-serif font-light text-text-main tracking-tight">Finalizar Pedido</h1>
+    <p class="text-xs text-text-muted mt-1 font-light">Completa tus datos para coordinar el retiro en la sede más cercana.</p>
+    <div class="w-12 h-[1px] bg-brand-black mt-3"></div>
   </div>
 
   <form method="POST" class="grid grid-cols-1 md:grid-cols-12 gap-8 items-start">
     {% csrf_token %}
 
-    <div class="md:col-span-7 bg-bg-surface border border-bg-border p-6 sm:p-8 space-y-5 shadow-card-dark">
-      <h3 class="text-base font-serif font-bold text-ivory">Datos de Contacto</h3>
+    <div class="md:col-span-7 bg-white border border-bg-border p-6 sm:p-8 space-y-5">
+      <h3 class="text-base font-serif font-medium text-text-main">Datos de Contacto</h3>
 
       <div>
-        <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1">Nombre Completo *</label>
-        <input type="text" name="nombre" value="{{ user.get_full_name|default:'' }}" required class="w-full bg-bg-dark border border-bg-border focus:border-gold text-ivory px-4 py-2.5 text-xs rounded-none">
+        <label class="block text-xs uppercase tracking-wider text-text-muted font-medium mb-1">Nombre Completo *</label>
+        <input type="text" name="nombre" value="{{ user.get_full_name|default:'' }}" required class="w-full bg-white border border-bg-border focus:border-brand-black text-text-main px-4 py-2.5 text-xs rounded-none focus:outline-none">
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1">Correo Electrónico *</label>
-          <input type="email" name="email" value="{{ user.email|default:'' }}" required class="w-full bg-bg-dark border border-bg-border focus:border-gold text-ivory px-4 py-2.5 text-xs rounded-none">
+          <label class="block text-xs uppercase tracking-wider text-text-muted font-medium mb-1">Correo Electrónico *</label>
+          <input type="email" name="email" value="{{ user.email|default:'' }}" required class="w-full bg-white border border-bg-border focus:border-brand-black text-text-main px-4 py-2.5 text-xs rounded-none focus:outline-none">
         </div>
         <div>
-          <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1">Teléfono / WhatsApp *</label>
-          <input type="tel" name="telefono" value="{{ user.telefono|default:'' }}" required class="w-full bg-bg-dark border border-bg-border focus:border-gold text-ivory px-4 py-2.5 text-xs rounded-none">
+          <label class="block text-xs uppercase tracking-wider text-text-muted font-medium mb-1">Teléfono / WhatsApp *</label>
+          <input type="tel" name="telefono" value="{{ user.telefono|default:'' }}" required class="w-full bg-white border border-bg-border focus:border-brand-black text-text-main px-4 py-2.5 text-xs rounded-none focus:outline-none">
         </div>
       </div>
 
       <div>
-        <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1">Sucursal de Retiro *</label>
-        <select name="sucursal_id" required class="w-full bg-bg-dark border border-bg-border focus:border-gold text-ivory px-4 py-2.5 text-xs rounded-none cursor-pointer">
+        <label class="block text-xs uppercase tracking-wider text-text-muted font-medium mb-1">Sucursal de Retiro *</label>
+        <select name="sucursal_id" required class="w-full bg-white border border-bg-border focus:border-brand-black text-text-main px-4 py-2.5 text-xs rounded-none cursor-pointer focus:outline-none">
           {% for suc in sucursales %}
           <option value="{{ suc.id }}">{{ suc.nombre }} ({{ suc.direccion }})</option>
           {% endfor %}
@@ -46,51 +46,51 @@
       </div>
 
       <div>
-        <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1">Forma de Pago</label>
+        <label class="block text-xs uppercase tracking-wider text-text-muted font-medium mb-1">Forma de Pago</label>
         <div class="space-y-2 mt-2">
-          <label class="flex items-center gap-3 p-3 border border-gold/40 bg-bg-dark cursor-pointer text-xs">
-            <input type="radio" name="metodo_pago" value="LOCAL" checked class="text-gold focus:ring-gold">
+          <label class="flex items-center gap-3 p-3 border border-brand-black bg-bg-alt cursor-pointer text-xs">
+            <input type="radio" name="metodo_pago" value="LOCAL" checked class="text-brand-black focus:ring-brand-black">
             <div>
-              <span class="text-ivory font-bold block">Pago directo en el local al retirar</span>
-              <span class="text-[11px] text-ivory-dim">Efectivo, Débito o Tarjeta de Crédito</span>
+              <span class="text-text-main font-semibold block">Pago directo en el local al retirar</span>
+              <span class="text-[11px] text-text-muted">Efectivo, Débito o Tarjeta de Crédito</span>
             </div>
           </label>
-          <label class="flex items-center gap-3 p-3 border border-bg-border bg-bg-dark cursor-pointer text-xs opacity-75">
-            <input type="radio" name="metodo_pago" value="TRANSFERENCIA" class="text-gold focus:ring-gold">
+          <label class="flex items-center gap-3 p-3 border border-bg-border bg-white cursor-pointer text-xs opacity-75">
+            <input type="radio" name="metodo_pago" value="TRANSFERENCIA" class="text-brand-black focus:ring-brand-black">
             <div>
-              <span class="text-ivory font-bold block">Transferencia bancaria previa</span>
-              <span class="text-[11px] text-ivory-dim">Te enviaremos los datos de transferencia a tu correo</span>
+              <span class="text-text-main font-semibold block">Transferencia bancaria previa</span>
+              <span class="text-[11px] text-text-muted">Te enviaremos los datos de transferencia a tu correo</span>
             </div>
           </label>
         </div>
       </div>
 
       <div>
-        <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1">Instrucciones o Notas Especiales</label>
-        <textarea name="notas" rows="2" class="w-full bg-bg-dark border border-bg-border focus:border-gold text-ivory px-4 py-2 text-xs rounded-none placeholder-ivory-dim" placeholder="Ej. Retiraré el viernes por la tarde."></textarea>
+        <label class="block text-xs uppercase tracking-wider text-text-muted font-medium mb-1">Instrucciones o Notas Especiales</label>
+        <textarea name="notas" rows="2" class="w-full bg-white border border-bg-border focus:border-brand-black text-text-main px-4 py-2 text-xs rounded-none placeholder:text-text-dim focus:outline-none" placeholder="Ej. Retiraré el viernes por la tarde."></textarea>
       </div>
     </div>
 
     <!-- Resumen -->
-    <div class="md:col-span-5 bg-bg-surface border border-gold/40 p-6 shadow-card-dark">
-      <h3 class="text-sm font-serif font-bold text-gold uppercase tracking-wider mb-4">Total a Pagar</h3>
+    <div class="md:col-span-5 bg-bg-alt border border-bg-border p-6">
+      <h3 class="text-xs font-sans font-semibold text-text-main uppercase tracking-widest mb-4">Total a Pagar</h3>
       <div class="space-y-2 text-xs mb-6 pb-4 border-b border-bg-border">
-        <div class="flex justify-between text-ivory-muted">
+        <div class="flex justify-between text-text-muted">
           <span>Total Productos:</span>
-          <span class="text-ivory font-bold">{{ total_formateado }}</span>
+          <span class="text-text-main font-semibold">{{ total_formateado }}</span>
         </div>
-        <div class="flex justify-between text-ivory-muted">
+        <div class="flex justify-between text-text-muted">
           <span>Retiro en Local:</span>
-          <span class="text-status-success font-bold">Gratis</span>
+          <span class="text-status-success font-semibold">Gratis</span>
         </div>
       </div>
 
-      <div class="flex justify-between text-base font-serif font-bold text-ivory mb-6">
+      <div class="flex justify-between text-base font-serif font-medium text-text-main mb-6">
         <span>Total:</span>
-        <span class="text-gold text-xl">{{ total_formateado }}</span>
+        <span class="text-text-main text-xl font-semibold">{{ total_formateado }}</span>
       </div>
 
-      <button type="submit" class="w-full btn-shimmer-effect bg-gold hover:bg-gold-hover text-bg-dark font-bold text-xs uppercase tracking-widest py-3.5 shadow-gold-glow">
+      <button type="submit" class="w-full bg-brand-black hover:bg-neutral-800 text-white font-medium text-xs uppercase tracking-widest py-3.5 transition-colors">
         Confirmar Pedido de Retiro
       </button>
     </div>

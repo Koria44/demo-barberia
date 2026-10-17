@@ -6,26 +6,26 @@
 {% block content %}
 <section class="py-20 px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto min-h-[75vh]">
   <div class="mb-8">
-    <span class="text-xs uppercase tracking-widest text-gold font-serif block mb-1">Tu Selección</span>
-    <h1 class="text-2xl sm:text-4xl font-serif font-bold text-ivory">Bolsa de Compras</h1>
-    <div class="w-12 h-[1px] bg-gold mt-3"></div>
+    <span class="text-xs uppercase tracking-widest text-text-muted font-sans font-medium block mb-1">Tu Selección</span>
+    <h1 class="text-2xl sm:text-4xl font-serif font-light text-text-main tracking-tight">Bolsa de Compras</h1>
+    <div class="w-12 h-[1px] bg-brand-black mt-3"></div>
   </div>
 
   {% if items %}
   <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
     <!-- Tabla de Ítems -->
-    <div class="lg:col-span-8 bg-bg-surface border border-bg-border p-6 shadow-card-dark divide-y divide-bg-border">
+    <div class="lg:col-span-8 bg-white border border-bg-border p-6 divide-y divide-bg-border">
       {% for item in items %}
       <div class="py-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 first:pt-0 last:pb-0">
         <div class="flex items-center gap-4">
-          <div class="w-16 h-16 bg-bg-dark border border-bg-border overflow-hidden shrink-0">
-            <img src="{{ item.imagen_url }}" alt="{{ item.nombre }}" class="w-full h-full object-cover">
+          <div class="w-16 h-16 bg-bg-alt border border-bg-border overflow-hidden shrink-0">
+            <img src="{{ item.imagen_url }}" alt="{{ item.nombre }}" class="w-full h-full object-cover img-editorial">
           </div>
           <div>
-            <h3 class="text-sm font-serif font-bold text-ivory">
-              <a href="{% url 'tienda:producto_detalle' item.slug %}" class="hover:text-gold transition-colors">{{ item.nombre }}</a>
+            <h3 class="text-sm font-serif font-medium text-text-main">
+              <a href="{% url 'tienda:producto_detalle' item.slug %}" class="hover:underline transition-colors">{{ item.nombre }}</a>
             </h3>
-            <span class="text-xs text-gold font-bold">{{ item.precio_formateado }} c/u</span>
+            <span class="text-xs text-text-muted font-semibold">{{ item.precio_formateado }} c/u</span>
           </div>
         </div>
 
@@ -33,16 +33,16 @@
           <!-- Modificador de Cantidad -->
           <form method="POST" action="{% url 'tienda:actualizar_carrito' item.producto_id %}" class="flex items-center">
             {% csrf_token %}
-            <input type="number" name="cantidad" value="{{ item.cantidad }}" min="1" max="99" onchange="this.form.submit()" class="w-16 bg-bg-dark border border-bg-border text-center text-xs py-1.5 text-ivory font-bold">
+            <input type="number" name="cantidad" value="{{ item.cantidad }}" min="1" max="99" onchange="this.form.submit()" class="w-16 bg-white border border-bg-border text-center text-xs py-1.5 text-text-main font-semibold focus:outline-none focus:border-brand-black">
           </form>
 
           <!-- Subtotal -->
-          <span class="text-sm font-serif font-bold text-ivory min-w-[70px] text-right">{{ item.subtotal_formateado }}</span>
+          <span class="text-sm font-serif font-semibold text-text-main min-w-[70px] text-right">{{ item.subtotal_formateado }}</span>
 
           <!-- Botón Eliminar -->
           <form method="POST" action="{% url 'tienda:eliminar_carrito' item.producto_id %}">
             {% csrf_token %}
-            <button type="submit" class="text-ivory-dim hover:text-status-error text-xs p-1" title="Eliminar producto">✕</button>
+            <button type="submit" class="text-text-dim hover:text-status-error text-xs p-1 transition-colors" title="Eliminar producto">✕</button>
           </form>
         </div>
       </div>
@@ -50,37 +50,37 @@
     </div>
 
     <!-- Resumen de Orden y Checkout -->
-    <div class="lg:col-span-4 bg-bg-surface border border-gold/40 p-6 shadow-card-dark">
-      <h3 class="text-sm font-serif font-bold text-gold uppercase tracking-wider mb-4">Resumen del Pedido</h3>
+    <div class="lg:col-span-4 bg-bg-alt border border-bg-border p-6">
+      <h3 class="text-xs font-sans font-semibold text-text-main uppercase tracking-widest mb-4">Resumen del Pedido</h3>
       <div class="space-y-3 text-xs mb-6">
-        <div class="flex justify-between text-ivory-muted">
+        <div class="flex justify-between text-text-muted">
           <span>Subtotal:</span>
-          <span class="text-ivory font-bold">{{ total_formateado }}</span>
+          <span class="text-text-main font-semibold">{{ total_formateado }}</span>
         </div>
-        <div class="flex justify-between text-ivory-muted">
+        <div class="flex justify-between text-text-muted">
           <span>Retiro en Sucursal:</span>
-          <span class="text-status-success font-bold">Gratis</span>
+          <span class="text-status-success font-semibold">Gratis</span>
         </div>
         <div class="pt-3 border-t border-bg-border flex justify-between text-sm">
-          <span class="font-serif font-bold text-ivory">Total:</span>
-          <span class="font-serif font-bold text-gold text-lg">{{ total_formateado }}</span>
+          <span class="font-serif font-medium text-text-main">Total:</span>
+          <span class="font-serif font-semibold text-text-main text-lg">{{ total_formateado }}</span>
         </div>
       </div>
 
-      <a href="{% url 'tienda:checkout' %}" class="w-full btn-shimmer-effect block text-center py-3.5 bg-gold hover:bg-gold-hover text-bg-dark font-bold text-xs uppercase tracking-widest shadow-gold-glow mb-3">
+      <a href="{% url 'tienda:checkout' %}" class="w-full block text-center py-3.5 bg-brand-black hover:bg-neutral-800 text-white font-medium text-xs uppercase tracking-widest mb-3 transition-colors">
         Continuar al Checkout
       </a>
-      <a href="{% url 'tienda:catalogo' %}" class="block text-center text-xs text-ivory-muted hover:text-gold transition-colors">
+      <a href="{% url 'tienda:catalogo' %}" class="block text-center text-xs text-text-muted hover:text-text-main transition-colors">
         ← Seguir explorando la tienda
       </a>
     </div>
   </div>
   {% else %}
-  <div class="bg-bg-surface border border-bg-border p-12 text-center shadow-card-dark">
-    <svg class="w-12 h-12 text-gold/40 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
-    <h2 class="text-lg font-serif font-bold text-ivory mb-2">Tu bolsa de compras está vacía</h2>
-    <p class="text-xs text-ivory-muted mb-6">Explora nuestra colección de productos para el cuidado del cabello y la barba.</p>
-    <a href="{% url 'tienda:catalogo' %}" class="inline-block bg-gold hover:bg-gold-hover text-bg-dark font-bold text-xs uppercase tracking-widest px-6 py-3 shadow-gold-glow">
+  <div class="bg-white border border-bg-border p-12 text-center">
+    <svg class="w-12 h-12 text-text-dim mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"/></svg>
+    <h2 class="text-lg font-serif font-light text-text-main mb-2">Tu bolsa de compras está vacía</h2>
+    <p class="text-xs text-text-muted mb-6 font-light">Explora nuestra colección de productos para el cuidado del cabello y la barba.</p>
+    <a href="{% url 'tienda:catalogo' %}" class="inline-block bg-brand-black hover:bg-neutral-800 text-white font-medium text-xs uppercase tracking-widest px-6 py-3 transition-colors">
       Ir al Catálogo
     </a>
   </div>

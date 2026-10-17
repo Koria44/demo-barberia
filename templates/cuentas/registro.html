@@ -5,18 +5,18 @@
 
 {% block content %}
 <section class="min-h-[85vh] flex items-center justify-center py-24 px-4 sm:px-6 lg:px-8 relative">
-  <div class="max-w-lg w-full bg-bg-surface border border-bg-border p-8 sm:p-10 shadow-card-dark relative z-10 reveal-on-scroll">
+  <div class="max-w-lg w-full bg-white border border-bg-border p-8 sm:p-10 relative z-10">
     <div class="text-center mb-8">
-      <span class="text-xs uppercase tracking-widest text-gold font-serif block mb-2">Membresía & Experiencia</span>
-      <h1 class="text-2xl sm:text-3xl font-serif font-bold text-ivory">Únete al Club</h1>
-      <p class="text-xs text-ivory-muted mt-2">Accede a historial de cortes, reservas prioritarias y promociones exclusivas</p>
-      <div class="w-12 h-[1px] bg-gold mx-auto mt-4"></div>
+      <span class="text-xs uppercase tracking-widest text-text-muted font-sans font-medium block mb-2">Membresía & Experiencia</span>
+      <h1 class="text-2xl sm:text-3xl font-serif font-light text-text-main tracking-tight">Únete al Club</h1>
+      <p class="text-xs text-text-muted mt-2 font-light">Accede a historial de cortes, reservas prioritarias y promociones exclusivas</p>
+      <div class="w-12 h-[1px] bg-brand-black mx-auto mt-4"></div>
     </div>
 
     {% if form.non_field_errors %}
-    <div class="mb-6 p-4 bg-status-error/15 border border-status-error text-xs text-ivory">
+    <div class="mb-6 p-4 bg-red-50 border border-status-error/30 text-xs text-status-error">
       {% for error in form.non_field_errors %}
-        <p class="flex items-center gap-2"><span class="text-status-error font-bold">✕</span> {{ error }}</p>
+        <p class="flex items-center gap-2"><span class="font-bold">✕</span> {{ error }}</p>
       {% endfor %}
     </div>
     {% endif %}
@@ -26,51 +26,51 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1.5">Nombre</label>
+          <label class="block text-xs uppercase tracking-wider text-text-muted font-medium mb-1.5">Nombre</label>
           {{ form.first_name }}
           {% if form.first_name.errors %}<p class="text-[11px] text-status-error mt-1">{{ form.first_name.errors.0 }}</p>{% endif %}
         </div>
         <div>
-          <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1.5">Apellido</label>
+          <label class="block text-xs uppercase tracking-wider text-text-muted font-medium mb-1.5">Apellido</label>
           {{ form.last_name }}
           {% if form.last_name.errors %}<p class="text-[11px] text-status-error mt-1">{{ form.last_name.errors.0 }}</p>{% endif %}
         </div>
       </div>
 
       <div>
-        <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1.5">Correo Electrónico</label>
+        <label class="block text-xs uppercase tracking-wider text-text-muted font-medium mb-1.5">Correo Electrónico</label>
         {{ form.email }}
         {% if form.email.errors %}<p class="text-[11px] text-status-error mt-1">{{ form.email.errors.0 }}</p>{% endif %}
       </div>
 
       <div>
-        <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1.5">Teléfono / WhatsApp</label>
+        <label class="block text-xs uppercase tracking-wider text-text-muted font-medium mb-1.5">Teléfono / WhatsApp</label>
         {{ form.telefono }}
         {% if form.telefono.errors %}<p class="text-[11px] text-status-error mt-1">{{ form.telefono.errors.0 }}</p>{% endif %}
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div>
-          <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1.5">Contraseña</label>
+          <label class="block text-xs uppercase tracking-wider text-text-muted font-medium mb-1.5">Contraseña</label>
           {{ form.password }}
           {% if form.password.errors %}<p class="text-[11px] text-status-error mt-1">{{ form.password.errors.0 }}</p>{% endif %}
         </div>
         <div>
-          <label class="block text-xs uppercase tracking-wider text-ivory-muted font-medium mb-1.5">Confirmar Contraseña</label>
+          <label class="block text-xs uppercase tracking-wider text-text-muted font-medium mb-1.5">Confirmar Contraseña</label>
           {{ form.confirmar_password }}
           {% if form.confirmar_password.errors %}<p class="text-[11px] text-status-error mt-1">{{ form.confirmar_password.errors.0 }}</p>{% endif %}
         </div>
       </div>
 
-      <button type="submit" class="w-full btn-shimmer-effect bg-gold hover:bg-gold-hover text-bg-dark font-bold text-xs uppercase tracking-widest py-3.5 shadow-gold-glow transition-all duration-300 mt-4">
+      <button type="submit" class="w-full bg-brand-black hover:bg-neutral-800 text-white font-medium text-xs uppercase tracking-widest py-3.5 transition-colors mt-4">
         Crear mi Cuenta de Cliente
       </button>
     </form>
 
-    <div class="mt-8 pt-6 border-t border-bg-border/60 text-center">
-      <p class="text-xs text-ivory-muted">
+    <div class="mt-8 pt-6 border-t border-bg-border text-center">
+      <p class="text-xs text-text-muted font-light">
         ¿Ya eres miembro? 
-        <a href="{% url 'cuentas:login' %}" class="text-gold font-bold hover:underline ml-1">Inicia sesión</a>
+        <a href="{% url 'cuentas:login' %}" class="text-text-main font-semibold hover:underline ml-1">Inicia sesión</a>
       </p>
     </div>
   </div>

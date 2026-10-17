@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <html lang="es">
-<body style="background:#0A0A0A; color:#F5F0E6; font-family:sans-serif; padding:40px 20px;">
-  <div style="max-width:500px; margin:0 auto; background:#141414; border:1px solid #C9A24B; padding:30px; text-align:center;">
-    <h2 style="color:#C9A24B; font-family:serif; letter-spacing:2px; margin-bottom:10px;">DEMO BARBER CLUB</h2>
-    <p style="color:#A8A294; font-size:14px; margin-bottom:25px;">Has solicitado restablecer la contraseña de tu cuenta.</p>
-    <p style="font-size:14px; color:#F5F0E6; margin-bottom:30px;">Haz clic en el siguiente botón para definir una nueva clave:</p>
-    <a href="{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}" style="display:inline-block; background:#C9A24B; color:#0A0A0A; font-weight:bold; font-size:13px; text-transform:uppercase; letter-spacing:2px; padding:12px 25px; text-decoration:none;">
+<body style="background:#F7F7F5; color:#0A0A0A; font-family:-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; padding:40px 20px; margin:0;">
+  <div style="max-width:500px; margin:0 auto; background:#FFFFFF; border:1px solid #E7E7E4; padding:36px; text-align:center;">
+    <h2 style="color:#0A0A0A; font-family:serif; letter-spacing:3px; margin-bottom:12px; font-weight:normal;">DEMO BARBER CLUB</h2>
+    <div style="width:40px; height:1px; background:#0A0A0A; margin:0 auto 24px auto;"></div>
+    <p style="color:#5C5C58; font-size:14px; line-height:1.6; margin-bottom:24px;">Has solicitado restablecer la contraseña de tu cuenta de cliente.</p>
+    <p style="font-size:14px; color:#0A0A0A; margin-bottom:30px;">Haz clic en el siguiente botón para definir una nueva clave de acceso:</p>
+    <a href="{{ protocol }}://{{ domain }}{% url 'password_reset_confirm' uidb64=uid token=token %}" style="display:inline-block; background:#0A0A0A; color:#FFFFFF; font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:2px; padding:14px 28px; text-decoration:none;">
       Restablecer Contraseña
     </a>
-    <p style="color:#6E695F; font-size:12px; margin-top:35px;">Si no solicitaste este cambio, puedes ignorar este correo con total tranquilidad.</p>
+    <p style="color:#9A9A95; font-size:12px; margin-top:36px; line-height:1.5;">Si no solicitaste este cambio, puedes ignorar este correo con total tranquilidad.</p>
   </div>
 </body>
 </html>

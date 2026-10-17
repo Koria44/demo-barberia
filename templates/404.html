@@ -4,16 +4,16 @@
 
 {% block content %}
 <section class="min-h-[75vh] flex flex-col items-center justify-center py-24 px-4 text-center">
-  <span class="text-xs uppercase tracking-widest text-gold font-serif block mb-2">Error 404</span>
-  <h1 class="text-4xl sm:text-6xl font-serif font-bold text-ivory mb-4">Página no Encontrada</h1>
-  <p class="text-xs sm:text-sm text-ivory-muted max-w-md mx-auto mb-8 font-light">
+  <span class="text-xs uppercase tracking-widest text-text-muted font-sans font-medium block mb-2">Error 404</span>
+  <h1 class="text-4xl sm:text-6xl font-serif font-light text-text-main mb-4 tracking-tight">Página no Encontrada</h1>
+  <p class="text-xs sm:text-sm text-text-muted max-w-md mx-auto mb-8 font-light">
     La página o recurso que buscas no existe o ha sido movida. Te invitamos a volver al inicio o agendar tu hora.
   </p>
   <div class="flex gap-4">
-    <a href="{% url 'sitio_publico:inicio' %}" class="px-6 py-3 border border-gold/40 text-gold hover:bg-gold hover:text-bg-dark font-bold text-xs uppercase tracking-wider transition-colors">
+    <a href="{% url 'sitio_publico:inicio' %}" class="px-6 py-3 border border-brand-black text-brand-black hover:bg-neutral-100 font-medium text-xs uppercase tracking-wider transition-colors">
       Volver al Inicio
     </a>
-    <a href="{% url 'reservas:agendar' %}" class="px-6 py-3 bg-gold text-bg-dark font-bold text-xs uppercase tracking-wider shadow-gold-glow">
+    <a href="{% url 'reservas:agendar' %}" class="px-6 py-3 bg-brand-black hover:bg-neutral-800 text-white font-medium text-xs uppercase tracking-wider transition-colors">
       Agendar Cita
     </a>
   </div>
