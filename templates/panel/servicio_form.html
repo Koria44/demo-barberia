@@ -1,0 +1,105 @@
+{% extends 'panel/base_panel.html' %}
+{% load static barber_tags %}
+
+{% block header_title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto space-y-6">
+
+  <!-- Encabezado -->
+  <div class="flex items-center justify-between bg-bg-surface border border-bg-border p-5 shadow-card-dark">
+    <div>
+      <h2 class="text-base font-serif font-bold text-ivory">{{ titulo }}</h2>
+      <p class="text-xs text-ivory-dim mt-0.5">{{ subtitulo }}</p>
+    </div>
+    <a href="{% url 'panel:servicios_list' %}" class="px-3 py-1.5 bg-bg-dark border border-bg-border hover:border-gold text-ivory text-xs font-bold uppercase transition-colors">
+      ← Volver al Catálogo
+    </a>
+  </div>
+
+  <!-- Formulario -->
+  <form method="POST" enctype="multipart/form-data" class="bg-bg-surface border border-bg-border p-6 shadow-card-dark space-y-6">
+    {% csrf_token %}
+
+    {% if form.non_field_errors %}
+    <div class="p-4 bg-status-error/15 border border-status-error text-status-error text-xs">
+      {{ form.non_field_errors }}
+    </div>
+    {% endif %}
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div class="md:col-span-2">
+        <label class="block text-xs text-ivory-dim mb-1 font-semibold">Nombre del Servicio *</label>
+        {{ form.nombre }}
+        {% if form.nombre.errors %}<span class="text-[11px] text-status-error mt-1 block">{{ form.nombre.errors.0 }}</span>{% endif %}
+      </div>
+
+      <div>
+        <label class="block text-xs text-ivory-dim mb-1 font-semibold">Categoría *</label>
+        {{ form.categoria }}
+      </div>
+
+      <div>
+        <label class="block text-xs text-ivory-dim mb-1 font-semibold">Etiqueta Comercial (Opcional)</label>
+        {{ form.etiqueta }}
+        <span class="text-[10px] text-ivory-muted block mt-1">Ej: "Más Solicitado", "Signature", "Ritual"</span>
+      </div>
+
+      <div>
+        <label class="block text-xs text-ivory-dim mb-1 font-semibold">Duración Base (minutos) *</label>
+        {{ form.duracion_minutos }}
+        {% if form.duracion_minutos.errors %}<span class="text-[11px] text-status-error mt-1 block">{{ form.duracion_minutos.errors.0 }}</span>{% endif %}
+      </div>
+
+      <div>
+        <label class="block text-xs text-ivory-dim mb-1 font-semibold">Precio Base CLP *</label>
+        {{ form.precio }}
+        {% if form.precio.errors %}<span class="text-[11px] text-status-error mt-1 block">{{ form.precio.errors.0 }}</span>{% endif %}
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="block text-xs text-ivory-dim mb-1 font-semibold">Descripción Detallada *</label>
+        {{ form.descripcion }}
+        {% if form.descripcion.errors %}<span class="text-[11px] text-status-error mt-1 block">{{ form.descripcion.errors.0 }}</span>{% endif %}
+      </div>
+
+      <div class="md:col-span-2">
+        <label class="block text-xs text-ivory-dim mb-1 font-semibold">Imagen Ilustrativa</label>
+        {{ form.imagen }}
+        {% if servicio and servicio.imagen %}
+        <div class="mt-2 flex items-center gap-3">
+          <img src="{{ servicio.imagen_url }}" class="w-12 h-12 object-cover border border-gold/40">
+          <span class="text-xs text-ivory-dim">Imagen actual</span>
+        </div>
+        {% endif %}
+      </div>
+
+      <div>
+        <label class="block text-xs text-ivory-dim mb-1 font-semibold">Orden de Visualización</label>
+        {{ form.orden }}
+      </div>
+
+      <div class="pt-5 space-y-2">
+        <label class="flex items-center gap-2 text-xs text-ivory cursor-pointer">
+          {{ form.activo }}
+          <span class="font-bold">Servicio Activo en el Catálogo</span>
+        </label>
+        <label class="flex items-center gap-2 text-xs text-ivory cursor-pointer">
+          {{ form.es_destacado }}
+          <span class="font-bold">Mostrar como Destacado en Inicio</span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Botones de Acción -->
+    <div class="pt-4 border-t border-bg-border flex items-center justify-end gap-3">
+      <a href="{% url 'panel:servicios_list' %}" class="px-4 py-2 border border-bg-border text-ivory-dim hover:text-ivory text-xs uppercase font-bold transition-colors">
+        Cancelar
+      </a>
+      <button type="submit" class="px-6 py-2 bg-gold hover:bg-gold-light text-bg-dark text-xs uppercase font-bold tracking-wider shadow-gold-glow transition-all">
+        Guardar Servicio
+      </button>
+    </div>
+  </form>
+</div>
+{% endblock %}
