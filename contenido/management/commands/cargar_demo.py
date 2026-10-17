@@ -40,9 +40,9 @@ class Command(BaseCommand):
         config.horas_minimas_cancelacion = 4
         config.dias_maximos_futuro = 30
         config.tiempo_descanso_entre_citas_minutos = 10
-        config.color_fondo = "#0A0A0A"
-        config.color_acento = "#C9A24B"
-        config.color_texto = "#F5F0E6"
+        config.color_fondo = "#FFFFFF"
+        config.color_acento = "#0A0A0A"
+        config.color_texto = "#0A0A0A"
         config.stat_anios = 8
         config.stat_clientes = 15400
         config.stat_cortes = 32800

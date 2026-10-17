@@ -11,4 +11,7 @@ python manage.py collectstatic --no-input
 echo "==> Aplicando migraciones de base de datos..."
 python manage.py migrate
 
-echo "==> Build finalizado con éxito."
+echo "==> Poblando base de datos con demo completa (sucursales, barberos, servicios, inventario y citas)..."
+python manage.py cargar_demo
+
+echo "==> Build y carga de demo finalizados con éxito."
