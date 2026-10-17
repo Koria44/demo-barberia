@@ -3,110 +3,131 @@
 @tailwind utilities;
 
 :root {
-  --color-bg-dark: #0A0A0A;
-  --color-bg-surface: #141414;
-  --color-bg-elevated: #1C1C1C;
-  --color-gold: #C9A24B;
-  --color-gold-hover: #DDB968;
-  --color-ivory: #F5F0E6;
-  --color-ivory-muted: #A8A294;
-  --color-status-success: #3E8E5E;
+  /* Nueva Identidad Monocromática: Blanco, Negro y Escala de Grises Editorial */
+  --color-bg-main: #FFFFFF;
+  --color-bg-alt: #F7F7F5;
+  --color-bg-surface: #FFFFFF;
+  --color-bg-elevated: #FAFAF8;
+  --color-bg-border: #E7E7E4;
+  --color-text-main: #0A0A0A;
+  --color-text-muted: #5C5C58;
+  --color-text-dim: #9A9A95;
+  --color-brand-black: #0A0A0A;
+  --color-brand-hover: #262626;
+
+  /* Estados Funcionales Sobrios (WCAG AA) */
+  --color-status-success: #2F7D4F;
   --color-status-error: #B3412F;
+  --color-status-warning: #B7791F;
 }
 
-/* Scrollbar estilizada de lujo */
+/* Scrollbar limpia y minimalista */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: #0A0A0A;
+  background: #F7F7F5;
 }
 ::-webkit-scrollbar-thumb {
-  background: #2A2A2A;
-  border-radius: 4px;
+  background: #D4D4D0;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #C9A24B;
+  background: #0A0A0A;
 }
 
-/* Barra de progreso de lectura */
+/* Barra de progreso de lectura: negra y nítida de 2px */
 #reading-progress {
   transform-origin: left;
   transform: scaleX(0);
   transition: transform 0.1s ease-out;
+  background: #0A0A0A;
 }
 
-/* Efecto de poste de barbero sutil y elegante */
+/* Poste de barbero decorativo monocromático (rayas diagonales negro / blanco) */
 .barber-pole-stripes {
   background: repeating-linear-gradient(
     45deg,
-    rgba(179, 65, 47, 0.25),
-    rgba(179, 65, 47, 0.25) 12px,
-    rgba(245, 240, 230, 0.2) 12px,
-    rgba(245, 240, 230, 0.2) 24px,
-    rgba(59, 126, 212, 0.25) 24px,
-    rgba(59, 126, 212, 0.25) 36px,
-    rgba(245, 240, 230, 0.2) 36px,
-    rgba(245, 240, 230, 0.2) 48px
+    #0A0A0A,
+    #0A0A0A 14px,
+    #FFFFFF 14px,
+    #FFFFFF 28px,
+    #5C5C58 28px,
+    #5C5C58 32px,
+    #FFFFFF 32px,
+    #FFFFFF 42px
   );
   animation: barberPoleMove 4s linear infinite;
 }
 
 @keyframes barberPoleMove {
   0% { background-position: 0 0; }
-  100% { background-position: 96px 0; }
+  100% { background-position: 84px 0; }
 }
 
-/* Botón con efecto de brillo metálico cruzado */
-.btn-shimmer-effect {
-  position: relative;
-  overflow: hidden;
+/* Tratamiento de imágenes: escala de grises con transición suave al color en hover */
+.img-editorial {
+  filter: grayscale(100%);
+  transition: filter 0.5s cubic-bezier(0.16, 1, 0.3, 1), transform 0.5s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.btn-shimmer-effect::after {
-  content: '';
-  position: absolute;
-  top: -50%;
-  left: -50%;
-  width: 200%;
-  height: 200%;
-  background: linear-gradient(
-    60deg,
-    transparent,
-    rgba(255, 255, 255, 0.15),
-    transparent
-  );
-  transform: rotate(30deg) translateX(-100%);
-  animation: btnShimmer 5s infinite;
+.img-editorial:hover,
+.group:hover .img-editorial {
+  filter: grayscale(0%);
 }
 
-@keyframes btnShimmer {
-  0%, 80% { transform: rotate(30deg) translateX(-100%); }
-  100% { transform: rotate(30deg) translateX(100%); }
-}
-
-/* Animación de entrada con scroll */
+/* Animaciones sutiles y ágiles (400-700ms) */
 .reveal-on-scroll {
   opacity: 0;
-  transform: translateY(24px);
-  transition: opacity 0.8s cubic-bezier(0.16, 1, 0.3, 1), transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  transform: translateY(16px);
+  transition: opacity 0.6s cubic-bezier(0.16, 1, 0.3, 1), transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 .reveal-on-scroll.is-visible {
   opacity: 1;
   transform: translateY(0);
 }
 
-/* Línea dorada que se dibuja */
-.draw-gold-line {
+/* Línea editorial fina que se dibuja */
+.draw-gold-line,
+.draw-editorial-line {
   transform: scaleX(0);
   transform-origin: left;
-  transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.8s cubic-bezier(0.16, 1, 0.3, 1);
 }
-.draw-gold-line.is-visible {
+.draw-gold-line.is-visible,
+.draw-editorial-line.is-visible {
   transform: scaleX(1);
 }
 
-/* Respeto a usuarios con movimiento reducido */
+/* Botón con efecto de barrido sutil en negro */
+.btn-editorial-sweep {
+  position: relative;
+  overflow: hidden;
+  transition: color 0.3s ease;
+}
+.btn-editorial-sweep::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: #0A0A0A;
+  transform: scaleX(0);
+  transform-origin: right;
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  z-index: 0;
+}
+.btn-editorial-sweep:hover::before {
+  transform: scaleX(1);
+  transform-origin: left;
+}
+.btn-editorial-sweep > * {
+  position: relative;
+  z-index: 1;
+}
+
+/* Accesibilidad y respeto a preferencias de movimiento reducido */
 @media (prefers-reduced-motion: reduce) {
   *, ::before, ::after {
     animation-duration: 0.01ms !important;
@@ -118,7 +139,8 @@
     opacity: 1 !important;
     transform: none !important;
   }
-  .draw-gold-line {
+  .draw-gold-line,
+  .draw-editorial-line {
     transform: scaleX(1) !important;
   }
 }

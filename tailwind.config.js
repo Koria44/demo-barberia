@@ -9,29 +9,52 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        // Paleta inspirada en barbería de lujo y viggomhc.cl
+        // Nueva identidad visual: Blanco y Negro, minimalista y editorial
         bg: {
-          dark: '#0A0A0A',    // Fondo principal negro carbón
-          surface: '#141414', // Superficie de tarjetas y contenedores
-          elevated: '#1C1C1C',// Superficie elevada / dropdowns
-          border: '#2A2A2A',  // Bordes sutiles
+          main: '#FFFFFF',     // Fondo principal blanco puro
+          alt: '#F7F7F5',      // Fondo alterno de secciones (blanco roto sutil)
+          surface: '#FFFFFF',  // Superficie de tarjetas
+          elevated: '#FAFAF8', // Superficie elevada / dropdowns
+          border: '#E7E7E4',   // Líneas y divisores 1px
+          dark: '#0A0A0A',     // Secciones invertidas (Hero, CTA, Footer)
+          'dark-surface': '#141414',
+          'dark-border': '#262626',
         },
-        gold: {
-          DEFAULT: '#C9A24B', // Dorado acento de conversión
-          hover: '#DDB968',   // Dorado claro al pasar el cursor
-          light: '#F2DFAB',   // Brillo sutil
-          dark: '#8C6C26',    // Dorado apagado
-        },
+        // Mapeo retrocompatible para clases heredadas
         ivory: {
-          DEFAULT: '#F5F0E6', // Texto marfil principal
-          muted: '#A8A294',   // Texto secundario
-          dim: '#6E695F',     // Texto tenue / placeholders
+          DEFAULT: '#0A0A0A',  // Pasa a texto principal oscuro sobre fondos claros
+          light: '#FFFFFF',    // Blanco para secciones invertidas
+          muted: '#5C5C58',    // Texto secundario
+          dim: '#9A9A95',      // Texto terciario / deshabilitado
         },
+        // Acciones editoriales: el antiguo dorado pasa a negro puro
+        gold: {
+          DEFAULT: '#0A0A0A',  // Acción primaria negra
+          hover: '#262626',    // Hover carbón oscuro
+          light: '#F7F7F5',    // Acento muy sutil en gris claro
+          dark: '#000000',     // Negro profundo
+          subtle: '#E7E7E4',   // Borde neutro
+        },
+        // Texto general
+        text: {
+          main: '#0A0A0A',     // Texto principal / negro carbón
+          muted: '#5C5C58',    // Texto secundario / gris medio
+          dim: '#9A9A95',      // Texto terciario / deshabilitado
+          inverse: '#FFFFFF',  // Texto blanco sobre fondo oscuro
+        },
+        // Acciones
+        brand: {
+          black: '#0A0A0A',
+          hover: '#262626',
+          white: '#FFFFFF',
+          border: '#E7E7E4',
+        },
+        // Colores funcionales desaturados y moderados (solo para estado, no decorativos)
         status: {
-          success: '#3E8E5E', // Éxito / Confirmada (verde apagado)
-          error: '#B3412F',   // Error / Cancelada (rojo ladrillo)
-          warning: '#D4973B', // Pendiente / Alerta
-          info: '#3B7ED4',    // Informativo
+          success: '#2F7D4F', // Éxito / Confirmada (verde bosque sobrio)
+          error: '#B3412F',   // Error / Cancelada (rojo teja)
+          warning: '#B7791F', // Pendiente / Alerta (ocre apagado)
+          info: '#2D3748',    // Informativo (gris pizarra)
         }
       },
       fontFamily: {
@@ -39,23 +62,20 @@ module.exports = {
         sans: ['"Inter"', 'system-ui', '-apple-system', 'sans-serif'],
       },
       boxShadow: {
-        'gold-glow': '0 0 25px -5px rgba(201, 162, 75, 0.3)',
-        'gold-glow-lg': '0 0 40px -5px rgba(201, 162, 75, 0.45)',
-        'card-dark': '0 10px 30px -10px rgba(0, 0, 0, 0.8)',
+        'soft': '0 8px 30px rgba(0, 0, 0, 0.06)',
+        'card': '0 4px 20px rgba(0, 0, 0, 0.04)',
+        'card-dark': '0 10px 30px -10px rgba(0, 0, 0, 0.5)',
+        'gold-glow': '0 4px 20px rgba(0, 0, 0, 0.08)',
+        'gold-glow-lg': '0 8px 30px rgba(0, 0, 0, 0.12)',
       },
       animation: {
         'pulse-subtle': 'pulseSubtle 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-        'shimmer': 'shimmer 2.5s infinite linear',
         'marquee': 'marquee 25s linear infinite',
       },
       keyframes: {
         pulseSubtle: {
           '0%, 100%': { opacity: '1', transform: 'scale(1)' },
-          '50%': { opacity: '0.85', transform: 'scale(1.03)' },
-        },
-        shimmer: {
-          '0%': { transform: 'translateX(-100%)' },
-          '100%': { transform: 'translateX(100%)' },
+          '50%': { opacity: '0.9', transform: 'scale(1.02)' },
         },
         marquee: {
           '0%': { transform: 'translateX(0%)' },

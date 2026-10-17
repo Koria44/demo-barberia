@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 80" fill="none" class="w-full h-auto">
+  <!-- Emblema Geométrico de Tijera y Navaja - Versión Blanca (para secciones invertidas oscuras) -->
+  <g transform="translate(15, 12)">
+    <circle cx="28" cy="28" r="26" stroke="#FFFFFF" stroke-width="1.5" stroke-dasharray="2 3"/>
+    <circle cx="28" cy="28" r="22" stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="1"/>
+    <!-- Cuchillas cruzadas de precisión -->
+    <path d="M19 19 L37 37" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+    <path d="M37 19 L19 37" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+    <circle cx="28" cy="28" r="3.5" fill="#FFFFFF"/>
+    <circle cx="16" cy="16" r="3" stroke="#FFFFFF" stroke-width="1.5"/>
+    <circle cx="40" cy="16" r="3" stroke="#FFFFFF" stroke-width="1.5"/>
+  </g>
+  <!-- Tipografía Editorial Minimalista -->
+  <text x="82" y="38" font-family="'Playfair Display', Georgia, serif" font-size="24" font-weight="700" letter-spacing="3" fill="#FFFFFF">
+    DEMO<tspan fill="#D4D4D0">BARBER</tspan>
+  </text>
+  <text x="84" y="54" font-family="'Inter', sans-serif" font-size="9" font-weight="500" letter-spacing="6" fill="#A8A294">
+    HAIRCUTS &amp; SHAVING CLUB
+  </text>
+  <line x1="84" y1="60" x2="260" y2="60" stroke="#FFFFFF" stroke-opacity="0.3" stroke-width="0.75"/>
+</svg>
